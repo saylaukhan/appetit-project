@@ -178,12 +178,12 @@
 }
 
 .statusPreparing {
-  background: rgba(255, 107, 53, 0.1);
+  background: rgba(233, 74, 78, 0.1);
   color: var(--primary-color);
 }
 
 .statusCooking {
-  background: rgba(255, 107, 53, 0.1);
+  background: rgba(233, 74, 78, 0.1);
   color: var(--primary-color);
 }
 

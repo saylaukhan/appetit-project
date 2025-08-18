@@ -94,7 +94,7 @@
 .input:focus {
   outline: none;
   border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+  box-shadow: 0 0 0 3px rgba(233, 74, 78, 0.1);
   background: var(--surface);
 }
 
@@ -123,7 +123,7 @@
 
 .submitButton:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(255, 107, 53, 0.3);
+  box-shadow: 0 8px 25px rgba(233, 74, 78, 0.3);
 }
 
 .submitButton:disabled {
@@ -339,6 +339,6 @@
 /* Dark mode support */
 @media (prefers-color-scheme: dark) {
   .loginContainer {
-    background: linear-gradient(135deg, rgba(255, 107, 53, 0.1) 0%, #1a1a1a 50%, #2d2d2d 100%);
+    background: linear-gradient(135deg, rgba(233, 74, 78, 0.1) 0%, #1a1a1a 50%, #2d2d2d 100%);
   }
 }

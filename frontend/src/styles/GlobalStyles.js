@@ -3,9 +3,9 @@ import { createGlobalStyle } from 'styled-components'
 const GlobalStyles = createGlobalStyle`
   :root {
     /* Основная палитра APPETIT */
-    --primary-color: #FF6B35;
-    --primary-dark: #E85A2B;
-    --primary-light: #FFB99B;
+    --primary-color: #e94a4e;
+    --primary-dark: #d13c40;
+    --primary-light: #f5a5a8;
     
     --secondary-color: #2D3436;
     --secondary-light: #636E72;

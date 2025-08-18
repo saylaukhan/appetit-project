@@ -6,9 +6,9 @@ const themes = {
   light: {
     name: 'light',
     colors: {
-      primary: '#FF6B35',
-      primaryDark: '#E85A2B',
-      primaryLight: '#FFB99B',
+      primary: '#e94a4e',
+      primaryDark: '#d13c40',
+      primaryLight: '#f5a5a8',
       secondary: '#2D3436',
       secondaryLight: '#636E72',
       accent: '#00B894',
@@ -31,9 +31,9 @@ const themes = {
   dark: {
     name: 'dark',
     colors: {
-      primary: '#FF6B35',
-      primaryDark: '#E85A2B',
-      primaryLight: '#FFB99B',
+      primary: '#e94a4e',
+      primaryDark: '#d13c40',
+      primaryLight: '#f5a5a8',
       secondary: '#FFFFFF',
       secondaryLight: '#B2BEC3',
       accent: '#00B894',

@@ -11,7 +11,6 @@ function Footer() {
           <div className={styles.footerSection}>
             <div className={styles.logo}>
               <img src="/assets/Logo APPETIT.png" alt="APPETIT" />
-              <span>APPETIT</span>
             </div>
             <p>
               Ваша любимая доставка еды в городе. Быстро, вкусно и всегда свежо!
