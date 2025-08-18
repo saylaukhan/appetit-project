@@ -86,39 +86,29 @@ class DatabaseSeeder:
         
         categories_data = [
             {
-                "name": "Пицца",
-                "description": "Ароматная пицца на тонком и пышном тесте",
+                "name": "Комбо",
+                "description": "Готовые наборы блюд по выгодным ценам",
                 "sort_order": 1
             },
             {
-                "name": "Бургеры", 
-                "description": "Сочные бургеры с мясными котлетами",
+                "name": "Блюда", 
+                "description": "Основные блюда: шаурма, донер, хот-дог",
                 "sort_order": 2
             },
             {
-                "name": "Роллы и суши",
-                "description": "Свежие роллы и суши от шеф-повара",
+                "name": "Закуски",
+                "description": "Дополнительные закуски и гарниры",
                 "sort_order": 3
             },
             {
-                "name": "Салаты",
-                "description": "Свежие салаты из сезонных овощей",
+                "name": "Соусы",
+                "description": "Различные соусы для дополнения блюд",
                 "sort_order": 4
-            },
-            {
-                "name": "Супы",
-                "description": "Горячие супы на любой вкус",
-                "sort_order": 5
             },
             {
                 "name": "Напитки",
                 "description": "Прохладительные и горячие напитки",
-                "sort_order": 6
-            },
-            {
-                "name": "Десерты",
-                "description": "Сладкие десерты для завершения трапезы",
-                "sort_order": 7
+                "sort_order": 5
             }
         ]
 
@@ -178,149 +168,342 @@ class DatabaseSeeder:
         print("🍕 Создаем блюда...")
         
         dishes_data = [
-            # Пицца
+            # Комбо
             {
-                "name": "Маргарита",
-                "description": "Классическая пицца с томатным соусом, моцареллой и базиликом",
-                "price": Decimal("2500"),
+                "name": "Комбо для ОДНОГО",
+                "description": "Фирменная шаурма, картошка фри и айран.",
+                "price": Decimal("2490"),
                 "category_id": 1,
-                "weight": "400г",
-                "is_popular": True
+                "is_popular": False,
+                "image": "https://cdn-kz11.foodpicasso.com/assets/2025/05/21/fe556df31b0086a084ab61a2c8ac99ce---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
             },
             {
-                "name": "Пепперони",
-                "description": "Острая пицца с салями пепперони и моцареллой",
-                "price": Decimal("3200"),
+                "name": "Комбо для ДВОИХ",
+                "description": "2 фирменные средние шаурмы, порция фри и Пепси 0.5л.",
+                "price": Decimal("4490"),
                 "category_id": 1,
-                "weight": "450г",
-                "is_popular": True
+                "is_popular": False,
+                "image": "https://cdn-kz11.foodpicasso.com/assets/2025/05/21/3b38e62614d5f7b68f32e2a86835fcbc---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
             },
             {
-                "name": "Четыре сыра",
-                "description": "Пицца с четырьмя видами сыра: моцарелла, пармезан, горгонзола, фета",
-                "price": Decimal("3800"),
+                "name": "Комбо для КОМПАНИИ",
+                "description": "4 средние шаурмы на выбор, 2 порции фри и 2 сока 0.3л на выбор.",
+                "price": Decimal("8900"),
                 "category_id": 1,
-                "weight": "420г"
+                "is_popular": False,
+                "image": "https://cdn-kz11.foodpicasso.com/assets/2025/05/21/0aabb5c9e9e49e3d1fd81e938ee26dc2---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
             },
-            
-            # Бургеры
+
+            # Блюда
             {
-                "name": "Классик Бургер",
-                "description": "Сочная говяжья котлета, салат, помидор, лук, соус",
-                "price": Decimal("2200"),
+                "name": "Фирменная Средняя шаурма (Новинка)",
+                "description": "Тонкий лаваш, сочные кусочки говядины, картофель фри, лук, помидор, белый соус.",
+                "price": Decimal("1990"),
                 "category_id": 2,
-                "weight": "350г",
-                "is_popular": True
+                "is_popular": False,
+                "image": "https://cdn-kz11.foodpicasso.com/assets/2025/04/04/b9ef70d2195ea30d7a1a5a1b22450db8---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
             },
             {
-                "name": "Чизбургер",
-                "description": "Бургер с двумя котлетами, сыром чеддер и фирменным соусом",
-                "price": Decimal("2800"),
+                "name": "Фирменная Большая шаурма (Новинка)",
+                "description": "Тонкий лаваш, сочные кусочки говядины, картофель фри, лук, помидор, белый соус.",
+                "price": Decimal("2990"),
                 "category_id": 2,
-                "weight": "400г"
+                "is_popular": False,
+                "image": "https://cdn-kz11.foodpicasso.com/assets/2025/04/17/db9bdbdea43c0f2d5c625dc1ddac74e5---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
             },
             {
-                "name": "Куриный Бургер",
-                "description": "Хрустящая куриная котлета в панировке с салатом и майонезом",
-                "price": Decimal("2000"),
+                "name": "Классическая Средняя шаурма (Хит)",
+                "description": "Тонкий лаваш, сочные кусочки говядины, картофель фри, лук, помидор, красный соус, белый соус.",
+                "price": Decimal("1690"),
                 "category_id": 2,
-                "weight": "320г"
+                "is_popular": True,
+                "image": "https://cdn-kz11.foodpicasso.com/assets/2025/03/19/cb4e1a15ed8eb66b4cb3f04266b87a8f---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
             },
-            
-            # Роллы и суши
             {
-                "name": "Филадельфия",
-                "description": "Ролл с лососем, сливочным сыром и огурцом",
-                "price": Decimal("1800"),
+                "name": "Классическая Большая шаурма",
+                "description": "Тонкий лаваш, сочные кусочки говядины, картофель фри, лук, помидор, красный соус, белый соус.",
+                "price": Decimal("2490"),
+                "category_id": 2,
+                "is_popular": False,
+                "image": "https://cdn-kz11.foodpicasso.com/assets/2025/02/10/23b1fdb4fa17aaba0faa168238ce3d05---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
+            },
+            {
+                "name": "Куриная Большая шаурма",
+                "description": "Тонкий лаваш, сочные кусочки курицы, картофель фри, лук, помидор, красный соус, белый соус.",
+                "price": Decimal("2390"),
+                "category_id": 2,
+                "is_popular": False,
+                "image": "https://cdn-kz11.foodpicasso.com/assets/2025/02/10/978f0e0a396b13d5f8bcad7d7b5c79c9---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
+            },
+            {
+                "name": "Куриная Средняя шаурма",
+                "description": "Тонкий лаваш, сочные кусочки курицы, картофель фри, лук, помидор, красный соус, белый соус.",
+                "price": Decimal("1590"),
+                "category_id": 2,
+                "is_popular": False,
+                "image": "https://cdn-kz11.foodpicasso.com/assets/2025/02/10/de192faaddc80e9da0439c267659cf0b---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
+            },
+            {
+                "name": "Мраморная Большая шаурма (Новинка)",
+                "description": "Тонкий лаваш, сочные кусочки мраморной говядины, картофель фри, лук, помидор, красный соус, белый соус.",
+                "price": Decimal("3390"),
+                "category_id": 2,
+                "is_popular": False,
+                "image": "https://cdn-kz11.foodpicasso.com/assets/2025/05/21/f84b8267d07585cfecf2493841029507---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
+            },
+            {
+                "name": "Мраморная Средняя шаурма (Новинка)",
+                "description": "Тонкий лаваш, сочные кусочки мраморной говядины, картофель фри, лук, помидор, красный соус, белый соус.",
+                "price": Decimal("2390"),
+                "category_id": 2,
+                "is_popular": False,
+                "image": "https://cdn-kz11.foodpicasso.com/assets/2025/03/19/cb4e1a15ed8eb66b4cb3f04266b87a8f---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
+            },
+            {
+                "name": "Донер с говядиной",
+                "description": "Булочка, сочные кусочки говядины, картофель фри, лук, красный соус, белый соус.",
+                "price": Decimal("1490"),
+                "category_id": 2,
+                "is_popular": False,
+                "image": "https://cdn-kz11.foodpicasso.com/assets/2025/02/10/40c729cbc8fddf4dc03a48aa50517ab6---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
+            },
+            {
+                "name": "Донер с курицей",
+                "description": "Булочка, сочные кусочки курицы, картофель фри, лук, красный соус, белый соус.",
+                "price": Decimal("1490"),
+                "category_id": 2,
+                "is_popular": False,
+                "image": "https://cdn-kz11/foodpicasso.com/assets/2025/02/10/e09cfde451e5dde3c8ffa0f2f53b56bb---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
+            },
+            {
+                "name": "Хот-дог",
+                "description": "Булочка, сосиски обжаренные на гриле, картофель фри, красный соус, белый соус.",
+                "price": Decimal("990"),
+                "category_id": 2,
+                "is_popular": False,
+                "image": "https://cdn-kz11.foodpicasso.com/assets/2025/02/10/5df94c16b16bc7906f55d652a46d0f2f---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
+            },
+
+            # Закуски
+            {
+                "name": "Шекер",
+                "description": "Сладкие палочки из теста, обжаренные во фритюре: хрустящие снаружи и нежные внутри",
+                "price": Decimal("400"),
                 "category_id": 3,
-                "weight": "220г",
-                "is_popular": True
+                "is_popular": False,
+                "image": "https://cdn-kz11.foodpicasso.com/assets/2025/06/27/bc977c217d9ceed2395733bcd3e5127e---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
             },
             {
-                "name": "Калифорния",
-                "description": "Ролл с креветкой, авокадо и огурцом в кунжуте",
-                "price": Decimal("1600"),
+                "name": "Чебуречки",
+                "description": "Сочные и вкусные чебуречки, обжаренные во фритюре.",
+                "price": Decimal("990"),
                 "category_id": 3,
-                "weight": "200г"
+                "is_popular": False,
+                "image": "https://cdn-kz11/foodpicasso.com/assets/2025/02/10/5d00d455fdad4c1ffba2f003262fa348---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
             },
             {
-                "name": "Дракон",
-                "description": "Ролл с угрем, авокадо и унаги соусом",
-                "price": Decimal("2200"),
+                "name": "Наггетсы",
+                "description": "Нежнейшие кусочки куриного мяса в золотистой панировке!",
+                "price": Decimal("1490"),
                 "category_id": 3,
-                "weight": "240г"
+                "is_popular": False,
+                "image": "https://cdn-kz11/foodpicasso.com/assets/2025/02/10/b059d0e8a3ad4129618668e05fb3725b---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
             },
-            
-            # Салаты
             {
-                "name": "Цезарь с курицей",
-                "description": "Классический салат Цезарь с курицей гриль и пармезаном",
-                "price": Decimal("1500"),
+                "name": "Картофель Фри",
+                "description": "Ароматный и хрустящий картофель фри.",
+                "price": Decimal("890"),
+                "category_id": 3,
+                "is_popular": False,
+                "image": "https://cdn-kz11/foodpicasso.com/assets/2025/02/10/005a8258c1c7ffaa6b32b5c76ec54b40---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
+            },
+            {
+                "name": "Дольки",
+                "description": "Воздушная картофельная мякоть с деликатным пряным вкусом!",
+                "price": Decimal("1190"),
+                "category_id": 3,
+                "is_popular": False,
+                "image": "https://cdn-kz11/foodpicasso.com/assets/2025/02/10/99f031c4db6f80e433b1a4c1c5acf6e7---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
+            },
+
+            # Соусы
+            {
+                "name": "Перчики острые 15г",
+                "description": "",
+                "price": Decimal("240"),
                 "category_id": 4,
-                "weight": "300г",
-                "is_popular": True
+                "is_popular": False,
+                "image": "https://cdn-kz11/foodpicasso.com/assets/2025/02/10/8032248095ad95685129187c86a69fd3---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
             },
             {
-                "name": "Греческий салат",
-                "description": "Свежие овощи, фета, маслины, оливковое масло",
-                "price": Decimal("1200"),
+                "name": "Соус Сырный 30г",
+                "description": "",
+                "price": Decimal("240"),
                 "category_id": 4,
-                "weight": "280г"
-            },
-            
-            # Супы
-            {
-                "name": "Борщ украинский",
-                "description": "Традиционный борщ с говядиной и сметаной",
-                "price": Decimal("1000"),
-                "category_id": 5,
-                "weight": "400мл"
+                "is_popular": False,
+                "image": "https://cdn-kz11/foodpicasso.com/assets/2025/02/10/ef651ed87b4c3ab6e22e539c6081462c---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
             },
             {
-                "name": "Солянка мясная",
-                "description": "Сытная солянка с копченостями и маслинами",
-                "price": Decimal("1200"),
-                "category_id": 5,
-                "weight": "400мл"
+                "name": "Соус Томатный 30г",
+                "description": "",
+                "price": Decimal("240"),
+                "category_id": 4,
+                "is_popular": False,
+                "image": "https://cdn-kz11/foodpicasso.com/assets/2025/02/10/c282f9bf851d7be2402b14a824e3b859---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
             },
-            
+            {
+                "name": "Соус Горчичный 30г",
+                "description": "",
+                "price": Decimal("240"),
+                "category_id": 4,
+                "is_popular": False,
+                "image": "https://cdn-kz11/foodpicasso.com/assets/2025/02/10/628b8291327c6b3a506c71c9f3597351---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
+            },
+            {
+                "name": "Соус Барбекю 30г",
+                "description": "",
+                "price": Decimal("240"),
+                "category_id": 4,
+                "is_popular": False,
+                "image": "https://cdn-kz11/foodpicasso.com/assets/2025/02/10/efa6d1480bb4a3947d56250494bdc83a---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
+            },
+            {
+                "name": "Соус Чесночный 30г",
+                "description": "",
+                "price": Decimal("240"),
+                "category_id": 4,
+                "is_popular": False,
+                "image": "https://cdn-kz11/foodpicasso.com/assets/2025/02/10/0448f3c2b674898877d8a7c860eae049---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
+            },
+            {
+                "name": "соус Острый 30г",
+                "description": "",
+                "price": Decimal("240"),
+                "category_id": 4,
+                "is_popular": False,
+                "image": "https://cdn-kz11/foodpicasso.com/assets/2025/04/17/9a29b3909ca001074b9d29b36b5b5384---jpeg_1100_1e6e0_convert.webp"
+            },
+
             # Напитки
             {
-                "name": "Кока-Кола",
-                "description": "Освежающая газированная вода",
-                "price": Decimal("300"),
-                "category_id": 6,
-                "weight": "0.5л"
+                "name": "Сок Лимонный 1,0л",
+                "description": "",
+                "price": Decimal("990"),
+                "category_id": 5,
+                "is_popular": False,
+                "image": "https://cdn-kz11/foodpicasso.com/assets/2025/04/04/a20ed5cf74b611706a9079cac239e12d---png_420x420:whitepadding15_94310_convert.webp?v2"
             },
             {
-                "name": "Зеленый чай",
-                "description": "Ароматный зеленый чай",
-                "price": Decimal("200"),
-                "category_id": 6,
-                "weight": "400мл"
+                "name": "Сок Лимонный 0,3л",
+                "description": "",
+                "price": Decimal("390"),
+                "category_id": 5,
+                "is_popular": False,
+                "image": "https://cdn-kz11/foodpicasso.com/assets/2025/02/10/e3445e38097d7fb9ef8e58c64d1b0534---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
             },
             {
-                "name": "Свежевыжатый сок",
-                "description": "Апельсиновый сок собственного производства",
-                "price": Decimal("600"),
-                "category_id": 6,
-                "weight": "300мл"
-            },
-            
-            # Десерты
-            {
-                "name": "Тирамису",
-                "description": "Классический итальянский десерт с маскарпоне",
-                "price": Decimal("900"),
-                "category_id": 7,
-                "weight": "120г"
+                "name": "Морс Смородина 1,0л",
+                "description": "",
+                "price": Decimal("1390"),
+                "category_id": 5,
+                "is_popular": False,
+                "image": "https://cdn-kz11/foodpicasso.com/assets/2025/02/10/fe29ee0ab3100a6b940d873ea691e9ac---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
             },
             {
-                "name": "Чизкейк Нью-Йорк",
-                "description": "Нежный творожный торт с ягодным соусом",
-                "price": Decimal("800"),
-                "category_id": 7,
-                "weight": "130г"
+                "name": "Морс Смородина 0,3л",
+                "description": "",
+                "price": Decimal("490"),
+                "category_id": 5,
+                "is_popular": False,
+                "image": "https://cdn-kz11/foodpicasso.com/assets/2025/02/10/fe29ee0ab3100a6b940d873ea691e9ac---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
+            },
+            {
+                "name": "Айран 1ст",
+                "description": "",
+                "price": Decimal("390"),
+                "category_id": 5,
+                "is_popular": False,
+                "image": "https://cdn-kz11/foodpicasso.com/assets/2025/02/10/8efdca35c475f581483df64ff8337bbb---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
+            },
+            {
+                "name": "Пепси 1л",
+                "description": "",
+                "price": Decimal("740"),
+                "category_id": 5,
+                "is_popular": False,
+                "image": "https://cdn-kz11/foodpicasso.com/assets/2025/02/10/8c5dd0e3612f293fe87d01a7a817669d---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
+            },
+            {
+                "name": "Пепси 0,5л",
+                "description": "",
+                "price": Decimal("640"),
+                "category_id": 5,
+                "is_popular": False,
+                "image": "https://cdn-kz11/foodpicasso.com/assets/2025/02/10/3a79628d7f921f91eafd5c3a1bd30012---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
+            },
+            {
+                "name": "Пиала чай 1л",
+                "description": "",
+                "price": Decimal("740"),
+                "category_id": 5,
+                "is_popular": False,
+                "image": "https://cdn-kz11/foodpicasso.com/assets/2025/04/04/6c5f30cf228ba984715d633e13d350f6---png_420x420:whitepadding15_94310_convert.webp?v2"
+            },
+            {
+                "name": "Пиала чай 0,5л",
+                "description": "",
+                "price": Decimal("640"),
+                "category_id": 5,
+                "is_popular": False,
+                "image": "https://cdn-kz11/foodpicasso.com/assets/2025/04/04/686ea4bea44c0cbf418254f5cca9e815---png_420x420:whitepadding15_94310_convert.webp?v2"
+            },
+            {
+                "name": "ДаДа 1л",
+                "description": "",
+                "price": Decimal("990"),
+                "category_id": 5,
+                "is_popular": False,
+                "image": "https://cdn-kz11/foodpicasso.com/assets/2025/02/10/13c5ec64ce21c39139e0f414584f49f0---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
+            },
+            {
+                "name": "Сок ДаДа 0,2л",
+                "description": "",
+                "price": Decimal("390"),
+                "category_id": 5,
+                "is_popular": False,
+                "image": "https://cdn-kz11/foodpicasso.com/assets/2025/02/10/5dc2c7ea9c106dd4e56c797384ca4d98---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
+            },
+            {
+                "name": "Асу 0,5л",
+                "description": "",
+                "price": Decimal("390"),
+                "category_id": 5,
+                "is_popular": False,
+                "image": "https://cdn-kz11/foodpicasso.com/assets/2025/02/10/da4736943db10bcb6288e2877bde7435---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
+            },
+            {
+                "name": "Асу 1л",
+                "description": "",
+                "price": Decimal("490"),
+                "category_id": 5,
+                "is_popular": False,
+                "image": "https://cdn-kz11/foodpicasso.com/assets/2025/02/10/41ca19a6fbf1fc0611f3895f8907f92c---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
+            },
+            {
+                "name": "Лавина 0,5л",
+                "description": "",
+                "price": Decimal("690"),
+                "category_id": 5,
+                "is_popular": False,
+                "image": "https://cdn-kz11/foodpicasso.com/assets/2025/02/10/5410f4fa01ed227663bc945e2c7fe4ba---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
+            },
+            {
+                "name": "Горила 0,5л",
+                "description": "",
+                "price": Decimal("690"),
+                "category_id": 5,
+                "is_popular": False,
+                "image": "https://cdn-kz11/foodpicasso.com/assets/2025/02/10/17109ed26f93ceebcfca01d1120d8fb4---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
             }
         ]
 
@@ -330,7 +513,6 @@ class DatabaseSeeder:
                 description=dish_data["description"],
                 price=dish_data["price"],
                 category_id=dish_data["category_id"],
-                weight=dish_data["weight"],
                 is_available=True,
                 is_popular=dish_data.get("is_popular", False)
             )
