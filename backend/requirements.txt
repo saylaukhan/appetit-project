@@ -1,12 +1,12 @@
 # FastAPI и связанные
-fastapi==0.104.1
-uvicorn[standard]==0.24.0
-pydantic==2.5.0
-pydantic-settings==2.1.0
+fastapi==0.115.6
+uvicorn[standard]==0.32.1
+pydantic==2.10.5
+pydantic-settings==2.7.0
 
 # База данных
-sqlalchemy==2.0.23
-alembic==1.13.1
+sqlalchemy==2.0.36
+alembic==1.14.0
 
 # Аутентификация и безопасность
 python-jose[cryptography]==3.3.0
@@ -20,14 +20,13 @@ httpx==0.25.2
 email-validator==2.1.0
 python-dateutil==2.8.2
 
-# CORS
-python-cors==1.0.1
+# CORS (встроено в FastAPI, дополнительный пакет не нужен)
 
 # Логирование
 loguru==0.7.2
 
 # Обработка изображений
-Pillow==10.1.0
+Pillow==10.4.0
 
 # SMS (заглушка для разработки)
 twilio==8.10.0
