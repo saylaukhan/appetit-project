@@ -1,0 +1,5 @@
+/* Checkout Page Styles */
+.checkoutContainer {
+  min-height: calc(100vh - var(--header-height));
+  padding: var(--spacing-xl) 0;
+}

@@ -1,0 +1,11 @@
+/* Dish Page Styles */
+.dishContainer {
+  min-height: calc(100vh - var(--header-height));
+  padding: var(--spacing-xl) 0;
+}
+
+.dishContent {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 var(--spacing-md);
+}

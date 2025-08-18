@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  backend:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+      - ./shared:/app/shared
+    environment:
+      - DATABASE_URL=sqlite:///./database.db
+      - JWT_SECRET_KEY=your-secret-key-here
+      - FIREBASE_CREDENTIALS_PATH=/app/config/firebase-credentials.json
+    depends_on:
+      - db
+    networks:
+      - appetit-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - ./assets:/app/public/assets
+    environment:
+      - VITE_API_URL=http://localhost:8000
+      - VITE_GA_TRACKING_ID=GA_MEASUREMENT_ID
+    depends_on:
+      - backend
+    networks:
+      - appetit-network
+
+  db:
+    image: sqlite:latest
+    volumes:
+      - ./data:/data
+    networks:
+      - appetit-network
+
+networks:
+  appetit-network:
+    driver: bridge
+
+volumes:
+  data:

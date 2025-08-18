@@ -1,0 +1,324 @@
+/* Marketing Page Styles */
+.marketingContainer {
+  padding: var(--spacing-xl);
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Header */
+.header {
+  margin-bottom: var(--spacing-2xl);
+}
+
+.header h1 {
+  color: var(--text-primary);
+  font-size: 2rem;
+  margin-bottom: var(--spacing-sm);
+}
+
+.header p {
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+/* Section Header */
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-xl);
+  gap: var(--spacing-md);
+}
+
+.searchBox {
+  position: relative;
+  flex: 1;
+  max-width: 400px;
+}
+
+.searchIcon {
+  position: absolute;
+  left: var(--spacing-md);
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  width: 18px;
+  height: 18px;
+}
+
+.searchInput {
+  width: 100%;
+  padding: var(--spacing-md) var(--spacing-md) var(--spacing-md) 50px;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-medium);
+  font-size: 0.95rem;
+  background: var(--background);
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(255, 107, 53, 0.1);
+}
+
+.addButton {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md) var(--spacing-lg);
+  background: var(--primary-color);
+  color: var(--text-white);
+  border: none;
+  border-radius: var(--radius-medium);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.addButton:hover {
+  background: var(--primary-dark);
+  transform: translateY(-2px);
+}
+
+/* Promo Codes Grid */
+.promoCodesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: var(--spacing-lg);
+}
+
+.promoCodeCard {
+  background: var(--surface);
+  border-radius: var(--radius-large);
+  box-shadow: var(--shadow-small);
+  padding: var(--spacing-xl);
+  transition: all 0.2s ease;
+  border: 1px solid var(--border-light);
+}
+
+.promoCodeCard:hover {
+  box-shadow: var(--shadow-medium);
+  transform: translateY(-2px);
+}
+
+/* Promo Code Header */
+.promoCodeHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-lg);
+  padding-bottom: var(--spacing-md);
+  border-bottom: 1px solid var(--border-light);
+}
+
+.promoCodeCode {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.promoCodeCode span {
+  font-size: 1.3rem;
+  font-weight: 700;
+  font-family: 'Courier New', monospace;
+  color: var(--primary-color);
+  background: var(--primary-light);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-small);
+}
+
+.copyButton {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: var(--spacing-xs);
+  border-radius: var(--radius-small);
+  transition: all 0.2s ease;
+}
+
+.copyButton:hover {
+  color: var(--primary-color);
+  background: var(--primary-light);
+}
+
+.promoCodeStatus {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-medium);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.promoCodeStatus.active {
+  background: rgba(0, 184, 148, 0.1);
+  color: var(--success);
+}
+
+.promoCodeStatus.inactive {
+  background: rgba(220, 53, 69, 0.1);
+  color: var(--error);
+}
+
+/* Promo Code Body */
+.promoCodeBody {
+  margin-bottom: var(--spacing-lg);
+}
+
+.promoCodeBody h3 {
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-sm);
+  font-size: 1.1rem;
+}
+
+.promoCodeDescription {
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-lg);
+  line-height: 1.5;
+}
+
+.promoCodeDetails {
+  background: var(--background);
+  padding: var(--spacing-md);
+  border-radius: var(--radius-medium);
+  border: 1px solid var(--border-light);
+}
+
+.detailRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-sm);
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.detailRow:last-child {
+  margin-bottom: 0;
+}
+
+.detailRow span:last-child {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Promo Code Actions */
+.promoCodeActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-sm);
+}
+
+.actionButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-small);
+  background: var(--background);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.actionButton:hover {
+  background: var(--surface);
+  color: var(--text-primary);
+}
+
+.enableButton {
+  color: var(--success);
+  border-color: var(--success);
+}
+
+.enableButton:hover {
+  background: rgba(0, 184, 148, 0.1);
+}
+
+.disableButton {
+  color: var(--warning);
+  border-color: var(--warning);
+}
+
+.disableButton:hover {
+  background: rgba(255, 193, 7, 0.1);
+}
+
+.deleteButton {
+  color: var(--error);
+  border-color: var(--error);
+}
+
+.deleteButton:hover {
+  background: rgba(220, 53, 69, 0.1);
+}
+
+/* Empty State */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-2xl);
+  text-align: center;
+  color: var(--text-muted);
+  background: var(--surface);
+  border-radius: var(--radius-large);
+  box-shadow: var(--shadow-small);
+}
+
+.emptyState h3 {
+  margin: var(--spacing-lg) 0 var(--spacing-sm) 0;
+  color: var(--text-secondary);
+}
+
+.emptyState p {
+  margin: 0;
+  max-width: 300px;
+}
+
+/* Mobile Styles */
+@media (max-width: 768px) {
+  .marketingContainer {
+    padding: var(--spacing-md);
+  }
+  
+  .sectionHeader {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-md);
+  }
+  
+  .searchBox {
+    max-width: none;
+  }
+  
+  .addButton {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .promoCodesGrid {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-md);
+  }
+  
+  .promoCodeCard {
+    padding: var(--spacing-lg);
+  }
+  
+  .promoCodeHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-sm);
+  }
+  
+  .promoCodeCode span {
+    font-size: 1.1rem;
+  }
+}

@@ -1,0 +1,47 @@
+# FastAPI и связанные
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+pydantic==2.5.0
+pydantic-settings==2.1.0
+
+# База данных
+sqlalchemy==2.0.23
+alembic==1.13.1
+
+# Аутентификация и безопасность
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+python-multipart==0.0.6
+
+# HTTP клиент
+httpx==0.25.2
+
+# Валидация и утилиты
+email-validator==2.1.0
+python-dateutil==2.8.2
+
+# CORS
+python-cors==1.0.1
+
+# Логирование
+loguru==0.7.2
+
+# Обработка изображений
+Pillow==10.1.0
+
+# SMS (заглушка для разработки)
+twilio==8.10.0
+
+# Push уведомления
+firebase-admin==6.4.0
+
+# Дополнительные утилиты
+python-slugify==8.0.1
+phonenumbers==8.13.25
+
+# Для разработки
+pytest==7.4.3
+pytest-asyncio==0.21.1
+black==23.11.0
+isort==5.12.0
+mypy==1.7.1

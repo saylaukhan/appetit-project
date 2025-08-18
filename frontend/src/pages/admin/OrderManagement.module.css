@@ -1,0 +1,357 @@
+/* Order Management Styles */
+.orderManagement {
+  padding: var(--spacing-xl);
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.header {
+  margin-bottom: var(--spacing-xl);
+}
+
+.header h1 {
+  color: var(--text-primary);
+  font-size: 2rem;
+  margin-bottom: var(--spacing-sm);
+}
+
+.header p {
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+/* Filters */
+.filters {
+  display: flex;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-xl);
+  align-items: center;
+}
+
+.searchBox {
+  position: relative;
+  flex: 1;
+  max-width: 400px;
+}
+
+.searchIcon {
+  position: absolute;
+  left: var(--spacing-md);
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  width: 18px;
+  height: 18px;
+}
+
+.searchInput {
+  width: 100%;
+  padding: var(--spacing-md) var(--spacing-md) var(--spacing-md) 50px;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-medium);
+  font-size: 0.95rem;
+  background: var(--surface);
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(255, 107, 53, 0.1);
+}
+
+.statusFilter {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  background: var(--surface);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-medium);
+  border: 1px solid var(--border-light);
+}
+
+.filterIcon {
+  color: var(--text-muted);
+  width: 18px;
+  height: 18px;
+}
+
+.filterSelect {
+  border: none;
+  background: none;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.filterSelect:focus {
+  outline: none;
+}
+
+/* Orders Grid */
+.ordersGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+  gap: var(--spacing-lg);
+}
+
+.orderCard {
+  background: var(--surface);
+  border-radius: var(--radius-large);
+  box-shadow: var(--shadow-small);
+  padding: var(--spacing-xl);
+  transition: box-shadow 0.2s ease;
+}
+
+.orderCard:hover {
+  box-shadow: var(--shadow-medium);
+}
+
+.orderHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-md);
+}
+
+.orderInfo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.orderNumber {
+  font-weight: 700;
+  color: var(--primary-color);
+  font-size: 1.1rem;
+}
+
+.orderTime {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.orderStatus {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-medium);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.statusIcon {
+  width: 14px;
+  height: 14px;
+}
+
+.statusPending {
+  background: rgba(255, 193, 7, 0.1);
+  color: #d39e00;
+}
+
+.statusPreparing {
+  background: rgba(255, 107, 53, 0.1);
+  color: var(--primary-color);
+}
+
+.statusCooking {
+  background: rgba(255, 107, 53, 0.1);
+  color: var(--primary-color);
+}
+
+.statusReady {
+  background: rgba(0, 184, 148, 0.1);
+  color: #00a085;
+}
+
+.statusDelivering {
+  background: rgba(0, 123, 255, 0.1);
+  color: #0056b3;
+}
+
+.statusDelivered {
+  background: rgba(40, 167, 69, 0.1);
+  color: #1e7e34;
+}
+
+.statusCancelled {
+  background: rgba(220, 53, 69, 0.1);
+  color: #b91d47;
+}
+
+/* Customer Info */
+.customerInfo {
+  margin-bottom: var(--spacing-md);
+}
+
+.customerInfo h3 {
+  color: var(--text-primary);
+  margin: 0 0 var(--spacing-xs) 0;
+  font-size: 1.1rem;
+}
+
+.customerDetails {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.customerDetails span {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+/* Order Items */
+.orderItems {
+  margin-bottom: var(--spacing-md);
+  padding: var(--spacing-md);
+  background: var(--background);
+  border-radius: var(--radius-medium);
+}
+
+.orderItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-xs) 0;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.orderItem:not(:last-child) {
+  border-bottom: 1px solid var(--border-light);
+  margin-bottom: var(--spacing-xs);
+  padding-bottom: var(--spacing-xs);
+}
+
+/* Order Footer */
+.orderFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+}
+
+.orderTotal {
+  color: var(--text-primary);
+  font-size: 1.1rem;
+}
+
+.orderActions {
+  display: flex;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+}
+
+.actionButton {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-medium);
+  background: var(--surface);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.8rem;
+}
+
+.actionButton:hover {
+  background: var(--background);
+  color: var(--text-primary);
+}
+
+.confirmButton {
+  background: var(--success);
+  color: var(--text-white);
+  border-color: var(--success);
+}
+
+.confirmButton:hover {
+  background: var(--accent-dark);
+  border-color: var(--accent-dark);
+}
+
+.deliverButton {
+  background: var(--info);
+  color: var(--text-white);
+  border-color: var(--info);
+}
+
+.deliverButton:hover {
+  background: #0056b3;
+  border-color: #0056b3;
+}
+
+/* Empty State */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-2xl);
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.emptyState h3 {
+  margin: var(--spacing-lg) 0 var(--spacing-sm) 0;
+  color: var(--text-secondary);
+}
+
+.emptyState p {
+  margin: 0;
+  max-width: 300px;
+}
+
+/* Mobile Styles */
+@media (max-width: 768px) {
+  .orderManagement {
+    padding: var(--spacing-md);
+  }
+  
+  .filters {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-sm);
+  }
+  
+  .searchBox {
+    max-width: none;
+  }
+  
+  .ordersGrid {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-md);
+  }
+  
+  .orderCard {
+    padding: var(--spacing-lg);
+  }
+  
+  .orderHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-sm);
+  }
+  
+  .orderFooter {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .orderActions {
+    justify-content: stretch;
+  }
+  
+  .actionButton {
+    flex: 1;
+    justify-content: center;
+  }
+}

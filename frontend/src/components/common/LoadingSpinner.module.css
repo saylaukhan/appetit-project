@@ -1,0 +1,31 @@
+/* Loading Spinner Styles */
+.spinnerContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xl);
+}
+
+.spinnerContainer.fullScreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.9);
+  z-index: var(--z-modal);
+}
+
+.spinner {
+  border: 3px solid var(--border-light);
+  border-top: 3px solid var(--primary-color);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.loadingText {
+  margin-top: var(--spacing-md);
+  color: var(--text-secondary);
+  text-align: center;
+  font-size: 0.9rem;
+}

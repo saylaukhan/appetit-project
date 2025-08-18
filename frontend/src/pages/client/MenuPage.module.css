@@ -1,0 +1,35 @@
+/* Menu Page Styles */
+.menuContainer {
+  min-height: calc(100vh - var(--header-height));
+  padding: var(--spacing-xl) 0;
+}
+
+.menuContent {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 var(--spacing-md);
+}
+
+.pageTitle {
+  text-align: center;
+  margin-bottom: var(--spacing-xl);
+  color: var(--text-primary);
+}
+
+.comingSoon {
+  text-align: center;
+  padding: var(--spacing-2xl);
+  background: var(--surface);
+  border-radius: var(--radius-large);
+  box-shadow: var(--shadow-small);
+}
+
+.comingSoon h2 {
+  color: var(--primary-color);
+  margin-bottom: var(--spacing-md);
+}
+
+.comingSoon p {
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+}
