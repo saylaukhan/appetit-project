@@ -3,12 +3,20 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.core.database import Base
 
-# Многие-ко-многим связь между блюдами и модификаторами
-dish_modifier_table = Table(
-    'dish_modifiers',
+# Многие-ко-многим связь между блюдами и вариантами
+dish_variant_table = Table(
+    'dish_variants',
     Base.metadata,
     Column('dish_id', Integer, ForeignKey('dishes.id'), primary_key=True),
-    Column('modifier_id', Integer, ForeignKey('modifiers.id'), primary_key=True)
+    Column('variant_id', Integer, ForeignKey('variants.id'), primary_key=True)
+)
+
+# Таблица связи блюд и добавок
+dish_addon_table = Table(
+    'dish_addons',
+    Base.metadata,
+    Column('dish_id', Integer, ForeignKey('dishes.id'), primary_key=True),
+    Column('addon_id', Integer, ForeignKey('addons.id'), primary_key=True)
 )
 
 class Category(Base):
@@ -56,36 +64,66 @@ class Dish(Base):
 
     # Отношения
     category = relationship("Category", back_populates="dishes")
-    modifiers = relationship("Modifier", secondary=dish_modifier_table, back_populates="dishes")
+    variants = relationship("Variant", secondary=dish_variant_table, back_populates="dishes")
+    addons = relationship("Addon", secondary=dish_addon_table, back_populates="dishes")
 
     def __repr__(self):
         return f"<Dish(id={self.id}, name='{self.name}', price={self.price})>"
 
-class Modifier(Base):
-    __tablename__ = "modifiers"
+# Группы вариантов (например, "Размер", "Тип теста", "Температура")
+class VariantGroup(Base):
+    __tablename__ = "variant_groups"
 
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String(100), nullable=False)
-    price = Column(Numeric(10, 2), default=0)  # Может быть 0 для бесплатных модификаторов
-    is_required = Column(Boolean, default=False)  # Обязательный ли модификатор
+    name = Column(String(100), nullable=False)  # например "Размер", "Тип теста"
+    is_required = Column(Boolean, default=True)  # Обязательно ли выбрать вариант из этой группы
+    is_multiple = Column(Boolean, default=False)  # Можно ли выбрать несколько вариантов
+    sort_order = Column(Integer, default=0)
     
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     # Отношения
-    dishes = relationship("Dish", secondary=dish_modifier_table, back_populates="modifiers")
+    variants = relationship("Variant", back_populates="group")
 
     def __repr__(self):
-        return f"<Modifier(id={self.id}, name='{self.name}', price={self.price})>"
+        return f"<VariantGroup(id={self.id}, name='{self.name}')>"
 
-# Таблица для связи блюд и модификаторов (если нужны дополнительные поля)
-class DishModifier(Base):
-    __tablename__ = "dish_modifier_details"
+# Варианты внутри группы (например, "Маленькая", "Средняя", "Большая" для группы "Размер")
+class Variant(Base):
+    __tablename__ = "variants"
 
     id = Column(Integer, primary_key=True, index=True)
-    dish_id = Column(Integer, ForeignKey("dishes.id"), nullable=False)
-    modifier_id = Column(Integer, ForeignKey("modifiers.id"), nullable=False)
-    is_default = Column(Boolean, default=False)  # Модификатор по умолчанию
+    name = Column(String(100), nullable=False)
+    price = Column(Numeric(10, 2), default=0)  # Может быть 0 для базовых вариантов
+    group_id = Column(Integer, ForeignKey("variant_groups.id"), nullable=False)
+    is_default = Column(Boolean, default=False)  # Вариант по умолчанию в группе
     sort_order = Column(Integer, default=0)
+    
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    # Отношения
+    group = relationship("VariantGroup", back_populates="variants")
+    dishes = relationship("Dish", secondary=dish_variant_table, back_populates="variants")
 
     def __repr__(self):
-        return f"<DishModifier(dish_id={self.dish_id}, modifier_id={self.modifier_id})>"
+        return f"<Variant(id={self.id}, name='{self.name}', price={self.price})>"
+
+
+
+class Addon(Base):
+    __tablename__ = "addons"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(100), nullable=False)
+    price = Column(Numeric(10, 2), default=0)  # Цена добавки
+    category = Column(String(50), nullable=True)  # Категория добавки (например, "соусы", "сыры")
+    is_active = Column(Boolean, default=True)
+    
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    # Отношения
+    dishes = relationship("Dish", secondary=dish_addon_table, back_populates="addons")
+
+    def __repr__(self):
+        return f"<Addon(id={self.id}, name='{self.name}', price={self.price})>"

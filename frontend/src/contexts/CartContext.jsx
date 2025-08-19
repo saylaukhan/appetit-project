@@ -22,8 +22,8 @@ function cartReducer(state, action) {
       }
 
     case 'ADD_ITEM': {
-      const { dish, modifiers = [], quantity = 1 } = action.payload
-      const itemId = generateItemId(dish.id, modifiers)
+      const { dish, modifiers = [], addons = [], quantity = 1 } = action.payload
+      const itemId = generateItemId(dish.id, modifiers, addons)
       
       const existingItemIndex = state.items.findIndex(item => item.id === itemId)
       
@@ -37,7 +37,7 @@ function cartReducer(state, action) {
         )
       } else {
         // Добавляем новый товар
-        const itemPrice = calculateItemPrice(dish.price, modifiers)
+        const itemPrice = calculateItemPrice(dish.price, modifiers, addons)
         const newItem = {
           id: itemId,
           dishId: dish.id,
@@ -47,6 +47,7 @@ function cartReducer(state, action) {
           price: itemPrice,
           quantity,
           modifiers: modifiers || [],
+          addons: addons || [],
           dish,
         }
         newItems = [...state.items, newItem]
@@ -124,14 +125,16 @@ function cartReducer(state, action) {
 }
 
 // Вспомогательные функции
-function generateItemId(dishId, modifiers) {
+function generateItemId(dishId, modifiers, addons = []) {
   const modifierIds = modifiers.map(m => m.id).sort().join('-')
-  return `${dishId}_${modifierIds}`
+  const addonIds = addons.map(a => `${a.id}:${a.quantity}`).sort().join('-')
+  return `${dishId}_${modifierIds}_${addonIds}`
 }
 
-function calculateItemPrice(basePrice, modifiers) {
+function calculateItemPrice(basePrice, modifiers, addons = []) {
   const modifiersPrice = modifiers.reduce((sum, modifier) => sum + (modifier.price || 0), 0)
-  return basePrice + modifiersPrice
+  const addonsPrice = addons.reduce((sum, addon) => sum + ((addon.price || 0) * (addon.quantity || 1)), 0)
+  return basePrice + modifiersPrice + addonsPrice
 }
 
 function calculateTotals(items, discount = 0) {
@@ -172,10 +175,10 @@ export function CartProvider({ children }) {
   }, [state])
 
   // Добавление товара в корзину
-  const addItem = (dish, modifiers = [], quantity = 1) => {
+  const addItem = (dish, modifiers = [], addons = [], quantity = 1) => {
     dispatch({
       type: 'ADD_ITEM',
-      payload: { dish, modifiers, quantity }
+      payload: { dish, modifiers, addons, quantity }
     })
     
     toast.success(`${dish.name} добавлено в корзину`, {
@@ -243,14 +246,14 @@ export function CartProvider({ children }) {
   }
 
   // Проверка, есть ли товар в корзине
-  const isInCart = (dishId, modifiers = []) => {
-    const itemId = generateItemId(dishId, modifiers)
+  const isInCart = (dishId, modifiers = [], addons = []) => {
+    const itemId = generateItemId(dishId, modifiers, addons)
     return state.items.some(item => item.id === itemId)
   }
 
   // Получение количества товара в корзине
-  const getItemQuantity = (dishId, modifiers = []) => {
-    const itemId = generateItemId(dishId, modifiers)
+  const getItemQuantity = (dishId, modifiers = [], addons = []) => {
+    const itemId = generateItemId(dishId, modifiers, addons)
     const item = state.items.find(item => item.id === itemId)
     return item?.quantity || 0
   }

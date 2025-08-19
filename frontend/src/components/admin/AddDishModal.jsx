@@ -20,6 +20,15 @@ const AddDishModal = ({ isOpen, onClose, onDishAdded, onDishUpdated, categories 
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [uploadingImage, setUploadingImage] = useState(false)
   const [errors, setErrors] = useState({})
+  const [availableAddons, setAvailableAddons] = useState([])
+  const [selectedAddons, setSelectedAddons] = useState([])
+
+  // Загружаем добавки при открытии модала
+  useEffect(() => {
+    if (isOpen) {
+      loadAddons()
+    }
+  }, [isOpen])
 
   // Инициализация формы при открытии/закрытии
   useEffect(() => {
@@ -36,6 +45,7 @@ const AddDishModal = ({ isOpen, onClose, onDishAdded, onDishUpdated, categories 
       setImageFile(null)
       setImagePreview('')
       setErrors({})
+      setSelectedAddons([])
     } else if (isEditMode && editingDish) {
       // Заполняем форму данными для редактирования
       setFormData({
@@ -48,8 +58,18 @@ const AddDishModal = ({ isOpen, onClose, onDishAdded, onDishUpdated, categories 
         is_available: editingDish.available !== undefined ? editingDish.available : true
       })
       setImagePreview(editingDish.image || '')
+      setSelectedAddons(editingDish.addons?.map(addon => addon.id) || [])
     }
   }, [isOpen, isEditMode, editingDish])
+
+  const loadAddons = async () => {
+    try {
+      const response = await menuAPI.getAddons({ show_all: false })
+      setAvailableAddons(response.data)
+    } catch (error) {
+      console.error('Ошибка загрузки добавок:', error)
+    }
+  }
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target
@@ -65,6 +85,16 @@ const AddDishModal = ({ isOpen, onClose, onDishAdded, onDishUpdated, categories 
         [name]: ''
       }))
     }
+  }
+
+  const handleAddonToggle = (addonId) => {
+    setSelectedAddons(prev => {
+      if (prev.includes(addonId)) {
+        return prev.filter(id => id !== addonId)
+      } else {
+        return [...prev, addonId]
+      }
+    })
   }
 
   const handleImageChange = async (e) => {
@@ -164,10 +194,10 @@ const AddDishModal = ({ isOpen, onClose, onDishAdded, onDishUpdated, categories 
         description: formData.description.trim(),
         price: parseFloat(formData.price),
         category_id: parseInt(formData.category_id),
-
         image: imageUrl || formData.image || null,
         is_popular: formData.is_popular,
-        is_available: formData.is_available
+        is_available: formData.is_available,
+        addon_ids: selectedAddons
       }
 
       // Отправляем на сервер
@@ -344,6 +374,40 @@ const AddDishModal = ({ isOpen, onClose, onDishAdded, onDishUpdated, categories 
               {errors.image && <span className={styles.errorText}>{errors.image}</span>}
             </div>
           </div>
+
+          {/* Добавки */}
+          {availableAddons.length > 0 && (
+            <div className={styles.formSection}>
+              <h3>Доступные добавки</h3>
+              <p className={styles.sectionDescription}>
+                Выберите добавки, которые можно будет заказать с этим блюдом
+              </p>
+              
+              <div className={styles.addonsGrid}>
+                {availableAddons.map(addon => (
+                  <label 
+                    key={addon.id} 
+                    className={`${styles.addonOption} ${selectedAddons.includes(addon.id) ? styles.selected : ''}`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedAddons.includes(addon.id)}
+                      onChange={() => handleAddonToggle(addon.id)}
+                      disabled={isSubmitting}
+                      style={{ display: 'none' }}
+                    />
+                    <div className={styles.addonInfo}>
+                      <span className={styles.addonName}>{addon.name}</span>
+                      <span className={styles.addonPrice}>+{addon.price}₸</span>
+                      {addon.category && (
+                        <span className={styles.addonCategory}>{addon.category}</span>
+                      )}
+                    </div>
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Настройки */}
           <div className={styles.formSection}>

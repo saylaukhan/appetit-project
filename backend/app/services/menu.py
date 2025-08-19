@@ -4,8 +4,8 @@ from sqlalchemy.orm import selectinload
 from sqlalchemy.exc import IntegrityError
 from typing import List, Optional
 from fastapi import HTTPException, status
-from app.models.menu import Category, Dish, Modifier
-from app.schemas.menu import DishCreateRequest, DishUpdateRequest
+from app.models.menu import Category, Dish, VariantGroup, Variant, Addon
+from app.schemas.menu import DishCreateRequest, DishUpdateRequest, AddonCreateRequest, AddonUpdateRequest
 
 class MenuService:
     def __init__(self, db: AsyncSession):
@@ -59,12 +59,13 @@ class MenuService:
         return result.scalars().all()
 
     async def get_dish_by_id(self, dish_id: int) -> Optional[dict]:
-        """Получение блюда по ID с модификаторами."""
+        """Получение блюда по ID с группами вариантов и добавками."""
         result = await self.db.execute(
             select(Dish)
             .options(
                 selectinload(Dish.category),
-                selectinload(Dish.modifiers)
+                selectinload(Dish.variants).selectinload(Variant.group),
+                selectinload(Dish.addons)
             )
             .where(Dish.id == dish_id)
         )
@@ -72,6 +73,32 @@ class MenuService:
         
         if dish is None:
             return None
+            
+        # Группируем варианты по группам
+        variant_groups = {}
+        for variant in dish.variants:
+            group_id = variant.group_id
+            if group_id not in variant_groups:
+                variant_groups[group_id] = {
+                    "id": variant.group.id,
+                    "name": variant.group.name,
+                    "is_required": variant.group.is_required,
+                    "is_multiple": variant.group.is_multiple,
+                    "sort_order": variant.group.sort_order,
+                    "variants": []
+                }
+            variant_groups[group_id]["variants"].append({
+                "id": variant.id,
+                "name": variant.name,
+                "price": variant.price,
+                "is_default": variant.is_default,
+                "sort_order": variant.sort_order
+            })
+        
+        # Сортируем группы и варианты внутри групп
+        sorted_groups = sorted(variant_groups.values(), key=lambda x: x["sort_order"])
+        for group in sorted_groups:
+            group["variants"].sort(key=lambda x: x["sort_order"])
             
         # Преобразуем в словарь с дополнительными полями
         dish_dict = {
@@ -85,7 +112,8 @@ class MenuService:
             "is_available": dish.is_available,
             "is_popular": dish.is_popular,
             "weight": dish.weight,
-            "modifiers": dish.modifiers
+            "variant_groups": sorted_groups,
+            "addons": dish.addons
         }
         
         return dish_dict
@@ -118,6 +146,24 @@ class MenuService:
 
         try:
             self.db.add(new_dish)
+            await self.db.flush()  # Получаем ID блюда без коммита
+            
+            # Связываем с добавками если указаны
+            if dish_data.addon_ids:
+                addons_result = await self.db.execute(
+                    select(Addon).where(Addon.id.in_(dish_data.addon_ids))
+                )
+                addons = addons_result.scalars().all()
+                new_dish.addons = list(addons)
+            
+            # Связываем с вариантами если указаны
+            if dish_data.variant_ids:
+                variants_result = await self.db.execute(
+                    select(Variant).where(Variant.id.in_(dish_data.variant_ids))
+                )
+                variants = variants_result.scalars().all()
+                new_dish.variants = list(variants)
+            
             await self.db.commit()
             await self.db.refresh(new_dish)
             return new_dish
@@ -152,8 +198,33 @@ class MenuService:
 
         # Обновляем только переданные поля
         update_data = dish_data.dict(exclude_unset=True)
+        addon_ids = update_data.pop('addon_ids', None)
+        variant_ids = update_data.pop('variant_ids', None)
+        
         for field, value in update_data.items():
             setattr(dish, field, value)
+
+        # Обновляем связи с добавками если указаны
+        if addon_ids is not None:
+            if addon_ids:
+                addons_result = await self.db.execute(
+                    select(Addon).where(Addon.id.in_(addon_ids))
+                )
+                addons = addons_result.scalars().all()
+                dish.addons = list(addons)
+            else:
+                dish.addons = []
+        
+        # Обновляем связи с вариантами если указаны
+        if variant_ids is not None:
+            if variant_ids:
+                variants_result = await self.db.execute(
+                    select(Variant).where(Variant.id.in_(variant_ids))
+                )
+                variants = variants_result.scalars().all()
+                dish.variants = list(variants)
+            else:
+                dish.variants = []
 
         try:
             await self.db.commit()
@@ -208,4 +279,123 @@ class MenuService:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Ошибка при обновлении статуса блюда."
+            )
+
+    # CRUD операции для добавок
+    async def get_addons(
+        self, 
+        category: Optional[str] = None,
+        show_all: bool = False
+    ) -> List[Addon]:
+        """Получение добавок с фильтрацией."""
+        query = select(Addon)
+        
+        # Фильтр по категории
+        if category:
+            query = query.where(Addon.category == category)
+        
+        # Только активные добавки (если не указан show_all для админки)
+        if not show_all:
+            query = query.where(Addon.is_active == True)
+        
+        # Сортировка
+        query = query.order_by(Addon.category, Addon.name)
+        
+        result = await self.db.execute(query)
+        return result.scalars().all()
+
+    async def get_addon_by_id(self, addon_id: int) -> Optional[Addon]:
+        """Получение добавки по ID."""
+        result = await self.db.execute(
+            select(Addon).where(Addon.id == addon_id)
+        )
+        return result.scalar_one_or_none()
+
+    async def create_addon(self, addon_data: AddonCreateRequest) -> Addon:
+        """Создание новой добавки."""
+        new_addon = Addon(
+            name=addon_data.name,
+            price=addon_data.price,
+            category=addon_data.category,
+            is_active=True
+        )
+
+        try:
+            self.db.add(new_addon)
+            await self.db.commit()
+            await self.db.refresh(new_addon)
+            return new_addon
+        except IntegrityError:
+            await self.db.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Ошибка при создании добавки. Проверьте данные."
+            )
+
+    async def update_addon(self, addon_id: int, addon_data: AddonUpdateRequest) -> Optional[Addon]:
+        """Обновление добавки."""
+        result = await self.db.execute(
+            select(Addon).where(Addon.id == addon_id)
+        )
+        addon = result.scalar_one_or_none()
+        if not addon:
+            return None
+
+        # Обновляем только переданные поля
+        update_data = addon_data.dict(exclude_unset=True)
+        for field, value in update_data.items():
+            setattr(addon, field, value)
+
+        try:
+            await self.db.commit()
+            await self.db.refresh(addon)
+            return addon
+        except IntegrityError:
+            await self.db.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Ошибка при обновлении добавки. Проверьте данные."
+            )
+
+    async def delete_addon(self, addon_id: int) -> bool:
+        """Удаление добавки."""
+        result = await self.db.execute(
+            select(Addon).where(Addon.id == addon_id)
+        )
+        addon = result.scalar_one_or_none()
+        if not addon:
+            return False
+
+        try:
+            from sqlalchemy import delete
+            await self.db.execute(delete(Addon).where(Addon.id == addon_id))
+            await self.db.commit()
+            return True
+        except IntegrityError:
+            await self.db.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Невозможно удалить добавку. Возможно, она используется в блюдах."
+            )
+
+    async def toggle_addon_active(self, addon_id: int) -> Optional[Addon]:
+        """Переключение активности добавки."""
+        result = await self.db.execute(
+            select(Addon).where(Addon.id == addon_id)
+        )
+        addon = result.scalar_one_or_none()
+        if not addon:
+            return None
+
+        addon.is_active = not addon.is_active
+        
+        try:
+            await self.db.commit()
+            await self.db.refresh(addon)
+            return addon
+        except IntegrityError:
+            await self.db.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Ошибка при обновлении статуса добавки."
             )
