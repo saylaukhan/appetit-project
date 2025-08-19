@@ -72,6 +72,10 @@ export const menuAPI = {
   getDishes: (params = {}) => api.get('/api/v1/menu/dishes', { params }),
   getDish: (dishId) => api.get(`/api/v1/menu/dishes/${dishId}`),
   searchDishes: (query) => api.get('/api/v1/menu/dishes/search', { params: { q: query } }),
+  createDish: (dishData) => api.post('/api/v1/menu/dishes', dishData),
+  updateDish: (dishId, dishData) => api.put(`/api/v1/menu/dishes/${dishId}`, dishData),
+  deleteDish: (dishId) => api.delete(`/api/v1/menu/dishes/${dishId}`),
+  toggleDishAvailability: (dishId) => api.patch(`/api/v1/menu/dishes/${dishId}/toggle-availability`),
 }
 
 // Заказы

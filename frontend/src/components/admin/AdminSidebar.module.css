@@ -1,5 +1,8 @@
 /* Admin Sidebar Styles */
 .sidebarContainer {
+  position: fixed;
+  top: 0;
+  left: -280px; /* Скрыт по умолчанию слева */
   width: 280px;
   height: 100vh;
   background: var(--surface);
@@ -7,6 +10,14 @@
   display: flex;
   flex-direction: column;
   overflow-y: auto;
+  z-index: 1000;
+  transition: left 0.3s ease;
+  box-shadow: var(--shadow-large);
+}
+
+/* Показать sidebar когда открыт */
+.sidebarContainer.open {
+  left: 0;
 }
 
 /* Header Section */
@@ -162,14 +173,34 @@
   color: var(--error);
 }
 
+/* Close Button */
+.closeButton {
+  position: absolute;
+  top: var(--spacing-md);
+  right: var(--spacing-md);
+  width: 32px;
+  height: 32px;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.closeButton:hover {
+  background: var(--background);
+  color: var(--text-primary);
+}
+
 /* Mobile Responsive */
 @media (max-width: 768px) {
   .sidebarContainer {
-    position: fixed;
-    top: 0;
-    left: -280px;
-    z-index: var(--z-modal);
-    transition: left 0.3s ease;
+    width: 100vw;
+    left: -100vw; /* Полная ширина экрана на мобильных */
   }
   
   .sidebarContainer.open {

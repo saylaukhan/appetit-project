@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>APPETIT API Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test { margin: 20px 0; padding: 10px; border: 1px solid #ccc; }
+        .success { background-color: #d4edda; }
+        .error { background-color: #f8d7da; }
+        pre { background-color: #f8f9fa; padding: 10px; overflow-x: auto; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>APPETIT API Test</h1>
+    
+    <div id="results"></div>
+    
+    <button onclick="testCategories()">Тест Категорий</button>
+    <button onclick="testDishes()">Тест Блюд (клиент)</button>
+    <button onclick="testAllDishes()">Тест ВСЕХ Блюд (админка)</button>
+    <button onclick="testCreateDish()">Тест Создания Блюда</button>
+    <button onclick="clearResults()">Очистить</button>
+
+    <script>
+        const API_BASE = 'http://localhost:8000/api/v1';
+        
+        function addResult(title, success, data) {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `test ${success ? 'success' : 'error'}`;
+            div.innerHTML = `
+                <h3>${title}</h3>
+                <pre>${JSON.stringify(data, null, 2)}</pre>
+            `;
+            results.appendChild(div);
+        }
+        
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+        }
+        
+        async function testCategories() {
+            try {
+                const response = await fetch(`${API_BASE}/menu/categories`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    addResult(`✅ Категории (${data.length} шт.)`, true, data);
+                } else {
+                    addResult('❌ Ошибка загрузки категорий', false, data);
+                }
+            } catch (error) {
+                addResult('❌ Ошибка сети категорий', false, error.message);
+            }
+        }
+        
+        async function testDishes() {
+            try {
+                const response = await fetch(`${API_BASE}/menu/dishes?limit=100`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    addResult(`✅ Клиентские блюда (${data.length} шт.)`, true, data);
+                } else {
+                    addResult('❌ Ошибка загрузки блюд', false, data);
+                }
+            } catch (error) {
+                addResult('❌ Ошибка сети блюд', false, error.message);
+            }
+        }
+        
+        async function testAllDishes() {
+            try {
+                const response = await fetch(`${API_BASE}/menu/dishes?limit=100&show_all=true`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    addResult(`✅ ВСЕ блюда для админки (${data.length} шт.)`, true, data);
+                } else {
+                    addResult('❌ Ошибка загрузки всех блюд', false, data);
+                }
+            } catch (error) {
+                addResult('❌ Ошибка сети всех блюд', false, error.message);
+            }
+        }
+        
+        async function testCreateDish() {
+            try {
+                const dishData = {
+                    name: 'Тестовое блюдо API',
+                    description: 'Тестовое описание',
+                    price: 1000,
+                    category_id: 1,
+                    is_available: true,
+                    is_popular: false
+                };
+                
+                const response = await fetch(`${API_BASE}/menu/dishes`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(dishData)
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    addResult('✅ Блюдо создано', true, data);
+                } else {
+                    addResult('❌ Ошибка создания блюда', false, data);
+                }
+            } catch (error) {
+                addResult('❌ Ошибка сети создания', false, error.message);
+            }
+        }
+        
+        // Автоматически тестируем при загрузке
+        window.onload = function() {
+            testCategories();
+            testDishes();
+            testAllDishes();
+        };
+    </script>
+</body>
+</html>

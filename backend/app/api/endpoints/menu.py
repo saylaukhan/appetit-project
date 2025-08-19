@@ -1,8 +1,8 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List, Optional
 from app.core.database import get_db_session
-from app.schemas.menu import CategoryResponse, DishResponse, DishDetailResponse
+from app.schemas.menu import CategoryResponse, DishResponse, DishDetailResponse, DishCreateRequest, DishUpdateRequest
 from app.services.menu import MenuService
 
 router = APIRouter()
@@ -21,6 +21,7 @@ async def get_dishes(
     search: Optional[str] = Query(None),
     page: int = Query(1, ge=1),
     limit: int = Query(20, ge=1, le=100),
+    show_all: bool = Query(False, description="Показать все блюда, включая недоступные (для админки)"),
     db: AsyncSession = Depends(get_db_session)
 ):
     """Получение списка блюд с фильтрацией и поиском."""
@@ -29,7 +30,8 @@ async def get_dishes(
         category_id=category_id,
         search=search,
         page=page,
-        limit=limit
+        limit=limit,
+        show_all=show_all
     )
 
 @router.get("/dishes/{dish_id}", response_model=DishDetailResponse)
@@ -41,6 +43,51 @@ async def get_dish(
     menu_service = MenuService(db)
     dish_data = await menu_service.get_dish_by_id(dish_id)
     if dish_data is None:
-        from fastapi import HTTPException
         raise HTTPException(status_code=404, detail="Блюдо не найдено")
     return dish_data
+
+@router.post("/dishes", response_model=DishResponse, status_code=status.HTTP_201_CREATED)
+async def create_dish(
+    dish_data: DishCreateRequest,
+    db: AsyncSession = Depends(get_db_session)
+):
+    """Создание нового блюда."""
+    menu_service = MenuService(db)
+    new_dish = await menu_service.create_dish(dish_data)
+    return new_dish
+
+@router.put("/dishes/{dish_id}", response_model=DishResponse)
+async def update_dish(
+    dish_id: int,
+    dish_data: DishUpdateRequest,
+    db: AsyncSession = Depends(get_db_session)
+):
+    """Обновление блюда."""
+    menu_service = MenuService(db)
+    updated_dish = await menu_service.update_dish(dish_id, dish_data)
+    if updated_dish is None:
+        raise HTTPException(status_code=404, detail="Блюдо не найдено")
+    return updated_dish
+
+@router.delete("/dishes/{dish_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_dish(
+    dish_id: int,
+    db: AsyncSession = Depends(get_db_session)
+):
+    """Удаление блюда."""
+    menu_service = MenuService(db)
+    deleted = await menu_service.delete_dish(dish_id)
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Блюдо не найдено")
+
+@router.patch("/dishes/{dish_id}/toggle-availability", response_model=DishResponse)
+async def toggle_dish_availability(
+    dish_id: int,
+    db: AsyncSession = Depends(get_db_session)
+):
+    """Переключение доступности блюда."""
+    menu_service = MenuService(db)
+    dish = await menu_service.toggle_dish_availability(dish_id)
+    if dish is None:
+        raise HTTPException(status_code=404, detail="Блюдо не найдено")
+    return dish

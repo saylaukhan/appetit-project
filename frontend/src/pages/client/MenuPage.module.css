@@ -380,6 +380,7 @@
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 1.5rem;
   margin-bottom: 2rem;
+  grid-auto-rows: 1fr;
 }
 
 .dishCard {
@@ -389,6 +390,9 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .dishCard:hover {
@@ -423,6 +427,9 @@
 
 .dishInfo {
   padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
 }
 
 .dishName {
@@ -446,7 +453,7 @@
 }
 
 .dishMeta {
-  margin-bottom: 1rem;
+  margin-bottom: auto;
 }
 
 .dishWeight {
@@ -463,6 +470,8 @@
   justify-content: space-between;
   align-items: center;
   gap: 1rem;
+  margin-top: auto;
+  padding-top: 1rem;
 }
 
 .dishPrice {

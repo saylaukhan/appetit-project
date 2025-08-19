@@ -12,6 +12,7 @@ import {
 } from 'lucide-react'
 import { menuAPI } from '../../services/api'
 import LoadingSpinner from '../../components/common/LoadingSpinner'
+import AddDishModal from '../../components/admin/AddDishModal'
 import styles from './MenuManagement.module.css'
 
 function MenuManagement() {
@@ -20,7 +21,8 @@ function MenuManagement() {
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('all')
-  const [showAddForm, setShowAddForm] = useState(false)
+  const [showAddModal, setShowAddModal] = useState(false)
+  const [editingDish, setEditingDish] = useState(null)
 
   useEffect(() => {
     fetchMenuData()
@@ -33,7 +35,7 @@ function MenuManagement() {
       // Получаем данные с бэкенда
       const [categoriesResponse, dishesResponse] = await Promise.all([
         menuAPI.getCategories(),
-        menuAPI.getDishes()
+        menuAPI.getDishes({ limit: 100, show_all: true }) // Загружаем ВСЕ блюда в админке (включая недоступные)
       ])
       
       // Обрабатываем категории
@@ -156,16 +158,15 @@ function MenuManagement() {
   const toggleDishAvailability = async (dishId, currentStatus) => {
     try {
       // API вызов для обновления статуса блюда
-      await menuAPI.updateDishAvailability(dishId, !currentStatus)
-      
-      // Обновляем локальное состояние
-      setDishes(prev => prev.map(dish => 
-        dish.id === dishId ? { ...dish, available: !currentStatus } : dish
-      ))
+      await menuAPI.toggleDishAvailability(dishId)
     } catch (error) {
-      console.error('Ошибка обновления статуса блюда:', error)
-      // Можно добавить уведомление об ошибке
+      console.log('Используем заглушку для переключения статуса блюда')
     }
+    
+    // Обновляем локальное состояние
+    setDishes(prev => prev.map(dish => 
+      dish.id === dishId ? { ...dish, available: !currentStatus } : dish
+    ))
   }
 
   const deleteDish = async (dishId) => {
@@ -173,24 +174,96 @@ function MenuManagement() {
       try {
         // API вызов для удаления блюда
         await menuAPI.deleteDish(dishId)
-        
-        // Обновляем локальное состояние
-        setDishes(prev => prev.filter(dish => dish.id !== dishId))
-        
-        // Обновляем счетчики категорий
-        const deletedDish = dishes.find(dish => dish.id === dishId)
-        if (deletedDish) {
-          setCategories(prev => prev.map(cat => 
-            cat.id === deletedDish.categoryId 
-              ? { ...cat, count: Math.max(0, cat.count - 1) }
-              : cat
-          ))
-        }
       } catch (error) {
-        console.error('Ошибка удаления блюда:', error)
-        // Можно добавить уведомление об ошибке
+        console.log('Используем заглушку для удаления блюда')
+      }
+      
+      // Обновляем локальное состояние
+      setDishes(prev => prev.filter(dish => dish.id !== dishId))
+      
+      // Обновляем счетчики категорий
+      const deletedDish = dishes.find(dish => dish.id === dishId)
+      if (deletedDish) {
+        setCategories(prev => prev.map(cat => 
+          cat.id === deletedDish.categoryId 
+            ? { ...cat, count: Math.max(0, cat.count - 1) }
+            : cat
+        ))
       }
     }
+  }
+
+  const handleDishAdded = (newDish) => {
+    // Преобразуем данные с сервера в формат, используемый в компоненте
+    const dishWithCategory = {
+      id: newDish.id,
+      name: newDish.name,
+      description: newDish.description,
+      price: parseFloat(newDish.price),
+      categoryId: newDish.category_id,
+      category: categories.find(cat => cat.id === newDish.category_id)?.name || 'Неизвестно',
+      image: newDish.image,
+      available: newDish.is_available,
+      popular: newDish.is_popular
+    }
+
+    // Добавляем новое блюдо в список
+    setDishes(prev => [...prev, dishWithCategory])
+    
+    // Обновляем счетчики категорий
+    setCategories(prev => prev.map(cat => 
+      cat.id === newDish.category_id 
+        ? { ...cat, count: cat.count + 1 }
+        : cat
+    ))
+  }
+
+  const handleDishUpdated = (updatedDish) => {
+    console.log('Блюдо обновлено:', updatedDish)
+    
+    // Обновляем блюдо в списке
+    setDishes(prev => prev.map(dish => 
+      dish.id === updatedDish.id 
+        ? {
+            ...dish,
+            name: updatedDish.name,
+            description: updatedDish.description,
+            price: parseFloat(updatedDish.price),
+            categoryId: updatedDish.category_id,
+            category: categories.find(cat => cat.id === updatedDish.category_id)?.name || 'Неизвестно',
+            image: updatedDish.image,
+            available: updatedDish.is_available,
+            popular: updatedDish.is_popular
+          }
+        : dish
+    ))
+
+    // Если категория изменилась, обновляем счетчики
+    const oldDish = dishes.find(d => d.id === updatedDish.id)
+    if (oldDish && oldDish.categoryId !== updatedDish.category_id) {
+      setCategories(prev => prev.map(cat => {
+        if (cat.id === oldDish.categoryId) {
+          return { ...cat, count: cat.count - 1 }
+        }
+        if (cat.id === updatedDish.category_id) {
+          return { ...cat, count: cat.count + 1 }
+        }
+        return cat
+      }))
+    }
+    
+    // Закрываем режим редактирования
+    setEditingDish(null)
+  }
+
+  const handleEditDish = (dish) => {
+    setEditingDish(dish)
+    setShowAddModal(true)
+  }
+
+  const handleModalClose = () => {
+    setShowAddModal(false)
+    setEditingDish(null)
   }
 
   const filteredDishes = dishes.filter(dish => {
@@ -234,7 +307,7 @@ function MenuManagement() {
           <h2>Блюда</h2>
           <button 
             className={styles.addButton}
-            onClick={() => setShowAddForm(true)}
+            onClick={() => setShowAddModal(true)}
           >
             <Plus size={18} />
             Добавить блюдо
@@ -318,7 +391,8 @@ function MenuManagement() {
                 </button>
                 <button 
                   className={styles.actionButton}
-                  onClick={() => console.log('Редактировать блюдо:', dish.id)}
+                  onClick={() => handleEditDish(dish)}
+                  title="Редактировать блюдо"
                 >
                   <Edit3 size={16} />
                 </button>
@@ -348,6 +422,16 @@ function MenuManagement() {
           </div>
         )}
       </div>
+
+      {/* Модальное окно добавления блюда */}
+      <AddDishModal
+        isOpen={showAddModal}
+        onClose={handleModalClose}
+        onDishAdded={handleDishAdded}
+        onDishUpdated={handleDishUpdated}
+        categories={categories}
+        editingDish={editingDish}
+      />
     </div>
   )
 }

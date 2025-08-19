@@ -122,12 +122,15 @@ function MenuPage() {
   const loadCategories = async () => {
     try {
       setError(null)
+      console.log('Загружаем категории...')
       const response = await menuAPI.getCategories()
-      setCategories(response.data)
-      console.log('Загружено категорий:', response.data.length)
+      console.log('Ответ от API категории:', response)
+      setCategories(response.data || [])
+      console.log('Загружено категорий:', response.data?.length || 0)
     } catch (error) {
       console.error('Ошибка загрузки категорий:', error)
-      setError('Не удалось загрузить категории меню')
+      console.error('Детали ошибки:', error.response?.data)
+      setError(`Не удалось загрузить категории меню: ${error.message}`)
     } finally {
       setLoading(false)
     }
@@ -136,15 +139,18 @@ function MenuPage() {
   const loadDishes = async () => {
     setDishesLoading(true)
     try {
+      console.log('Загружаем блюда...')
       const params = { limit: 100 } // Загружаем все блюда
       if (searchQuery) params.search = searchQuery
 
       const response = await menuAPI.getDishes(params)
-      setDishes(response.data)
-      console.log('Загружено блюд:', response.data.length)
+      console.log('Ответ от API блюда:', response)
+      setDishes(response.data || [])
+      console.log('Загружено блюд:', response.data?.length || 0)
     } catch (error) {
       console.error('Ошибка загрузки блюд:', error)
-      setError('Не удалось загрузить блюда')
+      console.error('Детали ошибки:', error.response?.data)
+      setError(`Не удалось загрузить блюда: ${error.message}`)
     } finally {
       setDishesLoading(false)
     }
@@ -261,22 +267,8 @@ function MenuPage() {
 
   // SVG placeholder для изображений блюд
   const createPlaceholderImage = () => {
-    const svg = `
-      <svg width="250" height="200" xmlns="http://www.w3.org/2000/svg" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);">
-        <rect width="250" height="200" fill="url(#grad1)"/>
-        <defs>
-          <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" style="stop-color:#f8f9fa;stop-opacity:1" />
-            <stop offset="100%" style="stop-color:#e9ecef;stop-opacity:1" />
-          </linearGradient>
-        </defs>
-        <circle cx="125" cy="80" r="25" fill="#dee2e6"/>
-        <rect x="75" y="120" width="100" height="8" fill="#dee2e6" rx="4"/>
-        <rect x="90" y="140" width="70" height="6" fill="#dee2e6" rx="3"/>
-        <text x="125" y="170" font-family="Arial, sans-serif" font-size="12" fill="#6c757d" text-anchor="middle">Изображение не найдено</text>
-      </svg>
-    `
-    return `data:image/svg+xml;base64,${btoa(svg)}`
+    // Простой SVG placeholder без кодирования
+    return `data:image/svg+xml,%3Csvg width='250' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='250' height='200' fill='%23f8f9fa'/%3E%3Ccircle cx='125' cy='100' r='30' fill='%23dee2e6'/%3E%3C/svg%3E`
   }
 
   if (loading) {
