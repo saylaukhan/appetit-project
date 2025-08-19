@@ -377,7 +377,7 @@
 /* Сетка блюд */
 .dishesGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 1.5rem;
   margin-bottom: 2rem;
 }
@@ -398,9 +398,11 @@
 
 .dishImage {
   position: relative;
-  width: 100%;
-  height: 200px;
+  width: 300px;
+  height: 300px;
   overflow: hidden;
+  margin: 0 auto;
+  border-radius: 8px;
 }
 
 .dishImage img {
@@ -640,8 +642,13 @@
   }
   
   .dishesGrid {
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 1rem;
+  }
+
+  .dishImage {
+    width: 100%;
+    height: 250px;
   }
   
   .promoContent {
@@ -662,6 +669,11 @@
 @media (max-width: 480px) {
   .dishesGrid {
     grid-template-columns: 1fr;
+  }
+
+  .dishImage {
+    width: 100%;
+    height: 200px;
   }
   
   .promoImages img {

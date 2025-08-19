@@ -260,20 +260,80 @@ function MenuPage() {
   }
 
   // SVG placeholder для изображений блюд
-  const createPlaceholderImage = () => {
+  const createPlaceholderImage = (categoryName = '') => {
+    // Определяем цвета и иконки для разных категорий
+    const getCategoryStyle = (category) => {
+      const categoryLower = category.toLowerCase()
+      
+      if (categoryLower.includes('пицца')) {
+        return {
+          gradient1: '#ff6b6b', gradient2: '#ee5a52',
+          icon: '🍕', name: 'Пицца'
+        }
+      } else if (categoryLower.includes('суши') || categoryLower.includes('роллы')) {
+        return {
+          gradient1: '#4ecdc4', gradient2: '#44a08d',
+          icon: '🍣', name: 'Суши'
+        }
+      } else if (categoryLower.includes('бургер') || categoryLower.includes('сэндвич')) {
+        return {
+          gradient1: '#ffa726', gradient2: '#ff9800',
+          icon: '🍔', name: 'Бургеры'
+        }
+      } else if (categoryLower.includes('салат')) {
+        return {
+          gradient1: '#66bb6a', gradient2: '#4caf50',
+          icon: '🥗', name: 'Салаты'
+        }
+      } else if (categoryLower.includes('напитки') || categoryLower.includes('сок')) {
+        return {
+          gradient1: '#42a5f5', gradient2: '#2196f3',
+          icon: '🥤', name: 'Напитки'
+        }
+      } else if (categoryLower.includes('десерт') || categoryLower.includes('сладкое')) {
+        return {
+          gradient1: '#ab47bc', gradient2: '#9c27b0',
+          icon: '🧁', name: 'Десерты'
+        }
+      } else if (categoryLower.includes('суп')) {
+        return {
+          gradient1: '#ef5350', gradient2: '#f44336',
+          icon: '🍲', name: 'Супы'
+        }
+      } else if (categoryLower.includes('шаурма') || categoryLower.includes('шаверма')) {
+        return {
+          gradient1: '#ffb74d', gradient2: '#ff9800',
+          icon: '🌯', name: 'Шаурма'
+        }
+      }
+      
+      // Дефолтный стиль
+      return {
+        gradient1: '#f8f9fa', gradient2: '#e9ecef',
+        icon: '🍽️', name: 'Блюдо'
+      }
+    }
+
+    const style = getCategoryStyle(categoryName)
+    
     const svg = `
-      <svg width="250" height="200" xmlns="http://www.w3.org/2000/svg" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);">
-        <rect width="250" height="200" fill="url(#grad1)"/>
+      <svg width="300" height="300" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" style="stop-color:#f8f9fa;stop-opacity:1" />
-            <stop offset="100%" style="stop-color:#e9ecef;stop-opacity:1" />
+            <stop offset="0%" style="stop-color:${style.gradient1};stop-opacity:1" />
+            <stop offset="100%" style="stop-color:${style.gradient2};stop-opacity:1" />
           </linearGradient>
+          <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="2" dy="2" stdDeviation="3" flood-color="#000000" flood-opacity="0.3"/>
+          </filter>
         </defs>
-        <circle cx="125" cy="80" r="25" fill="#dee2e6"/>
-        <rect x="75" y="120" width="100" height="8" fill="#dee2e6" rx="4"/>
-        <rect x="90" y="140" width="70" height="6" fill="#dee2e6" rx="3"/>
-        <text x="125" y="170" font-family="Arial, sans-serif" font-size="12" fill="#6c757d" text-anchor="middle">Изображение не найдено</text>
+        <rect width="300" height="300" fill="url(#grad1)"/>
+        <circle cx="150" cy="120" r="45" fill="rgba(255,255,255,0.2)" filter="url(#shadow)"/>
+        <text x="150" y="140" font-family="Arial, sans-serif" font-size="48" text-anchor="middle" fill="rgba(255,255,255,0.9)">${style.icon}</text>
+        <rect x="75" y="180" width="150" height="16" fill="rgba(255,255,255,0.3)" rx="8"/>
+        <rect x="90" y="210" width="120" height="12" fill="rgba(255,255,255,0.2)" rx="6"/>
+        <text x="150" y="250" font-family="Arial, sans-serif" font-size="16" fill="rgba(255,255,255,0.9)" text-anchor="middle" font-weight="bold">${style.name}</text>
+        <text x="150" y="270" font-family="Arial, sans-serif" font-size="12" fill="rgba(255,255,255,0.7)" text-anchor="middle">300 × 300</text>
       </svg>
     `
     return `data:image/svg+xml;base64,${btoa(svg)}`
@@ -316,14 +376,14 @@ function MenuPage() {
               src="https://cdn-kz11.foodpicasso.com/assets/2025/03/19/cb4e1a15ed8eb66b4cb3f04266b87a8f---jpeg_420x420:whitepadding15_94310_convert.webp?v2" 
               alt="Фирменная шаурма"
               onError={(e) => {
-                e.target.src = createPlaceholderImage()
+                e.target.src = createPlaceholderImage('Шаурма')
               }}
             />
             <img 
               src="https://cdn-kz11.foodpicasso.com/assets/2025/04/04/b9ef70d2195ea30d7a1a5a1b22450db8---jpeg_420x420:whitepadding15_94310_convert.webp?v2" 
               alt="Классическая шаурма"
               onError={(e) => {
-                e.target.src = createPlaceholderImage()
+                e.target.src = createPlaceholderImage('Шаурма')
               }}
             />
           </div>
@@ -445,17 +505,21 @@ function MenuPage() {
                 // Если есть поисковый запрос, показываем все блюда в одной сетке
                 searchQuery ? (
                   <div className={styles.dishesGrid}>
-                    {sortDishes(dishes).map((dish) => (
-                      <DishCard 
-                        key={dish.id} 
-                        dish={dish} 
-                        onAddToCart={handleAddToCart}
-                        isInCart={isInCart}
-                        getItemQuantity={getItemQuantity}
-                        formatPrice={formatPrice}
-                        createPlaceholderImage={createPlaceholderImage}
-                      />
-                    ))}
+                    {sortDishes(dishes).map((dish) => {
+                      const dishCategory = categories.find(cat => cat.id === dish.category_id)
+                      return (
+                        <DishCard 
+                          key={dish.id} 
+                          dish={dish} 
+                          category={dishCategory}
+                          onAddToCart={handleAddToCart}
+                          isInCart={isInCart}
+                          getItemQuantity={getItemQuantity}
+                          formatPrice={formatPrice}
+                          createPlaceholderImage={createPlaceholderImage}
+                        />
+                      )
+                    })}
                   </div>
                 ) : (
                   // Иначе группируем по категориям
@@ -476,6 +540,7 @@ function MenuPage() {
                           <DishCard 
                             key={dish.id} 
                             dish={dish} 
+                            category={group.category}
                             onAddToCart={handleAddToCart}
                             isInCart={isInCart}
                             getItemQuantity={getItemQuantity}
@@ -501,16 +566,16 @@ function MenuPage() {
 }
 
 // Компонент карточки блюда
-function DishCard({ dish, onAddToCart, isInCart, getItemQuantity, formatPrice, createPlaceholderImage }) {
+function DishCard({ dish, category, onAddToCart, isInCart, getItemQuantity, formatPrice, createPlaceholderImage }) {
   return (
     <div className={styles.dishCard}>
       <div className={styles.dishImage}>
         <img 
-          src={dish.image || createPlaceholderImage()} 
+          src={dish.image || createPlaceholderImage(category?.name || dish.name)} 
           alt={dish.name}
           onError={(e) => {
             // Если это первая попытка и есть изображение, попробуем загрузить еще раз
-            const placeholderSrc = createPlaceholderImage()
+            const placeholderSrc = createPlaceholderImage(category?.name || dish.name)
             if (e.target.src !== placeholderSrc && !e.target.dataset.retried && dish.image) {
               e.target.dataset.retried = 'true'
               console.log(`Повторная попытка загрузки изображения для: ${dish.name}`)
