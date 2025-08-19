@@ -1,9 +1,10 @@
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import event
+from sqlalchemy import event, create_engine
 from sqlalchemy.engine import Engine
+from sqlalchemy.orm import sessionmaker, Session
 import sqlite3
-from typing import AsyncGenerator
+from typing import AsyncGenerator, Generator
 
 from app.core.config import settings
 
@@ -22,6 +23,16 @@ async_session_maker = async_sessionmaker(
     expire_on_commit=False
 )
 
+# Синхронный движок для совместимости
+sync_engine = create_engine(
+    settings.DATABASE_URL.replace("sqlite+aiosqlite://", "sqlite:///"),
+    echo=settings.DEBUG,
+    connect_args={"check_same_thread": False}
+)
+
+# Синхронная фабрика сессий
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=sync_engine)
+
 # Базовый класс для всех моделей
 Base = declarative_base()
 
@@ -38,7 +49,7 @@ def set_sqlite_pragma(dbapi_connection, connection_record):
 
 async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
     """
-    Dependency для получения сессии базы данных.
+    Dependency для получения асинхронной сессии базы данных.
     Используется в FastAPI endpoints через Depends(get_db_session).
     """
     async with async_session_maker() as session:
@@ -49,6 +60,18 @@ async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
             raise
         finally:
             await session.close()
+
+
+def get_db() -> Generator[Session, None, None]:
+    """
+    Dependency для получения синхронной сессии базы данных.
+    Используется в FastAPI endpoints через Depends(get_db).
+    """
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 
 async def create_db_and_tables():

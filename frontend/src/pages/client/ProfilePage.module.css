@@ -2,4 +2,457 @@
 .profileContainer {
   min-height: calc(100vh - var(--header-height));
   padding: var(--spacing-xl) 0;
+  background: var(--background);
+}
+
+.profileHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--spacing-xl);
+  padding-bottom: var(--spacing-lg);
+  border-bottom: 1px solid var(--border-light);
+}
+
+.headerLeft h1 {
+  color: var(--text-primary);
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: var(--spacing-sm);
+}
+
+.headerLeft p {
+  color: var(--text-secondary);
+  font-size: 1rem;
+  margin-bottom: 0;
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+}
+
+.userInfo {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.userName {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.userBadge {
+  background: var(--primary-color);
+  color: var(--text-white);
+  padding: 2px 8px;
+  border-radius: var(--radius-small);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.logoutBtn {
+  color: var(--primary-color);
+  background: none;
+  border: none;
+  font-size: 0.9rem;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.logoutBtn:hover {
+  color: var(--primary-dark);
+}
+
+.profileContent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl);
+}
+
+/* Секция бонусов */
+.bonusSection {
+  background: var(--surface);
+  padding: var(--spacing-lg);
+  border-radius: var(--radius-medium);
+  box-shadow: var(--shadow-small);
+  border: 1px solid var(--border-light);
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-md);
+}
+
+.sectionHeader h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0;
+}
+
+.closeBtn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.closeBtn:hover {
+  color: var(--text-secondary);
+}
+
+.bonusContent p {
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-md);
+  font-size: 0.95rem;
+}
+
+.bonusForm {
+  display: flex;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-sm);
+}
+
+.bonusInput {
+  flex: 1;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-small);
+  font-size: 0.95rem;
+}
+
+.bonusInput:focus {
+  outline: none;
+  border-color: var(--primary-color);
+}
+
+.subscribeBtn {
+  background: var(--primary-color);
+  color: var(--text-white);
+  border: none;
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border-radius: var(--radius-small);
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+.subscribeBtn:hover {
+  background: var(--primary-dark);
+}
+
+.subscribeBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.privacyBtn {
+  background: none;
+  border: none;
+  color: var(--primary-color);
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.privacyBtn:hover {
+  color: var(--primary-dark);
+}
+
+/* Секция личных данных */
+.personalSection {
+  background: var(--surface);
+  padding: var(--spacing-lg);
+  border-radius: var(--radius-medium);
+  box-shadow: var(--shadow-small);
+  border: 1px solid var(--border-light);
+}
+
+.personalSection h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-lg);
+}
+
+.formGrid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.formGroup label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.formInput {
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-small);
+  font-size: 0.95rem;
+  background: var(--background);
+}
+
+.formInput:focus {
+  outline: none;
+  border-color: var(--primary-color);
+}
+
+.readOnlyInput {
+  background-color: var(--background) !important;
+  color: var(--text-muted) !important;
+  cursor: not-allowed;
+  border-color: var(--border-light) !important;
+}
+
+.readOnlyInput:focus {
+  border-color: var(--border-light) !important;
+}
+
+.changeBtn, .saveBtn {
+  align-self: flex-start;
+  background: none;
+  border: none;
+  color: var(--primary-color);
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: 0.9rem;
+  padding: 0;
+}
+
+.changeBtn:hover, .saveBtn:hover {
+  color: var(--primary-dark);
+}
+
+.changeBtn:disabled, .saveBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  color: var(--text-muted) !important;
+}
+
+.dateInputs {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.dateSelect {
+  flex: 1;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-small);
+  font-size: 0.95rem;
+  background: var(--surface);
+}
+
+.dateSelect:focus {
+  outline: none;
+  border-color: var(--primary-color);
+}
+
+.genderInputs {
+  display: flex;
+}
+
+.genderSelect {
+  flex: 1;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-small);
+  font-size: 0.95rem;
+  background: var(--surface);
+}
+
+.genderSelect:focus {
+  outline: none;
+  border-color: var(--primary-color);
+}
+
+/* Секция подписок */
+.subscriptionSection {
+  background: var(--surface);
+  padding: var(--spacing-lg);
+  border-radius: var(--radius-medium);
+  box-shadow: var(--shadow-small);
+  border: 1px solid var(--border-light);
+}
+
+.subscriptionSection h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-md);
+}
+
+.subscriptionItem {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  cursor: pointer;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+}
+
+.checkboxLabel input[type="checkbox"] {
+  display: none;
+}
+
+.checkmark {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--border-color);
+  border-radius: 3px;
+  position: relative;
+  background: var(--surface);
+  transition: all 0.2s ease;
+}
+
+.checkboxLabel input[type="checkbox"]:checked + .checkmark {
+  background: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.checkboxLabel input[type="checkbox"]:checked + .checkmark::after {
+  content: '✓';
+  position: absolute;
+  top: -2px;
+  left: 2px;
+  color: var(--text-white);
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.subscriptionItem p {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-left: 26px;
+  margin-bottom: 0;
+}
+
+/* Секция истории заказов */
+.orderSection {
+  background: var(--surface);
+  padding: var(--spacing-lg);
+  border-radius: var(--radius-medium);
+  box-shadow: var(--shadow-small);
+  border: 1px solid var(--border-light);
+}
+
+.orderSection h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-md);
+}
+
+.orderSection p {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  margin-bottom: var(--spacing-lg);
+}
+
+.exitBtn {
+  background: none;
+  border: none;
+  color: var(--primary-color);
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: 0.95rem;
+  padding: 0;
+}
+
+.exitBtn:hover {
+  color: var(--primary-dark);
+}
+
+/* Индикатор загрузки */
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-2xl);
+  min-height: 200px;
+}
+
+.loadingSpinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid var(--border-light);
+  border-top: 4px solid var(--primary-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: var(--spacing-md);
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loadingContainer p {
+  color: var(--text-secondary);
+  font-size: 1rem;
+  margin: 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .profileHeader {
+    flex-direction: column;
+    gap: var(--spacing-md);
+    align-items: flex-start;
+  }
+  
+  .bonusForm {
+    flex-direction: column;
+  }
+  
+  .dateInputs {
+    flex-direction: column;
+  }
+  
+  .formGrid {
+    gap: var(--spacing-md);
+  }
+}
+
+@media (max-width: 480px) {
+  .profileContainer {
+    padding: var(--spacing-lg) 0;
+  }
+  
+  .bonusSection,
+  .personalSection,
+  .subscriptionSection,
+  .orderSection {
+    padding: var(--spacing-md);
+    margin: 0 -var(--spacing-sm);
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+  }
 }

@@ -9,6 +9,11 @@ class UserRole(str, Enum):
     KITCHEN = "kitchen"
     COURIER = "courier"
 
+class Gender(str, Enum):
+    MALE = "male"
+    FEMALE = "female"
+    OTHER = "other"
+
 class User(Base):
     __tablename__ = "users"
 
@@ -25,6 +30,11 @@ class User(Base):
     avatar = Column(String(255), nullable=True)
     address = Column(String(500), nullable=True)
     birth_date = Column(DateTime, nullable=True)
+    gender = Column(SQLEnum(Gender), nullable=True)
+    
+    # Настройки подписок
+    newsletter_subscribed = Column(Boolean, default=False)
+    sms_notifications = Column(Boolean, default=True)
     
     # Служебные поля
     created_at = Column(DateTime(timezone=True), server_default=func.now())
