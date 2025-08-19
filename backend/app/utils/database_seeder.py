@@ -419,7 +419,7 @@ class DatabaseSeeder:
                 "price": Decimal("490"),
                 "category_id": 5,
                 "is_popular": False,
-                "image": "https://cdn-kz11.foodpicasso.com/assets/2025/02/10/fe29ee0ab3100a6b940d873ea691e9ac---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
+                "image": "https://cdn-kz11.foodpicasso.com/assets/2025/02/10/8efdca35c475f581483df64ff8337bbb---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
             },
             {
                 "name": "Айран 1ст",
@@ -427,7 +427,7 @@ class DatabaseSeeder:
                 "price": Decimal("390"),
                 "category_id": 5,
                 "is_popular": False,
-                "image": "https://cdn-kz11.foodpicasso.com/assets/2025/02/10/8efdca35c475f581483df64ff8337bbb---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
+                "image": "https://cdn-kz11.foodpicasso.com/assets/2025/02/10/8c5dd0e3612f293fe87d01a7a817669d---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
             },
             {
                 "name": "Пепси 1л",
@@ -436,7 +436,7 @@ class DatabaseSeeder:
                 "category_id": 5,
                 "weight": "1л",
                 "is_popular": False,
-                "image": "https://cdn-kz11.foodpicasso.com/assets/2025/02/10/8c5dd0e3612f293fe87d01a7a817669d---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
+                "image": "https://cdn-kz11.foodpicasso.com/assets/2025/02/10/b8e35534332c0d9853bb8ee9fe29646f---jpeg_1100_1e6e0_convert.webp "
             },
             {
                 "name": "Пепси 0,5л",
