@@ -39,4 +39,8 @@ async def get_dish(
 ):
     """Получение детальной информации о блюде."""
     menu_service = MenuService(db)
-    return await menu_service.get_dish_by_id(dish_id)
+    dish_data = await menu_service.get_dish_by_id(dish_id)
+    if dish_data is None:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=404, detail="Блюдо не найдено")
+    return dish_data

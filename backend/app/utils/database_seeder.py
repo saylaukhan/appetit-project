@@ -200,6 +200,7 @@ class DatabaseSeeder:
                 "description": "Тонкий лаваш, сочные кусочки говядины, картофель фри, лук, помидор, белый соус.",
                 "price": Decimal("1990"),
                 "category_id": 2,
+                "weight": "350г",
                 "is_popular": False,
                 "image": "https://cdn-kz11.foodpicasso.com/assets/2025/04/04/b9ef70d2195ea30d7a1a5a1b22450db8---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
             },
@@ -208,6 +209,7 @@ class DatabaseSeeder:
                 "description": "Тонкий лаваш, сочные кусочки говядины, картофель фри, лук, помидор, белый соус.",
                 "price": Decimal("2990"),
                 "category_id": 2,
+                "weight": "500г",
                 "is_popular": False,
                 "image": "https://cdn-kz11.foodpicasso.com/assets/2025/04/17/db9bdbdea43c0f2d5c625dc1ddac74e5---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
             },
@@ -216,6 +218,7 @@ class DatabaseSeeder:
                 "description": "Тонкий лаваш, сочные кусочки говядины, картофель фри, лук, помидор, красный соус, белый соус.",
                 "price": Decimal("1690"),
                 "category_id": 2,
+                "weight": "350г",
                 "is_popular": True,
                 "image": "https://cdn-kz11.foodpicasso.com/assets/2025/03/19/cb4e1a15ed8eb66b4cb3f04266b87a8f---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
             },
@@ -273,7 +276,7 @@ class DatabaseSeeder:
                 "price": Decimal("1490"),
                 "category_id": 2,
                 "is_popular": False,
-                "image": "https://cdn-kz11/foodpicasso.com/assets/2025/02/10/e09cfde451e5dde3c8ffa0f2f53b56bb---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
+                "image": "https://cdn-kz11.foodpicasso.com/assets/2025/02/10/e09cfde451e5dde3c8ffa0f2f53b56bb---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
             },
             {
                 "name": "Хот-дог",
@@ -299,7 +302,7 @@ class DatabaseSeeder:
                 "price": Decimal("990"),
                 "category_id": 3,
                 "is_popular": False,
-                "image": "https://cdn-kz11/foodpicasso.com/assets/2025/02/10/5d00d455fdad4c1ffba2f003262fa348---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
+                "image": "https://cdn-kz11.foodpicasso.com/assets/2025/02/10/5d00d455fdad4c1ffba2f003262fa348---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
             },
             {
                 "name": "Наггетсы",
@@ -307,7 +310,7 @@ class DatabaseSeeder:
                 "price": Decimal("1490"),
                 "category_id": 3,
                 "is_popular": False,
-                "image": "https://cdn-kz11/foodpicasso.com/assets/2025/02/10/b059d0e8a3ad4129618668e05fb3725b---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
+                "image": "https://cdn-kz11.foodpicasso.com/assets/2025/02/10/b059d0e8a3ad4129618668e05fb3725b---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
             },
             {
                 "name": "Картофель Фри",
@@ -315,7 +318,7 @@ class DatabaseSeeder:
                 "price": Decimal("890"),
                 "category_id": 3,
                 "is_popular": False,
-                "image": "https://cdn-kz11/foodpicasso.com/assets/2025/02/10/005a8258c1c7ffaa6b32b5c76ec54b40---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
+                "image": "https://cdn-kz11.foodpicasso.com/assets/2025/02/10/005a8258c1c7ffaa6b32b5c76ec54b40---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
             },
             {
                 "name": "Дольки",
@@ -323,7 +326,7 @@ class DatabaseSeeder:
                 "price": Decimal("1190"),
                 "category_id": 3,
                 "is_popular": False,
-                "image": "https://cdn-kz11/foodpicasso.com/assets/2025/02/10/99f031c4db6f80e433b1a4c1c5acf6e7---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
+                "image": "https://cdn-kz11.foodpicasso.com/assets/2025/02/10/99f031c4db6f80e433b1a4c1c5acf6e7---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
             },
 
             # Соусы
@@ -333,7 +336,7 @@ class DatabaseSeeder:
                 "price": Decimal("240"),
                 "category_id": 4,
                 "is_popular": False,
-                "image": "https://cdn-kz11/foodpicasso.com/assets/2025/02/10/8032248095ad95685129187c86a69fd3---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
+                "image": "https://cdn-kz11.foodpicasso.com/assets/2025/02/10/8032248095ad95685129187c86a69fd3---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
             },
             {
                 "name": "Соус Сырный 30г",
@@ -341,7 +344,7 @@ class DatabaseSeeder:
                 "price": Decimal("240"),
                 "category_id": 4,
                 "is_popular": False,
-                "image": "https://cdn-kz11/foodpicasso.com/assets/2025/02/10/ef651ed87b4c3ab6e22e539c6081462c---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
+                "image": "https://cdn-kz11.foodpicasso.com/assets/2025/02/10/ef651ed87b4c3ab6e22e539c6081462c---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
             },
             {
                 "name": "Соус Томатный 30г",
@@ -349,7 +352,7 @@ class DatabaseSeeder:
                 "price": Decimal("240"),
                 "category_id": 4,
                 "is_popular": False,
-                "image": "https://cdn-kz11/foodpicasso.com/assets/2025/02/10/c282f9bf851d7be2402b14a824e3b859---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
+                "image": "https://cdn-kz11.foodpicasso.com/assets/2025/02/10/c282f9bf851d7be2402b14a824e3b859---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
             },
             {
                 "name": "Соус Горчичный 30г",
@@ -357,7 +360,7 @@ class DatabaseSeeder:
                 "price": Decimal("240"),
                 "category_id": 4,
                 "is_popular": False,
-                "image": "https://cdn-kz11/foodpicasso.com/assets/2025/02/10/628b8291327c6b3a506c71c9f3597351---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
+                "image": "https://cdn-kz11.foodpicasso.com/assets/2025/02/10/628b8291327c6b3a506c71c9f3597351---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
             },
             {
                 "name": "Соус Барбекю 30г",
@@ -365,7 +368,7 @@ class DatabaseSeeder:
                 "price": Decimal("240"),
                 "category_id": 4,
                 "is_popular": False,
-                "image": "https://cdn-kz11/foodpicasso.com/assets/2025/02/10/efa6d1480bb4a3947d56250494bdc83a---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
+                "image": "https://cdn-kz11.foodpicasso.com/assets/2025/02/10/efa6d1480bb4a3947d56250494bdc83a---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
             },
             {
                 "name": "Соус Чесночный 30г",
@@ -373,7 +376,7 @@ class DatabaseSeeder:
                 "price": Decimal("240"),
                 "category_id": 4,
                 "is_popular": False,
-                "image": "https://cdn-kz11/foodpicasso.com/assets/2025/02/10/0448f3c2b674898877d8a7c860eae049---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
+                "image": "https://cdn-kz11.foodpicasso.com/assets/2025/02/10/0448f3c2b674898877d8a7c860eae049---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
             },
             {
                 "name": "соус Острый 30г",
@@ -381,7 +384,7 @@ class DatabaseSeeder:
                 "price": Decimal("240"),
                 "category_id": 4,
                 "is_popular": False,
-                "image": "https://cdn-kz11/foodpicasso.com/assets/2025/04/17/9a29b3909ca001074b9d29b36b5b5384---jpeg_1100_1e6e0_convert.webp"
+                "image": "https://cdn-kz11.foodpicasso.com/assets/2025/04/17/9a29b3909ca001074b9d29b36b5b5384---jpeg_1100_1e6e0_convert.webp"
             },
 
             # Напитки
@@ -390,8 +393,9 @@ class DatabaseSeeder:
                 "description": "",
                 "price": Decimal("990"),
                 "category_id": 5,
+                "weight": "1.0л",
                 "is_popular": False,
-                "image": "https://cdn-kz11/foodpicasso.com/assets/2025/04/04/a20ed5cf74b611706a9079cac239e12d---png_420x420:whitepadding15_94310_convert.webp?v2"
+                "image": "https://cdn-kz11.foodpicasso.com/assets/2025/04/04/a20ed5cf74b611706a9079cac239e12d---png_420x420:whitepadding15_94310_convert.webp?v2"
             },
             {
                 "name": "Сок Лимонный 0,3л",
@@ -399,7 +403,7 @@ class DatabaseSeeder:
                 "price": Decimal("390"),
                 "category_id": 5,
                 "is_popular": False,
-                "image": "https://cdn-kz11/foodpicasso.com/assets/2025/02/10/e3445e38097d7fb9ef8e58c64d1b0534---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
+                "image": "https://cdn-kz11.foodpicasso.com/assets/2025/02/10/e3445e38097d7fb9ef8e58c64d1b0534---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
             },
             {
                 "name": "Морс Смородина 1,0л",
@@ -407,7 +411,7 @@ class DatabaseSeeder:
                 "price": Decimal("1390"),
                 "category_id": 5,
                 "is_popular": False,
-                "image": "https://cdn-kz11/foodpicasso.com/assets/2025/02/10/fe29ee0ab3100a6b940d873ea691e9ac---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
+                "image": "https://cdn-kz11.foodpicasso.com/assets/2025/02/10/fe29ee0ab3100a6b940d873ea691e9ac---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
             },
             {
                 "name": "Морс Смородина 0,3л",
@@ -415,7 +419,7 @@ class DatabaseSeeder:
                 "price": Decimal("490"),
                 "category_id": 5,
                 "is_popular": False,
-                "image": "https://cdn-kz11/foodpicasso.com/assets/2025/02/10/fe29ee0ab3100a6b940d873ea691e9ac---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
+                "image": "https://cdn-kz11.foodpicasso.com/assets/2025/02/10/fe29ee0ab3100a6b940d873ea691e9ac---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
             },
             {
                 "name": "Айран 1ст",
@@ -423,23 +427,25 @@ class DatabaseSeeder:
                 "price": Decimal("390"),
                 "category_id": 5,
                 "is_popular": False,
-                "image": "https://cdn-kz11/foodpicasso.com/assets/2025/02/10/8efdca35c475f581483df64ff8337bbb---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
+                "image": "https://cdn-kz11.foodpicasso.com/assets/2025/02/10/8efdca35c475f581483df64ff8337bbb---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
             },
             {
                 "name": "Пепси 1л",
                 "description": "",
                 "price": Decimal("740"),
                 "category_id": 5,
+                "weight": "1л",
                 "is_popular": False,
-                "image": "https://cdn-kz11/foodpicasso.com/assets/2025/02/10/8c5dd0e3612f293fe87d01a7a817669d---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
+                "image": "https://cdn-kz11.foodpicasso.com/assets/2025/02/10/8c5dd0e3612f293fe87d01a7a817669d---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
             },
             {
                 "name": "Пепси 0,5л",
                 "description": "",
                 "price": Decimal("640"),
                 "category_id": 5,
+                "weight": "0.5л",
                 "is_popular": False,
-                "image": "https://cdn-kz11/foodpicasso.com/assets/2025/02/10/3a79628d7f921f91eafd5c3a1bd30012---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
+                "image": "https://cdn-kz11.foodpicasso.com/assets/2025/02/10/3a79628d7f921f91eafd5c3a1bd30012---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
             },
             {
                 "name": "Пиала чай 1л",
@@ -447,7 +453,7 @@ class DatabaseSeeder:
                 "price": Decimal("740"),
                 "category_id": 5,
                 "is_popular": False,
-                "image": "https://cdn-kz11/foodpicasso.com/assets/2025/04/04/6c5f30cf228ba984715d633e13d350f6---png_420x420:whitepadding15_94310_convert.webp?v2"
+                "image": "https://cdn-kz11.foodpicasso.com/assets/2025/04/04/6c5f30cf228ba984715d633e13d350f6---png_420x420:whitepadding15_94310_convert.webp?v2"
             },
             {
                 "name": "Пиала чай 0,5л",
@@ -455,7 +461,7 @@ class DatabaseSeeder:
                 "price": Decimal("640"),
                 "category_id": 5,
                 "is_popular": False,
-                "image": "https://cdn-kz11/foodpicasso.com/assets/2025/04/04/686ea4bea44c0cbf418254f5cca9e815---png_420x420:whitepadding15_94310_convert.webp?v2"
+                "image": "https://cdn-kz11.foodpicasso.com/assets/2025/04/04/686ea4bea44c0cbf418254f5cca9e815---png_420x420:whitepadding15_94310_convert.webp?v2"
             },
             {
                 "name": "ДаДа 1л",
@@ -463,7 +469,7 @@ class DatabaseSeeder:
                 "price": Decimal("990"),
                 "category_id": 5,
                 "is_popular": False,
-                "image": "https://cdn-kz11/foodpicasso.com/assets/2025/02/10/13c5ec64ce21c39139e0f414584f49f0---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
+                "image": "https://cdn-kz11.foodpicasso.com/assets/2025/02/10/13c5ec64ce21c39139e0f414584f49f0---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
             },
             {
                 "name": "Сок ДаДа 0,2л",
@@ -471,7 +477,7 @@ class DatabaseSeeder:
                 "price": Decimal("390"),
                 "category_id": 5,
                 "is_popular": False,
-                "image": "https://cdn-kz11/foodpicasso.com/assets/2025/02/10/5dc2c7ea9c106dd4e56c797384ca4d98---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
+                "image": "https://cdn-kz11.foodpicasso.com/assets/2025/02/10/5dc2c7ea9c106dd4e56c797384ca4d98---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
             },
             {
                 "name": "Асу 0,5л",
@@ -479,7 +485,7 @@ class DatabaseSeeder:
                 "price": Decimal("390"),
                 "category_id": 5,
                 "is_popular": False,
-                "image": "https://cdn-kz11/foodpicasso.com/assets/2025/02/10/da4736943db10bcb6288e2877bde7435---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
+                "image": "https://cdn-kz11.foodpicasso.com/assets/2025/02/10/da4736943db10bcb6288e2877bde7435---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
             },
             {
                 "name": "Асу 1л",
@@ -487,7 +493,7 @@ class DatabaseSeeder:
                 "price": Decimal("490"),
                 "category_id": 5,
                 "is_popular": False,
-                "image": "https://cdn-kz11/foodpicasso.com/assets/2025/02/10/41ca19a6fbf1fc0611f3895f8907f92c---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
+                "image": "https://cdn-kz11.foodpicasso.com/assets/2025/02/10/41ca19a6fbf1fc0611f3895f8907f92c---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
             },
             {
                 "name": "Лавина 0,5л",
@@ -495,7 +501,7 @@ class DatabaseSeeder:
                 "price": Decimal("690"),
                 "category_id": 5,
                 "is_popular": False,
-                "image": "https://cdn-kz11/foodpicasso.com/assets/2025/02/10/5410f4fa01ed227663bc945e2c7fe4ba---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
+                "image": "https://cdn-kz11.foodpicasso.com/assets/2025/02/10/5410f4fa01ed227663bc945e2c7fe4ba---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
             },
             {
                 "name": "Горила 0,5л",
@@ -503,7 +509,7 @@ class DatabaseSeeder:
                 "price": Decimal("690"),
                 "category_id": 5,
                 "is_popular": False,
-                "image": "https://cdn-kz11/foodpicasso.com/assets/2025/02/10/17109ed26f93ceebcfca01d1120d8fb4---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
+                "image": "https://cdn-kz11.foodpicasso.com/assets/2025/02/10/17109ed26f93ceebcfca01d1120d8fb4---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
             }
         ]
 
@@ -513,6 +519,8 @@ class DatabaseSeeder:
                 description=dish_data["description"],
                 price=dish_data["price"],
                 category_id=dish_data["category_id"],
+                image=dish_data.get("image"),
+                weight=dish_data.get("weight"),
                 is_available=True,
                 is_popular=dish_data.get("is_popular", False)
             )

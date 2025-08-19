@@ -53,7 +53,7 @@ class MenuService:
         result = await self.db.execute(query)
         return result.scalars().all()
 
-    async def get_dish_by_id(self, dish_id: int) -> Optional[Dish]:
+    async def get_dish_by_id(self, dish_id: int) -> Optional[dict]:
         """Получение блюда по ID с модификаторами."""
         result = await self.db.execute(
             select(Dish)
@@ -63,4 +63,24 @@ class MenuService:
             )
             .where(Dish.id == dish_id)
         )
-        return result.scalar_one_or_none()
+        dish = result.scalar_one_or_none()
+        
+        if dish is None:
+            return None
+            
+        # Преобразуем в словарь с дополнительными полями
+        dish_dict = {
+            "id": dish.id,
+            "name": dish.name,
+            "description": dish.description,
+            "price": dish.price,
+            "image": dish.image,
+            "category_id": dish.category_id,
+            "category_name": dish.category.name if dish.category else "",
+            "is_available": dish.is_available,
+            "is_popular": dish.is_popular,
+            "weight": dish.weight,
+            "modifiers": dish.modifiers
+        }
+        
+        return dish_dict

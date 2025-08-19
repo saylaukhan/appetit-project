@@ -30,6 +30,7 @@ class DishResponse(BaseModel):
     image: Optional[str] = None
     category_id: int
     is_available: bool = True
+    is_popular: bool = False
     weight: Optional[str] = None
 
     class Config:

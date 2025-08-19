@@ -1,5 +1,5 @@
 from app.models.user import User
-from app.models.menu import Category, Dish, Modifier, DishModifier
+from app.models.menu import Category, Dish, Modifier
 from app.models.order import Order, OrderItem
 from app.models.promo_code import PromoCode
 from app.models.banner import Banner
@@ -12,8 +12,7 @@ __all__ = [
     "User", 
     "Category", 
     "Dish", 
-    "Modifier", 
-    "DishModifier",
+    "Modifier",
     "Order", 
     "OrderItem", 
     "PromoCode",
