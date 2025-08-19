@@ -185,8 +185,7 @@ class DatabaseSeeder:
                 "price": Decimal("2500"),
                 "category_id": 1,
                 "weight": "400г",
-                "is_popular": True,
-                "image": "/static/uploads/dishes/margherita.svg"
+                "is_popular": True
             },
             {
                 "name": "Пепперони",
@@ -194,16 +193,14 @@ class DatabaseSeeder:
                 "price": Decimal("3200"),
                 "category_id": 1,
                 "weight": "450г",
-                "is_popular": True,
-                "image": "/static/uploads/dishes/pepperoni.svg"
+                "is_popular": True
             },
             {
                 "name": "Четыре сыра",
                 "description": "Пицца с четырьмя видами сыра: моцарелла, пармезан, горгонзола, фета",
                 "price": Decimal("3800"),
                 "category_id": 1,
-                "weight": "420г",
-                "image": "/static/uploads/dishes/four-cheese.jpg"
+                "weight": "420г"
             },
             
             # Бургеры
@@ -213,24 +210,21 @@ class DatabaseSeeder:
                 "price": Decimal("2200"),
                 "category_id": 2,
                 "weight": "350г",
-                "is_popular": True,
-                "image": "/static/uploads/dishes/classic-burger.svg"
+                "is_popular": True
             },
             {
                 "name": "Чизбургер",
                 "description": "Бургер с двумя котлетами, сыром чеддер и фирменным соусом",
                 "price": Decimal("2800"),
                 "category_id": 2,
-                "weight": "400г",
-                "image": "/static/uploads/dishes/cheeseburger.jpg"
+                "weight": "400г"
             },
             {
                 "name": "Куриный Бургер",
                 "description": "Хрустящая куриная котлета в панировке с салатом и майонезом",
                 "price": Decimal("2000"),
                 "category_id": 2,
-                "weight": "320г",
-                "image": "/static/uploads/dishes/chicken-burger.jpg"
+                "weight": "320г"
             },
             
             # Роллы и суши
@@ -337,7 +331,6 @@ class DatabaseSeeder:
                 price=dish_data["price"],
                 category_id=dish_data["category_id"],
                 weight=dish_data["weight"],
-                image=dish_data.get("image"),
                 is_available=True,
                 is_popular=dish_data.get("is_popular", False)
             )

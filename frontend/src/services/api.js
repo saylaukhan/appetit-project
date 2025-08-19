@@ -68,10 +68,10 @@ export const authAPI = {
 
 // Меню и блюда
 export const menuAPI = {
-  getCategories: () => api.get('/api/v1/menu/categories'),
-  getDishes: (params = {}) => api.get('/api/v1/menu/dishes', { params }),
-  getDish: (dishId) => api.get(`/api/v1/menu/dishes/${dishId}`),
-  searchDishes: (query) => api.get('/api/v1/menu/dishes/search', { params: { q: query } }),
+  getCategories: () => api.get('/api/v1/categories'),
+  getDishes: (params = {}) => api.get('/api/v1/dishes', { params }),
+  getDish: (dishId) => api.get(`/api/v1/dishes/${dishId}`),
+  searchDishes: (query) => api.get('/api/v1/dishes/search', { params: { q: query } }),
 }
 
 // Заказы

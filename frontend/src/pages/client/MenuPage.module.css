@@ -14,203 +14,22 @@
   text-align: center;
   margin-bottom: var(--spacing-xl);
   color: var(--text-primary);
-  font-size: 2.5rem;
-  font-weight: bold;
 }
 
-/* Loading and Error States */
-.loading, .error {
+.comingSoon {
   text-align: center;
   padding: var(--spacing-2xl);
-  font-size: 1.2rem;
-}
-
-.loading {
-  color: var(--text-secondary);
-}
-
-.error {
-  color: var(--error-color);
-}
-
-/* Categories */
-.categoriesContainer {
-  display: flex;
-  gap: var(--spacing-sm);
-  margin-bottom: var(--spacing-xl);
-  overflow-x: auto;
-  padding-bottom: var(--spacing-sm);
-}
-
-.categoryBtn {
-  padding: var(--spacing-sm) var(--spacing-md);
-  border: 2px solid var(--border-color);
-  background: var(--surface);
-  color: var(--text-secondary);
-  border-radius: var(--radius-medium);
-  cursor: pointer;
-  transition: all 0.3s ease;
-  white-space: nowrap;
-  min-width: fit-content;
-}
-
-.categoryBtn:hover {
-  border-color: var(--primary-color);
-  color: var(--primary-color);
-}
-
-.categoryBtn.active {
-  background: var(--primary-color);
-  color: white;
-  border-color: var(--primary-color);
-}
-
-/* Dishes Grid */
-.dishesGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: var(--spacing-lg);
-}
-
-.noDishes {
-  grid-column: 1 / -1;
-  text-align: center;
-  color: var(--text-secondary);
-  padding: var(--spacing-2xl);
-  font-size: 1.1rem;
-}
-
-/* Dish Card */
-.dishCard {
   background: var(--surface);
   border-radius: var(--radius-large);
-  overflow: hidden;
   box-shadow: var(--shadow-small);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.dishCard:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-medium);
-}
-
-.dishImageContainer {
-  position: relative;
-  height: 200px;
-  overflow: hidden;
-}
-
-.dishImage {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.3s ease;
-}
-
-.dishCard:hover .dishImage {
-  transform: scale(1.05);
-}
-
-.unavailableBadge {
-  position: absolute;
-  top: var(--spacing-sm);
-  right: var(--spacing-sm);
-  background: var(--error-color);
-  color: white;
-  padding: var(--spacing-xs) var(--spacing-sm);
-  border-radius: var(--radius-small);
-  font-size: 0.8rem;
-  font-weight: bold;
-}
-
-/* Dish Info */
-.dishInfo {
-  padding: var(--spacing-md);
-}
-
-.dishName {
-  font-size: 1.3rem;
-  font-weight: bold;
-  color: var(--text-primary);
-  margin-bottom: var(--spacing-sm);
-}
-
-.dishDescription {
-  color: var(--text-secondary);
-  line-height: 1.5;
-  margin-bottom: var(--spacing-md);
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.dishMeta {
-  margin-bottom: var(--spacing-md);
-}
-
-.dishWeight {
-  color: var(--text-secondary);
-  font-size: 0.9rem;
-  background: var(--background);
-  padding: var(--spacing-xs) var(--spacing-sm);
-  border-radius: var(--radius-small);
-}
-
-/* Dish Footer */
-.dishFooter {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.dishPrice {
-  font-size: 1.4rem;
-  font-weight: bold;
+.comingSoon h2 {
   color: var(--primary-color);
+  margin-bottom: var(--spacing-md);
 }
 
-.addToCartBtn {
-  background: var(--primary-color);
-  color: white;
-  border: none;
-  padding: var(--spacing-sm) var(--spacing-md);
-  border-radius: var(--radius-medium);
-  cursor: pointer;
-  font-weight: bold;
-  transition: background-color 0.3s ease;
-}
-
-.addToCartBtn:hover:not(:disabled) {
-  background: var(--primary-dark);
-}
-
-.addToCartBtn:disabled {
-  background: var(--text-muted);
-  cursor: not-allowed;
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-  .menuContainer {
-    padding: var(--spacing-lg) 0;
-  }
-
-  .pageTitle {
-    font-size: 2rem;
-    margin-bottom: var(--spacing-lg);
-  }
-
-  .dishesGrid {
-    grid-template-columns: 1fr;
-    gap: var(--spacing-md);
-  }
-
-  .categoriesContainer {
-    margin-bottom: var(--spacing-lg);
-  }
-
-  .dishCard {
-    margin: 0 var(--spacing-xs);
-  }
+.comingSoon p {
+  color: var(--text-secondary);
+  font-size: 1.1rem;
 }
