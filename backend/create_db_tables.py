@@ -35,10 +35,11 @@ async def create_tables():
         print("  - Banner (баннеры)")
         print("  - PromoCode (промокоды)")
         
-        print("\n🆕 Новые поля User:")
-        print("  - gender (пол пользователя)")
-        print("  - newsletter_subscribed (подписка на рассылку)")
-        print("  - sms_notifications (SMS уведомления)")
+        print("\n📋 Основные поля User:")
+        print("  - name (имя пользователя)")
+        print("  - email (email адрес)")
+        print("  - birth_date (дата рождения)")
+        print("  - address (адрес)")
         
     except Exception as e:
         print(f"❌ Ошибка при создании таблиц: {e}")

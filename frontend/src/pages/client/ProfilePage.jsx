@@ -3,9 +3,8 @@ import { useAuth } from '../../contexts/AuthContext'
 import styles from './ProfilePage.module.css'
 
 function ProfilePage() {
-  const { user, logout } = useAuth()
+  const { user, logout, updateUser } = useAuth()
   const [activeTab, setActiveTab] = useState('personal')
-  const [showBonusModal, setShowBonusModal] = useState(false)
   const [profileData, setProfileData] = useState({
     name: '',
     phone: '',
@@ -14,13 +13,10 @@ function ProfilePage() {
     birth_day: '',
     birth_month: '',
     birth_year: '',
-    birth_date: '',
-    gender: '',
-    newsletter_subscribed: false,
-    sms_notifications: true
+    birth_date: ''
   })
   
-  const [bonusEmail, setBonusEmail] = useState('')
+  const [editingBirthDate, setEditingBirthDate] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [isLoadingProfile, setIsLoadingProfile] = useState(true)
 
@@ -41,7 +37,7 @@ function ProfilePage() {
         return
       }
 
-      const response = await fetch('http://localhost:8000/users/me/profile', {
+      const response = await fetch('http://localhost:8000/api/v1/users/me/profile', {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -70,16 +66,19 @@ function ProfilePage() {
           birth_day,
           birth_month, 
           birth_year,
-          birth_date: userData.birth_date || '',
-          gender: userData.gender || '',
-          newsletter_subscribed: userData.newsletter_subscribed || false,
-          sms_notifications: userData.sms_notifications || true
+          birth_date: userData.birth_date || ''
         })
       } else {
-        console.error('Ошибка загрузки профиля:', response.status)
+        const errorData = await response.json().catch(() => ({}))
+        console.error('Ошибка загрузки профиля:', response.status, errorData)
+        if (response.status === 401) {
+          alert('Сессия истекла. Необходимо войти в систему заново.')
+          logout && logout()
+        }
       }
     } catch (error) {
       console.error('Ошибка при загрузке профиля:', error)
+      alert('Не удалось загрузить данные профиля. Проверьте подключение к серверу.')
     } finally {
       setIsLoadingProfile(false)
     }
@@ -97,10 +96,7 @@ function ProfilePage() {
       [name]: type === 'checkbox' ? checked : value
     }))
     
-    // Автоматическое сохранение для checkbox подписки
-    if (name === 'newsletter_subscribed' && type === 'checkbox') {
-      setTimeout(() => handleNewsletterToggle(), 100)
-    }
+
   }
 
   const handleSaveProfile = async () => {
@@ -121,10 +117,7 @@ function ProfilePage() {
       const dataToSend = {
         name: profileData.name,
         email: profileData.email,
-        address: profileData.address,
-        gender: profileData.gender,
-        newsletter_subscribed: profileData.newsletter_subscribed,
-        sms_notifications: profileData.sms_notifications
+        address: profileData.address
       }
       
       // Добавляем дату рождения если она заполнена
@@ -132,7 +125,7 @@ function ProfilePage() {
         dataToSend.birth_date = birth_date
       }
 
-      const response = await fetch('http://localhost:8000/users/me/profile', {
+      const response = await fetch('http://localhost:8000/api/v1/users/me/profile', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -151,6 +144,8 @@ function ProfilePage() {
           ...prev,
           ...responseData
         }))
+        // Обновляем AuthContext
+        updateUser(responseData)
       } else {
         alert(`Ошибка при обновлении профиля: ${responseData.detail || 'Неизвестная ошибка'}`)
       }
@@ -172,7 +167,7 @@ function ProfilePage() {
     try {
       const token = localStorage.getItem('auth_token')
       
-      const response = await fetch('http://localhost:8000/users/me/profile', {
+      const response = await fetch('http://localhost:8000/api/v1/users/me/profile', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -188,6 +183,8 @@ function ProfilePage() {
         console.log('Имя обновлено:', responseData)
         // Обновляем локальное состояние данных пользователя
         setProfileData(prev => ({ ...prev, name: responseData.name }))
+        // Обновляем AuthContext для отображения в хедере
+        updateUser({ name: responseData.name })
       } else {
         alert(`Ошибка при сохранении имени: ${responseData.detail || 'Неизвестная ошибка'}`)
       }
@@ -197,6 +194,10 @@ function ProfilePage() {
     } finally {
       setIsLoading(false)
     }
+  }
+
+  const handleEditBirthDate = () => {
+    setEditingBirthDate(true)
   }
 
   const handleSaveBirthDate = async () => {
@@ -215,7 +216,7 @@ function ProfilePage() {
       const day = parseInt(profileData.birth_day)
       const birth_date = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`
       
-      const response = await fetch('http://localhost:8000/users/me/profile', {
+      const response = await fetch('http://localhost:8000/api/v1/users/me/profile', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -229,8 +230,10 @@ function ProfilePage() {
       if (response.ok) {
         alert('Дата рождения сохранена!')
         console.log('Дата рождения обновлена:', responseData)
-        // Обновляем локальное состояние
         setProfileData(prev => ({ ...prev, birth_date: birth_date }))
+        setEditingBirthDate(false)
+        // Обновляем AuthContext
+        updateUser({ birth_date: birth_date })
       } else {
         alert(`Ошибка при сохранении даты: ${responseData.detail || 'Неизвестная ошибка'}`)
       }
@@ -242,78 +245,67 @@ function ProfilePage() {
     }
   }
 
-  const handleNewsletterToggle = async () => {
+  const handleCancelBirthDate = () => {
+    // Возвращаем исходные значения
+    const birthDate = profileData.birth_date
+    if (birthDate) {
+      const date = new Date(birthDate)
+      setProfileData(prev => ({
+        ...prev,
+        birth_day: date.getDate().toString(),
+        birth_month: (date.getMonth() + 1).toString(),
+        birth_year: date.getFullYear().toString()
+      }))
+    } else {
+      setProfileData(prev => ({
+        ...prev,
+        birth_day: '',
+        birth_month: '',
+        birth_year: ''
+      }))
+    }
+    setEditingBirthDate(false)
+  }
+
+  const handleSaveEmail = async () => {
+    if (!profileData.email || !profileData.email.trim()) {
+      alert('Пожалуйста, введите email')
+      return
+    }
+    
     setIsLoading(true)
     try {
       const token = localStorage.getItem('auth_token')
       
-      const response = await fetch('http://localhost:8000/users/me/profile', {
+      const response = await fetch('http://localhost:8000/api/v1/users/me/profile', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ newsletter_subscribed: profileData.newsletter_subscribed })
+        body: JSON.stringify({ email: profileData.email })
       })
 
       const responseData = await response.json()
 
       if (response.ok) {
-        const message = profileData.newsletter_subscribed ? 'Подписка активирована!' : 'Подписка отключена!'
-        alert(message)
-        console.log('Подписка обновлена:', responseData)
-        // Обновляем локальное состояние
-        setProfileData(prev => ({ 
-          ...prev, 
-          newsletter_subscribed: responseData.newsletter_subscribed
-        }))
+        alert('Email сохранен!')
+        console.log('Email обновлен:', responseData)
+        setProfileData(prev => ({ ...prev, email: responseData.email }))
+        // Обновляем AuthContext
+        updateUser({ email: responseData.email })
       } else {
-        alert(`Ошибка при обновлении подписки: ${responseData.detail || 'Неизвестная ошибка'}`)
+        alert(`Ошибка при сохранении email: ${responseData.detail || 'Неизвестная ошибка'}`)
       }
     } catch (error) {
-      console.error('Error updating newsletter subscription:', error)
-      alert('Ошибка при обновлении подписки')
+      console.error('Error saving email:', error)
+      alert('Ошибка при сохранении email')
     } finally {
       setIsLoading(false)
     }
   }
 
-  const handleBonusSubscription = async () => {
-    if (!bonusEmail) return
-    
-    setIsLoading(true)
-    try {
-      const token = localStorage.getItem('auth_token')
-      const response = await fetch('http://localhost:8000/users/me/newsletter', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ email: bonusEmail })
-      })
 
-      const responseData = await response.json()
-      
-      if (response.ok) {
-        alert('Подписка оформлена успешно!')
-        setShowBonusModal(false)
-        setBonusEmail('')
-        setProfileData(prev => ({ 
-          ...prev, 
-          email: responseData.email || bonusEmail, 
-          newsletter_subscribed: true 
-        }))
-      } else {
-        alert(`Ошибка при оформлении подписки: ${responseData.detail || 'Неизвестная ошибка'}`)
-      }
-    } catch (error) {
-      console.error('Error subscribing:', error)
-      alert('Ошибка при оформлении подписки')
-    } finally {
-      setIsLoading(false)
-    }
-  }
 
   // Если пользователь не авторизован
   if (!user && !isLoadingProfile) {
@@ -358,42 +350,6 @@ function ProfilePage() {
             </div>
           ) : (
             <>
-          {/* Бонусы */}
-          <section className={styles.bonusSection}>
-            <div className={styles.sectionHeader}>
-              <h2>Бонусы</h2>
-              <button 
-                className={styles.closeBtn}
-                onClick={() => setShowBonusModal(false)}
-              >
-                ×
-              </button>
-            </div>
-            
-            <div className={styles.bonusContent}>
-              <p>Сообщим по почте о бонусах, акциях и новых продуктах</p>
-              <div className={styles.bonusForm}>
-                <input
-                  type="email"
-                  placeholder="Почта"
-                  value={bonusEmail}
-                  onChange={(e) => setBonusEmail(e.target.value)}
-                  className={styles.bonusInput}
-                />
-                <button 
-                  className={styles.subscribeBtn}
-                  onClick={handleBonusSubscription}
-                  disabled={isLoading}
-                >
-                  Подписаться
-                </button>
-              </div>
-              <button className={styles.privacyBtn}>
-                Все наши акции
-              </button>
-            </div>
-          </section>
-
           {/* Личные данные */}
           <section className={styles.personalSection}>
             <h2>Личные данные</h2>
@@ -424,90 +380,93 @@ function ProfilePage() {
                   placeholder="Номер телефона"
                   className={`${styles.formInput} ${styles.readOnlyInput}`}
                 />
+                <small className={styles.fieldNote}>Номер телефона нельзя изменить</small>
+              </div>
+
+              <div className={styles.formGroup}>
+                <label>Email</label>
+                <input
+                  type="email"
+                  name="email"
+                  value={profileData.email}
+                  onChange={handleInputChange}
+                  placeholder="Введите email"
+                  className={styles.formInput}
+                />
+                <button className={styles.changeBtn} onClick={handleSaveEmail} disabled={isLoading}>
+                  {isLoading ? 'Сохранение...' : 'Изменить'}
+                </button>
               </div>
 
               <div className={styles.formGroup}>
                 <label>Дата рождения</label>
-                <div className={styles.dateInputs}>
-                  <select 
-                    name="birth_day" 
-                    value={profileData.birth_day}
-                    className={styles.dateSelect}
-                    onChange={handleInputChange}
-                  >
-                    <option value="">День</option>
-                    {[...Array(31)].map((_, i) => (
-                      <option key={i + 1} value={i + 1}>{i + 1}</option>
-                    ))}
-                  </select>
-                  <select 
-                    name="birth_month" 
-                    value={profileData.birth_month}
-                    className={styles.dateSelect}
-                    onChange={handleInputChange}
-                  >
-                    <option value="">Месяц</option>
-                    {[...Array(12)].map((_, i) => (
-                      <option key={i + 1} value={i + 1}>{i + 1}</option>
-                    ))}
-                  </select>
-                  <select 
-                    name="birth_year" 
-                    value={profileData.birth_year}
-                    className={styles.dateSelect}
-                    onChange={handleInputChange}
-                  >
-                    <option value="">Год</option>
-                    {[...Array(50)].map((_, i) => {
-                      const year = new Date().getFullYear() - i
-                      return <option key={year} value={year}>{year}</option>
-                    })}
-                  </select>
-                </div>
-                <button className={styles.saveBtn} onClick={handleSaveBirthDate} disabled={isLoading}>
-                  {isLoading ? 'Сохранение...' : 'Сохранить'}
-                </button>
+                {!editingBirthDate ? (
+                  <>
+                    <div className={styles.birthDateDisplay}>
+                      {profileData.birth_date ? 
+                        new Date(profileData.birth_date).toLocaleDateString('ru-RU') : 
+                        'Дата рождения не указана'
+                      }
+                    </div>
+                    <button className={styles.changeBtn} onClick={handleEditBirthDate}>
+                      Изменить
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <div className={styles.dateInputs}>
+                      <select 
+                        name="birth_day" 
+                        value={profileData.birth_day}
+                        className={styles.dateSelect}
+                        onChange={handleInputChange}
+                      >
+                        <option value="">День</option>
+                        {[...Array(31)].map((_, i) => (
+                          <option key={i + 1} value={i + 1}>{i + 1}</option>
+                        ))}
+                      </select>
+                      <select 
+                        name="birth_month" 
+                        value={profileData.birth_month}
+                        className={styles.dateSelect}
+                        onChange={handleInputChange}
+                      >
+                        <option value="">Месяц</option>
+                        {[...Array(12)].map((_, i) => (
+                          <option key={i + 1} value={i + 1}>{i + 1}</option>
+                        ))}
+                      </select>
+                      <select 
+                        name="birth_year" 
+                        value={profileData.birth_year}
+                        className={styles.dateSelect}
+                        onChange={handleInputChange}
+                      >
+                        <option value="">Год</option>
+                        {[...Array(50)].map((_, i) => {
+                          const year = new Date().getFullYear() - i
+                          return <option key={year} value={year}>{year}</option>
+                        })}
+                      </select>
+                    </div>
+                    <div className={styles.buttonGroup}>
+                      <button className={styles.saveBtn} onClick={handleSaveBirthDate} disabled={isLoading}>
+                        {isLoading ? 'Сохранение...' : 'Сохранить'}
+                      </button>
+                      <button className={styles.cancelBtn} onClick={handleCancelBirthDate} disabled={isLoading}>
+                        Отмена
+                      </button>
+                    </div>
+                  </>
+                )}
               </div>
 
-              <div className={styles.formGroup}>
-                <label>Пол</label>
-                <div className={styles.genderInputs}>
-                  <select 
-                    name="gender"
-                    value={profileData.gender}
-                    onChange={handleInputChange}
-                    className={styles.genderSelect}
-                  >
-                    <option value="">Выберите</option>
-                    <option value="male">Мужской</option>
-                    <option value="female">Женский</option>
-                    <option value="other">Другой</option>
-                  </select>
-                </div>
-                <button className={styles.saveBtn} onClick={handleSaveProfile} disabled={isLoading}>
-                  {isLoading ? 'Сохранение...' : 'Сохранить'}
-                </button>
-              </div>
+
             </div>
           </section>
 
-          {/* Подписки */}
-          <section className={styles.subscriptionSection}>
-            <h2>Подписки</h2>
-            <div className={styles.subscriptionItem}>
-              <label className={styles.checkboxLabel}>
-                <input
-                  type="checkbox"
-                  name="newsletter_subscribed"
-                  checked={profileData.newsletter_subscribed}
-                  onChange={handleInputChange}
-                />
-                <span className={styles.checkmark}></span>
-                Подписаться на рассылку
-              </label>
-              <p>Пользовательское соглашение</p>
-            </div>
-          </section>
+
 
           {/* История заказов */}
           <section className={styles.orderSection}>

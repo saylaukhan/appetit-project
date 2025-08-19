@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
-from app.core.database import get_db
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.core.database import get_db_session
 from app.utils.auth_dependencies import get_current_admin, get_current_user
 from app.models.user import User
 from app.schemas.user import UserProfileUpdate, UserProfileResponse, NewsletterSubscription
@@ -20,7 +20,7 @@ async def get_user(user_id: int, current_user: User = Depends(get_current_admin)
 @router.get("/me/profile", response_model=UserProfileResponse)
 async def get_my_profile(
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db_session)
 ):
     """Получение профиля текущего пользователя."""
     return current_user
@@ -29,7 +29,7 @@ async def get_my_profile(
 async def update_profile(
     profile_data: UserProfileUpdate,
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db_session)
 ):
     """Обновление профиля текущего пользователя."""
     try:
@@ -37,28 +37,27 @@ async def update_profile(
         for field, value in profile_data.dict(exclude_unset=True).items():
             setattr(current_user, field, value)
         
-        db.commit()
-        db.refresh(current_user)
+        await db.commit()
+        await db.refresh(current_user)
         
         return current_user
     except Exception as e:
-        db.rollback()
+        await db.rollback()
         raise HTTPException(status_code=400, detail=f"Ошибка обновления профиля: {str(e)}")
 
 @router.post("/me/newsletter")
 async def subscribe_newsletter(
     subscription: NewsletterSubscription,
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db_session)
 ):
     """Подписка на рассылку."""
     try:
         current_user.email = subscription.email
-        current_user.newsletter_subscribed = True
         
-        db.commit()
+        await db.commit()
         
-        return {"message": "Успешно подписались на рассылку", "email": subscription.email}
+        return {"message": "Email успешно обновлен", "email": subscription.email}
     except Exception as e:
-        db.rollback()
-        raise HTTPException(status_code=400, detail=f"Ошибка подписки на рассылку: {str(e)}")
+        await db.rollback()
+        raise HTTPException(status_code=400, detail=f"Ошибка обновления email: {str(e)}")

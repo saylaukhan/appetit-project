@@ -4,6 +4,7 @@
 """
 
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 from passlib.context import CryptContext
 from decimal import Decimal
 from datetime import datetime, timedelta
@@ -66,19 +67,28 @@ class DatabaseSeeder:
         ]
 
         for user_data in users_data:
-            hashed_password = pwd_context.hash(user_data["password"])
-            
-            user = User(
-                phone=user_data["phone"],
-                name=user_data["name"],
-                role=user_data["role"],
-                hashed_password=hashed_password,
-                is_active=True,
-                is_verified=True
+            # Проверяем, существует ли пользователь с таким телефоном
+            result = await self.db.execute(
+                select(User).where(User.phone == user_data["phone"])
             )
+            existing_user = result.scalar_one_or_none()
             
-            self.db.add(user)
-            print(f"  ✓ {user_data['name']} ({user_data['role']})")
+            if existing_user is None:
+                hashed_password = pwd_context.hash(user_data["password"])
+                
+                user = User(
+                    phone=user_data["phone"],
+                    name=user_data["name"],
+                    role=user_data["role"],
+                    hashed_password=hashed_password,
+                    is_active=True,
+                    is_verified=True
+                )
+                
+                self.db.add(user)
+                print(f"  ✓ {user_data['name']} ({user_data['role']})")
+            else:
+                print(f"  ⚠️ {user_data['name']} ({user_data['phone']}) - уже существует, пропускаем")
 
     async def seed_categories(self):
         """Создание категорий блюд."""
@@ -113,14 +123,23 @@ class DatabaseSeeder:
         ]
 
         for cat_data in categories_data:
-            category = Category(
-                name=cat_data["name"],
-                description=cat_data["description"],
-                sort_order=cat_data["sort_order"],
-                is_active=True
+            # Проверяем, существует ли категория с таким именем
+            result = await self.db.execute(
+                select(Category).where(Category.name == cat_data["name"])
             )
-            self.db.add(category)
-            print(f"  ✓ {cat_data['name']}")
+            existing_category = result.scalar_one_or_none()
+            
+            if existing_category is None:
+                category = Category(
+                    name=cat_data["name"],
+                    description=cat_data["description"],
+                    sort_order=cat_data["sort_order"],
+                    is_active=True
+                )
+                self.db.add(category)
+                print(f"  ✓ {cat_data['name']}")
+            else:
+                print(f"  ⚠️ {cat_data['name']} - уже существует, пропускаем")
 
     async def seed_modifiers(self):
         """Создание модификаторов."""
@@ -156,12 +175,21 @@ class DatabaseSeeder:
         ]
 
         for mod_data in modifiers_data:
-            modifier = Modifier(
-                name=mod_data["name"],
-                price=mod_data["price"]
+            # Проверяем, существует ли модификатор с таким именем
+            result = await self.db.execute(
+                select(Modifier).where(Modifier.name == mod_data["name"])
             )
-            self.db.add(modifier)
-            print(f"  ✓ {mod_data['name']}")
+            existing_modifier = result.scalar_one_or_none()
+            
+            if existing_modifier is None:
+                modifier = Modifier(
+                    name=mod_data["name"],
+                    price=mod_data["price"]
+                )
+                self.db.add(modifier)
+                print(f"  ✓ {mod_data['name']}")
+            else:
+                print(f"  ⚠️ {mod_data['name']} - уже существует, пропускаем")
 
     async def seed_dishes(self):
         """Создание блюд."""
@@ -514,18 +542,27 @@ class DatabaseSeeder:
         ]
 
         for dish_data in dishes_data:
-            dish = Dish(
-                name=dish_data["name"],
-                description=dish_data["description"],
-                price=dish_data["price"],
-                category_id=dish_data["category_id"],
-                image=dish_data.get("image"),
-                weight=dish_data.get("weight"),
-                is_available=True,
-                is_popular=dish_data.get("is_popular", False)
+            # Проверяем, существует ли блюдо с таким именем
+            result = await self.db.execute(
+                select(Dish).where(Dish.name == dish_data["name"])
             )
-            self.db.add(dish)
-            print(f"  ✓ {dish_data['name']} - {dish_data['price']} тг")
+            existing_dish = result.scalar_one_or_none()
+            
+            if existing_dish is None:
+                dish = Dish(
+                    name=dish_data["name"],
+                    description=dish_data["description"],
+                    price=dish_data["price"],
+                    category_id=dish_data["category_id"],
+                    image=dish_data.get("image"),
+                    weight=dish_data.get("weight"),
+                    is_available=True,
+                    is_popular=dish_data.get("is_popular", False)
+                )
+                self.db.add(dish)
+                print(f"  ✓ {dish_data['name']} - {dish_data['price']} тг")
+            else:
+                print(f"  ⚠️ {dish_data['name']} - уже существует, пропускаем")
 
     async def seed_promo_codes(self):
         """Создание промокодов."""
@@ -562,18 +599,28 @@ class DatabaseSeeder:
         ]
 
         for promo_data in promo_codes_data:
-            promo = PromoCode(
-                code=promo_data["code"],
-                name=promo_data["name"],
-                description=promo_data["description"],
-                discount_type=promo_data["discount_type"],
-                discount_value=promo_data["discount_value"],
-                min_order_amount=promo_data["min_order_amount"],
-                valid_until=promo_data["valid_until"],
-                is_active=True
+            # Проверяем, существует ли промокод с таким кодом
+            result = await self.db.execute(
+                select(PromoCode).where(PromoCode.code == promo_data["code"])
             )
-            self.db.add(promo)
-            print(f"  ✓ {promo_data['code']} - {promo_data['discount_value']}{'%' if promo_data['discount_type'] == DiscountType.PERCENTAGE else 'тг'}")
+            existing_promo = result.scalar_one_or_none()
+            
+            if existing_promo is None:
+                # Создаем новый промокод только если его еще нет
+                promo = PromoCode(
+                    code=promo_data["code"],
+                    name=promo_data["name"],
+                    description=promo_data["description"],
+                    discount_type=promo_data["discount_type"],
+                    discount_value=promo_data["discount_value"],
+                    min_order_amount=promo_data["min_order_amount"],
+                    valid_until=promo_data["valid_until"],
+                    is_active=True
+                )
+                self.db.add(promo)
+                print(f"  ✓ {promo_data['code']} - {promo_data['discount_value']}{'%' if promo_data['discount_type'] == DiscountType.PERCENTAGE else 'тг'}")
+            else:
+                print(f"  ⚠️ {promo_data['code']} - уже существует, пропускаем")
 
     async def seed_banners(self):
         """Создание баннеров."""
@@ -605,17 +652,26 @@ class DatabaseSeeder:
         ]
 
         for banner_data in banners_data:
-            banner = Banner(
-                title=banner_data["title"],
-                description=banner_data["description"],
-                image=banner_data["image"],
-                position=banner_data["position"],
-                sort_order=banner_data["sort_order"],
-                show_until=banner_data.get("show_until"),
-                is_active=True
+            # Проверяем, существует ли баннер с таким заголовком
+            result = await self.db.execute(
+                select(Banner).where(Banner.title == banner_data["title"])
             )
-            self.db.add(banner)
-            print(f"  ✓ {banner_data['title']}")
+            existing_banner = result.scalar_one_or_none()
+            
+            if existing_banner is None:
+                banner = Banner(
+                    title=banner_data["title"],
+                    description=banner_data["description"],
+                    image=banner_data["image"],
+                    position=banner_data["position"],
+                    sort_order=banner_data["sort_order"],
+                    show_until=banner_data.get("show_until"),
+                    is_active=True
+                )
+                self.db.add(banner)
+                print(f"  ✓ {banner_data['title']}")
+            else:
+                print(f"  ⚠️ {banner_data['title']} - уже существует, пропускаем")
 
 
 # Функция для запуска сидера

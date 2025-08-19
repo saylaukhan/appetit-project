@@ -8,9 +8,6 @@ class UserProfileUpdate(BaseModel):
     email: Optional[str] = Field(None, description="Email адрес")
     address: Optional[str] = Field(None, max_length=500, description="Адрес")
     birth_date: Optional[datetime] = Field(None, description="Дата рождения")
-    gender: Optional[str] = Field(None, description="Пол (male, female, other)")
-    newsletter_subscribed: Optional[bool] = Field(None, description="Подписка на рассылку")
-    sms_notifications: Optional[bool] = Field(None, description="SMS уведомления")
 
     @validator('email')
     def validate_email(cls, v):
@@ -20,11 +17,7 @@ class UserProfileUpdate(BaseModel):
                 raise ValueError('Неверный формат email адреса')
         return v
 
-    @validator('gender')
-    def validate_gender(cls, v):
-        if v is not None and v not in ['male', 'female', 'other']:
-            raise ValueError('Пол должен быть: male, female или other')
-        return v
+
 
 class UserProfileResponse(BaseModel):
     id: int
@@ -33,9 +26,6 @@ class UserProfileResponse(BaseModel):
     email: Optional[str] = None
     address: Optional[str] = None
     birth_date: Optional[datetime] = None
-    gender: Optional[str] = None
-    newsletter_subscribed: bool = False
-    sms_notifications: bool = True
     role: str
     is_active: bool
     created_at: datetime
