@@ -8,11 +8,6 @@ function ProtectedRoute({ children, roles = [], redirectTo = '/login' }) {
   const { isAuthenticated, user, loading } = useAuth()
   const location = useLocation()
 
-  // ВРЕМЕННЫЙ ОБХОД ДЛЯ ТЕСТИРОВАНИЯ (для admin роли)
-  if (roles.includes('admin')) {
-    return children
-  }
-
   // Показываем спиннер во время проверки аутентификации
   if (loading) {
     return <LoadingSpinner fullScreen text="Проверяем доступ..." />
@@ -30,8 +25,8 @@ function ProtectedRoute({ children, roles = [], redirectTo = '/login' }) {
     const allowedRoles = roles.map(role => role.toLowerCase())
     
     if (!userRole || !allowedRoles.includes(userRole)) {
-      // Перенаправляем на соответствующую страницу в зависимости от роли
-      return <Navigate to={getDefaultRouteForRole(userRole)} replace />
+      // Показываем сообщение об ошибке доступа и перенаправляем на соответствующую страницу
+      return <AccessDenied userRole={userRole} requiredRoles={allowedRoles} />
     }
   }
 
