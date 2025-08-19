@@ -1,38 +1,85 @@
 /* App Component Styles */
-.app-container {
+.appContainer {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
 }
 
-.main-content {
+.mainContent {
   flex: 1;
   display: flex;
   flex-direction: column;
 }
 
 /* Admin Layout */
-.admin-container {
+.adminContainer {
+  position: relative;
   display: flex;
   height: 100vh;
   background: var(--background);
 }
 
-.admin-sidebar {
-  width: var(--sidebar-width);
-  background: var(--surface);
-  border-right: 1px solid var(--border-light);
-  padding: var(--spacing-lg);
-}
-
-.admin-main {
+.adminMain {
   flex: 1;
   overflow-y: auto;
   padding: var(--spacing-lg);
+  padding-top: calc(var(--spacing-lg) + 60px); /* Добавляем место для кнопки toggle */
+}
+
+/* Sidebar Toggle Button */
+.sidebarToggle {
+  position: fixed;
+  top: var(--spacing-lg);
+  left: var(--spacing-lg);
+  width: 48px;
+  height: 48px;
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 1001;
+  transition: all 0.3s ease;
+  box-shadow: var(--shadow-small);
+  color: var(--text-primary);
+}
+
+.sidebarToggle:hover {
+  background: var(--primary-light);
+  color: var(--primary-color);
+  box-shadow: var(--shadow-medium);
+}
+
+/* Hide toggle when sidebar is open */
+.sidebarToggleHidden {
+  z-index: 500; /* Lower than sidebar z-index (1000) */
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Sidebar Backdrop */
+.sidebarBackdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  opacity: 0;
+  animation: fadeIn 0.3s ease forwards;
+}
+
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+  }
 }
 
 /* Mobile Container */
-.mobile-container {
+.mobileContainer {
   min-height: 100vh;
   background: var(--background);
   padding: var(--spacing-sm);
@@ -40,13 +87,18 @@
 
 /* Mobile Styles */
 @media (max-width: 768px) {
-  .admin-sidebar {
-    display: none;
+  .adminMain {
+    padding-top: calc(var(--spacing-md) + 60px); /* Меньше отступ на мобильных */
+  }
+  
+  .sidebarToggle {
+    top: var(--spacing-md);
+    left: var(--spacing-md);
   }
 }
 
 @media (min-width: 769px) {
-  .mobile-container {
+  .mobileContainer {
     max-width: 400px;
     margin: 0 auto;
     border-left: 1px solid var(--border-light);

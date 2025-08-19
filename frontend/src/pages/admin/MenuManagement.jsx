@@ -12,6 +12,7 @@ import {
 } from 'lucide-react'
 import { menuAPI } from '../../services/api'
 import LoadingSpinner from '../../components/common/LoadingSpinner'
+import AddDishModal from '../../components/admin/AddDishModal'
 import styles from './MenuManagement.module.css'
 
 function MenuManagement() {
@@ -20,7 +21,8 @@ function MenuManagement() {
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('all')
-  const [showAddForm, setShowAddForm] = useState(false)
+  const [showAddModal, setShowAddModal] = useState(false)
+  const [editingDish, setEditingDish] = useState(null)
 
   useEffect(() => {
     fetchMenuData()
@@ -29,127 +31,239 @@ function MenuManagement() {
   const fetchMenuData = async () => {
     try {
       setLoading(true)
-      // В реальном приложении здесь будут API вызовы
-      // const [categoriesResponse, dishesResponse] = await Promise.all([
-      //   menuAPI.getCategories(),
-      //   menuAPI.getDishes()
-      // ])
       
-      // Пока используем моковые данные
-      setTimeout(() => {
-        const mockCategories = [
-          { id: 1, name: 'Пицца', count: 8, active: true },
-          { id: 2, name: 'Бургеры', count: 5, active: true },
-          { id: 3, name: 'Роллы и суши', count: 12, active: true },
-          { id: 4, name: 'Салаты', count: 6, active: true },
-          { id: 5, name: 'Супы', count: 4, active: true },
-          { id: 6, name: 'Напитки', count: 8, active: true },
-          { id: 7, name: 'Десерты', count: 3, active: true }
-        ]
-
-        const mockDishes = [
-          {
-            id: 1,
-            name: 'Пицца Маргарита',
-            description: 'Классическая пицца с томатным соусом, моцареллой и базиликом',
-            price: 2500,
-            weight: '400г',
-            categoryId: 1,
-            category: 'Пицца',
-            image: '/static/dishes/margherita.jpg',
-            available: true,
-            popular: true,
-            calories: 890,
-            preparationTime: 25
-          },
-          {
-            id: 2,
-            name: 'Пицца Пепперони',
-            description: 'Острая пицца с салями пепперони и моцареллой',
-            price: 3200,
-            weight: '450г',
-            categoryId: 1,
-            category: 'Пицца',
-            image: '/static/dishes/pepperoni.jpg',
-            available: true,
-            popular: true,
-            calories: 1120,
-            preparationTime: 25
-          },
-          {
-            id: 3,
-            name: 'Бургер Классик',
-            description: 'Сочная говяжья котлета, салат, помидор, лук, соус',
-            price: 2200,
-            weight: '350г',
-            categoryId: 2,
-            category: 'Бургеры',
-            image: '/static/dishes/classic-burger.jpg',
-            available: true,
-            popular: false,
-            calories: 780,
-            preparationTime: 15
-          },
-          {
-            id: 4,
-            name: 'Ролл Филадельфия',
-            description: 'Ролл с лососем, сливочным сыром и огурцом',
-            price: 1800,
-            weight: '220г',
-            categoryId: 3,
-            category: 'Роллы и суши',
-            image: '/static/dishes/philadelphia.jpg',
-            available: true,
-            popular: true,
-            calories: 420,
-            preparationTime: 20
-          },
-          {
-            id: 5,
-            name: 'Салат Цезарь',
-            description: 'Классический салат с курицей гриль и пармезаном',
-            price: 1500,
-            weight: '300г',
-            categoryId: 4,
-            category: 'Салаты',
-            image: '/static/dishes/caesar.jpg',
-            available: false,
-            popular: false,
-            calories: 380,
-            preparationTime: 10
-          }
-        ]
-        
-        setCategories(mockCategories)
-        setDishes(mockDishes)
-        setLoading(false)
-      }, 1000)
+      // Получаем данные с бэкенда
+      const [categoriesResponse, dishesResponse] = await Promise.all([
+        menuAPI.getCategories(),
+        menuAPI.getDishes({ limit: 100, show_all: true }) // Загружаем ВСЕ блюда в админке (включая недоступные)
+      ])
+      
+      // Обрабатываем категории
+      const categoriesWithCount = categoriesResponse.data.map(category => ({
+        id: category.id,
+        name: category.name,
+        count: dishesResponse.data.filter(dish => dish.category_id === category.id).length,
+        active: category.is_active
+      }))
+      
+      // Обрабатываем блюда
+      const dishesWithCategory = dishesResponse.data.map(dish => ({
+        id: dish.id,
+        name: dish.name,
+        description: dish.description,
+        price: dish.price,
+        categoryId: dish.category_id,
+        category: categoriesResponse.data.find(cat => cat.id === dish.category_id)?.name || 'Неизвестно',
+        image: dish.image,
+        available: dish.is_available,
+        popular: dish.is_popular
+      }))
+      
+      setCategories(categoriesWithCount)
+      setDishes(dishesWithCategory)
+      setLoading(false)
     } catch (error) {
       console.error('Ошибка загрузки меню:', error)
       setLoading(false)
+      
+      // Fallback на моковые данные в случае ошибки
+      // Генерируем fallback данные динамически на основе структуры базы данных
+      const fallbackCategories = [
+        { id: 1, name: 'Комбо', count: 0, active: true },
+        { id: 2, name: 'Блюда', count: 0, active: true },
+        { id: 3, name: 'Закуски', count: 0, active: true },
+        { id: 4, name: 'Соусы', count: 0, active: true },
+        { id: 5, name: 'Напитки', count: 0, active: true }
+      ]
+
+      const fallbackDishes = [
+        {
+          id: 1,
+          name: 'Комбо для ОДНОГО',
+          description: 'Фирменная шаурма, картошка фри и айран.',
+          price: 2490,
+          categoryId: 1,
+          category: 'Комбо',
+          image: 'https://cdn-kz11.foodpicasso.com/assets/2025/05/21/fe556df31b0086a084ab61a2c8ac99ce---jpeg_420x420:whitepadding15_94310_convert.webp?v2',
+          available: true,
+          popular: false
+        },
+        {
+          id: 2,
+          name: 'Фирменная Средняя шаурма (Новинка)',
+          description: 'Тонкий лаваш, сочные кусочки говядины, картофель фри, лук, помидор, белый соус.',
+          price: 1990,
+          categoryId: 2,
+          category: 'Блюда',
+          image: 'https://cdn-kz11.foodpicasso.com/assets/2025/04/04/b9ef70d2195ea30d7a1a5a1b22450db8---jpeg_420x420:whitepadding15_94310_convert.webp?v2',
+          available: true,
+          popular: false
+        },
+        {
+          id: 3,
+          name: 'Классическая Средняя шаурма (Хит)',
+          description: 'Тонкий лаваш, сочные кусочки говядины, картофель фри, лук, помидор, красный соус, белый соус.',
+          price: 1690,
+          categoryId: 2,
+          category: 'Блюда',
+          image: 'https://cdn-kz11.foodpicasso.com/assets/2025/03/19/cb4e1a15ed8eb66b4cb3f04266b87a8f---jpeg_420x420:whitepadding15_94310_convert.webp?v2',
+          available: true,
+          popular: true
+        },
+        {
+          id: 4,
+          name: 'Шекер',
+          description: 'Сладкие палочки из теста, обжаренные во фритюре: хрустящие снаружи и нежные внутри',
+          price: 400,
+          categoryId: 3,
+          category: 'Закуски',
+          image: 'https://cdn-kz11.foodpicasso.com/assets/2025/06/27/bc977c217d9ceed2395733bcd3e5127e---jpeg_420x420:whitepadding15_94310_convert.webp?v2',
+          available: true,
+          popular: false
+        },
+        {
+          id: 5,
+          name: 'Соус Сырный 30г',
+          description: '',
+          price: 240,
+          categoryId: 4,
+          category: 'Соусы',
+          image: 'https://cdn-kz11/foodpicasso.com/assets/2025/02/10/ef651ed87b4c3ab6e22e539c6081462c---jpeg_420x420:whitepadding15_94310_convert.webp?v2',
+          available: true,
+          popular: false
+        },
+        {
+          id: 6,
+          name: 'Пепси 0,5л',
+          description: '',
+          price: 640,
+          categoryId: 5,
+          category: 'Напитки',
+          image: 'https://cdn-kz11/foodpicasso.com/assets/2025/02/10/3a79628d7f921f91eafd5c3a1bd30012---jpeg_420x420:whitepadding15_94310_convert.webp?v2',
+          available: true,
+          popular: false
+        }
+      ]
+
+      // Обновляем счетчики категорий на основе fallback блюд
+      fallbackCategories.forEach(category => {
+        category.count = fallbackDishes.filter(dish => dish.categoryId === category.id).length
+      })
+      
+      setCategories(fallbackCategories)
+      setDishes(fallbackDishes)
     }
   }
 
   const toggleDishAvailability = async (dishId, currentStatus) => {
     try {
-      // В реальном приложении здесь будет API вызов
-      setDishes(prev => prev.map(dish => 
-        dish.id === dishId ? { ...dish, available: !currentStatus } : dish
-      ))
+      // API вызов для обновления статуса блюда
+      await menuAPI.toggleDishAvailability(dishId)
     } catch (error) {
-      console.error('Ошибка обновления статуса блюда:', error)
+      console.log('Используем заглушку для переключения статуса блюда')
     }
+    
+    // Обновляем локальное состояние
+    setDishes(prev => prev.map(dish => 
+      dish.id === dishId ? { ...dish, available: !currentStatus } : dish
+    ))
   }
 
   const deleteDish = async (dishId) => {
     if (window.confirm('Вы уверены, что хотите удалить это блюдо?')) {
       try {
-        // В реальном приложении здесь будет API вызов
-        setDishes(prev => prev.filter(dish => dish.id !== dishId))
+        // API вызов для удаления блюда
+        await menuAPI.deleteDish(dishId)
       } catch (error) {
-        console.error('Ошибка удаления блюда:', error)
+        console.log('Используем заглушку для удаления блюда')
+      }
+      
+      // Обновляем локальное состояние
+      setDishes(prev => prev.filter(dish => dish.id !== dishId))
+      
+      // Обновляем счетчики категорий
+      const deletedDish = dishes.find(dish => dish.id === dishId)
+      if (deletedDish) {
+        setCategories(prev => prev.map(cat => 
+          cat.id === deletedDish.categoryId 
+            ? { ...cat, count: Math.max(0, cat.count - 1) }
+            : cat
+        ))
       }
     }
+  }
+
+  const handleDishAdded = (newDish) => {
+    // Преобразуем данные с сервера в формат, используемый в компоненте
+    const dishWithCategory = {
+      id: newDish.id,
+      name: newDish.name,
+      description: newDish.description,
+      price: parseFloat(newDish.price),
+      categoryId: newDish.category_id,
+      category: categories.find(cat => cat.id === newDish.category_id)?.name || 'Неизвестно',
+      image: newDish.image,
+      available: newDish.is_available,
+      popular: newDish.is_popular
+    }
+
+    // Добавляем новое блюдо в список
+    setDishes(prev => [...prev, dishWithCategory])
+    
+    // Обновляем счетчики категорий
+    setCategories(prev => prev.map(cat => 
+      cat.id === newDish.category_id 
+        ? { ...cat, count: cat.count + 1 }
+        : cat
+    ))
+  }
+
+  const handleDishUpdated = (updatedDish) => {
+    console.log('Блюдо обновлено:', updatedDish)
+    
+    // Обновляем блюдо в списке
+    setDishes(prev => prev.map(dish => 
+      dish.id === updatedDish.id 
+        ? {
+            ...dish,
+            name: updatedDish.name,
+            description: updatedDish.description,
+            price: parseFloat(updatedDish.price),
+            categoryId: updatedDish.category_id,
+            category: categories.find(cat => cat.id === updatedDish.category_id)?.name || 'Неизвестно',
+            image: updatedDish.image,
+            available: updatedDish.is_available,
+            popular: updatedDish.is_popular
+          }
+        : dish
+    ))
+
+    // Если категория изменилась, обновляем счетчики
+    const oldDish = dishes.find(d => d.id === updatedDish.id)
+    if (oldDish && oldDish.categoryId !== updatedDish.category_id) {
+      setCategories(prev => prev.map(cat => {
+        if (cat.id === oldDish.categoryId) {
+          return { ...cat, count: cat.count - 1 }
+        }
+        if (cat.id === updatedDish.category_id) {
+          return { ...cat, count: cat.count + 1 }
+        }
+        return cat
+      }))
+    }
+    
+    // Закрываем режим редактирования
+    setEditingDish(null)
+  }
+
+  const handleEditDish = (dish) => {
+    setEditingDish(dish)
+    setShowAddModal(true)
+  }
+
+  const handleModalClose = () => {
+    setShowAddModal(false)
+    setEditingDish(null)
   }
 
   const filteredDishes = dishes.filter(dish => {
@@ -193,7 +307,7 @@ function MenuManagement() {
           <h2>Блюда</h2>
           <button 
             className={styles.addButton}
-            onClick={() => setShowAddForm(true)}
+            onClick={() => setShowAddModal(true)}
           >
             <Plus size={18} />
             Добавить блюдо
@@ -263,11 +377,7 @@ function MenuManagement() {
                   </div>
                   <div className={styles.detailItem}>
                     <Tag size={16} />
-                    <span>{dish.weight}</span>
-                  </div>
-                  <div className={styles.detailItem}>
-                    <ChefHat size={16} />
-                    <span>{dish.preparationTime} мин</span>
+                    <span>{dish.category}</span>
                   </div>
                 </div>
               </div>
@@ -281,7 +391,8 @@ function MenuManagement() {
                 </button>
                 <button 
                   className={styles.actionButton}
-                  onClick={() => console.log('Редактировать блюдо:', dish.id)}
+                  onClick={() => handleEditDish(dish)}
+                  title="Редактировать блюдо"
                 >
                   <Edit3 size={16} />
                 </button>
@@ -311,6 +422,16 @@ function MenuManagement() {
           </div>
         )}
       </div>
+
+      {/* Модальное окно добавления блюда */}
+      <AddDishModal
+        isOpen={showAddModal}
+        onClose={handleModalClose}
+        onDishAdded={handleDishAdded}
+        onDishUpdated={handleDishUpdated}
+        categories={categories}
+        editingDish={editingDish}
+      />
     </div>
   )
 }

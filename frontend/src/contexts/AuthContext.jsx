@@ -1,6 +1,11 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react'
-import axios from '../services/api'
-import { toast } from 'react-hot-toast'
+import api from '../services/api'
+
+// Простой toast для уведомлений
+const toast = {
+  success: (message) => console.log('SUCCESS:', message),
+  error: (message) => console.error('ERROR:', message)
+}
 
 const AuthContext = createContext()
 
@@ -75,8 +80,7 @@ export function AuthProvider({ children }) {
           payload: { token, user: parsedUser }
         })
         
-        // Установка токена в axios по умолчанию
-        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
+        // Установка токена в api по умолчанию (axios interceptor уже настроен)
       } catch (error) {
         console.error('Ошибка при загрузке данных пользователя:', error)
         localStorage.removeItem('auth_token')
@@ -92,7 +96,7 @@ export function AuthProvider({ children }) {
     try {
       dispatch({ type: 'LOGIN_START' })
 
-      const response = await axios.post('/api/v1/auth/login', {
+      const response = await api.post('/api/v1/auth/login', {
         phone,
         password
       })
@@ -103,8 +107,7 @@ export function AuthProvider({ children }) {
       localStorage.setItem('auth_token', access_token)
       localStorage.setItem('auth_user', JSON.stringify(user))
 
-      // Установка токена в axios
-      axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`
+      // Токен устанавливается автоматически через interceptor
 
       dispatch({
         type: 'LOGIN_SUCCESS',
@@ -126,7 +129,7 @@ export function AuthProvider({ children }) {
     try {
       dispatch({ type: 'LOGIN_START' })
 
-      const response = await axios.post('/api/v1/auth/register', {
+      const response = await api.post('/api/v1/auth/register', {
         phone,
         name,
         password
@@ -138,8 +141,7 @@ export function AuthProvider({ children }) {
       localStorage.setItem('auth_token', access_token)
       localStorage.setItem('auth_user', JSON.stringify(user))
 
-      // Установка токена в axios
-      axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`
+      // Токен устанавливается автоматически через interceptor
 
       dispatch({
         type: 'LOGIN_SUCCESS',
@@ -159,7 +161,7 @@ export function AuthProvider({ children }) {
   // Запрос SMS кода
   const requestSMS = async (phone) => {
     try {
-      await axios.post('/api/v1/auth/request-sms', { phone })
+      await api.post('/api/v1/auth/request-sms', { phone })
       toast.success('SMS код отправлен')
       return true
     } catch (error) {
@@ -172,7 +174,7 @@ export function AuthProvider({ children }) {
   // Подтверждение SMS кода
   const verifySMS = async (phone, code) => {
     try {
-      const response = await axios.post('/api/v1/auth/verify-sms', {
+      const response = await api.post('/api/v1/auth/verify-sms', {
         phone,
         code
       })
@@ -182,7 +184,7 @@ export function AuthProvider({ children }) {
       localStorage.setItem('auth_token', access_token)
       localStorage.setItem('auth_user', JSON.stringify(user))
 
-      axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`
+      // Токен устанавливается автоматически через interceptor
 
       dispatch({
         type: 'LOGIN_SUCCESS',
@@ -203,7 +205,7 @@ export function AuthProvider({ children }) {
     localStorage.removeItem('auth_token')
     localStorage.removeItem('auth_user')
     
-    delete axios.defaults.headers.common['Authorization']
+    // Токен будет удален автоматически из localStorage, interceptor обработает это
     
     dispatch({ type: 'LOGOUT' })
     toast.success('До свидания!')

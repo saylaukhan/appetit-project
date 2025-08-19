@@ -1,6 +1,7 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
-import './App.module.css'
+import { Menu } from 'lucide-react'
+import styles from './App.module.css'
 
 // Провайдеры контекстов
 import { AuthProvider } from './contexts/AuthContext'
@@ -45,7 +46,7 @@ function App() {
     <ThemeProvider>
       <AuthProvider>
         <CartProvider>
-          <div className="app-container">
+          <div className={styles.appContainer}>
             <Routes>
               {/* Публичные маршруты */}
               <Route path="/" element={<ClientLayout />} />
@@ -117,7 +118,7 @@ function ClientLayout() {
   return (
     <>
       <Header />
-      <main className="main-content">
+      <main className={styles.mainContent}>
         {getPageComponent()}
       </main>
       <Footer />
@@ -128,6 +129,7 @@ function ClientLayout() {
 // Макет для административной панели
 function AdminLayout() {
   const location = useLocation()
+  const [sidebarOpen, setSidebarOpen] = useState(false)
   
   const getAdminPage = () => {
     const path = location.pathname
@@ -140,12 +142,41 @@ function AdminLayout() {
     return <AdminDashboard />
   }
 
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen)
+  }
+
+  const closeSidebar = () => {
+    setSidebarOpen(false)
+  }
+
   return (
-    <div className="admin-container">
-      <AdminSidebar />
-      <main className="admin-main">
+    <div className={styles.adminContainer}>
+      {/* Кнопка гамбургер-меню */}
+      <button 
+        className={`${styles.sidebarToggle} ${sidebarOpen ? styles.sidebarToggleHidden : ''}`}
+        onClick={toggleSidebar}
+        aria-label="Открыть меню"
+      >
+        <Menu size={24} />
+      </button>
+
+      {/* Backdrop для закрытия sidebar при клике */}
+      {sidebarOpen && (
+        <div 
+          className={styles.sidebarBackdrop}
+          onClick={closeSidebar}
+        />
+      )}
+
+      <main className={styles.adminMain}>
         {getAdminPage()}
       </main>
+      
+      <AdminSidebar 
+        isOpen={sidebarOpen} 
+        onClose={closeSidebar}
+      />
     </div>
   )
 }
@@ -153,7 +184,7 @@ function AdminLayout() {
 // Макет для курьера
 function CourierLayout() {
   return (
-    <div className="mobile-container">
+    <div className={styles.mobileContainer}>
       <CourierDashboard />
     </div>
   )

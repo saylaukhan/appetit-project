@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, validator
 from typing import List, Optional
 from decimal import Decimal
 
@@ -30,6 +30,7 @@ class DishResponse(BaseModel):
     image: Optional[str] = None
     category_id: int
     is_available: bool = True
+    is_popular: bool = False
     weight: Optional[str] = None
 
     class Config:
@@ -49,3 +50,31 @@ class DishDetailResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+class DishCreateRequest(BaseModel):
+    name: str = Field(..., min_length=1, max_length=100)
+    description: Optional[str] = Field(None, max_length=1000)
+    price: Decimal = Field(..., gt=0)
+    image: Optional[str] = Field(None, max_length=255)
+    weight: Optional[str] = Field(None, max_length=50)
+    category_id: int = Field(..., gt=0)
+    is_available: bool = Field(True)
+    is_popular: bool = Field(False)
+    sort_order: int = Field(0)
+
+    @validator('name')
+    def name_must_not_be_empty(cls, v):
+        if not v.strip():
+            raise ValueError('Название блюда не может быть пустым')
+        return v.strip()
+
+class DishUpdateRequest(BaseModel):
+    name: Optional[str] = Field(None, min_length=1, max_length=100)
+    description: Optional[str] = Field(None, max_length=1000)
+    price: Optional[Decimal] = Field(None, gt=0)
+    image: Optional[str] = Field(None, max_length=255)
+    weight: Optional[str] = Field(None, max_length=50)
+    category_id: Optional[int] = Field(None, gt=0)
+    is_available: Optional[bool] = None
+    is_popular: Optional[bool] = None
+    sort_order: Optional[int] = None

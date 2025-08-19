@@ -117,16 +117,10 @@
 }
 
 .logo img {
-  height: 32px;
-  margin-right: var(--spacing-sm);
-  filter: brightness(0) invert(1);
+  height: 40px;
 }
 
-.logo span {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--text-white);
-}
+
 
 /* Mobile Styles */
 @media (max-width: 768px) {

@@ -10,12 +10,13 @@ import {
   Tag,
   TrendingUp,
   LogOut,
-  Home
+  Home,
+  X
 } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 import styles from './AdminSidebar.module.css'
 
-function AdminSidebar() {
+function AdminSidebar({ isOpen = false, onClose = () => {} }) {
   const location = useLocation()
   const { user, logout } = useAuth()
 
@@ -69,8 +70,22 @@ function AdminSidebar() {
     logout()
   }
 
+  const handleLinkClick = () => {
+    // Закрываем sidebar при клике на ссылку (для мобильных устройств)
+    onClose()
+  }
+
   return (
-    <div className={styles.sidebarContainer}>
+    <div className={`${styles.sidebarContainer} ${isOpen ? styles.open : ''}`}>
+      {/* Кнопка закрытия */}
+      <button 
+        className={styles.closeButton}
+        onClick={onClose}
+        aria-label="Закрыть меню"
+      >
+        <X size={20} />
+      </button>
+      
       {/* Логотип и заголовок */}
       <div className={styles.sidebarHeader}>
         <div className={styles.logo}>
@@ -98,6 +113,7 @@ function AdminSidebar() {
                 className={`${styles.navLink} ${
                   isActive(item.path, item.exact) ? styles.active : ''
                 }`}
+                onClick={handleLinkClick}
               >
                 <span className={styles.navIcon}>{item.icon}</span>
                 <span className={styles.navLabel}>{item.label}</span>
@@ -109,12 +125,18 @@ function AdminSidebar() {
 
       {/* Нижняя секция */}
       <div className={styles.sidebarFooter}>
-        <Link to="/" className={styles.backToSite}>
+        <Link to="/" className={styles.backToSite} onClick={handleLinkClick}>
           <Home />
           <span>На сайт</span>
         </Link>
         
-        <button onClick={handleLogout} className={styles.logoutButton}>
+        <button 
+          onClick={() => {
+            handleLogout()
+            handleLinkClick()
+          }} 
+          className={styles.logoutButton}
+        >
           <LogOut />
           <span>Выйти</span>
         </button>
