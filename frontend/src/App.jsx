@@ -29,6 +29,7 @@ import OrderManagement from './pages/admin/OrderManagement'
 import UserManagement from './pages/admin/UserManagement'
 import AnalyticsPage from './pages/admin/Analytics'
 import MarketingPage from './pages/admin/MarketingPage'
+import AddonsManagement from './components/admin/AddonsManagement'
 import AdminSidebar from './components/admin/AdminSidebar'
 
 // Интерфейс кухни
@@ -136,6 +137,7 @@ function AdminLayout() {
     if (path === '/admin') return <AdminDashboard />
     if (path === '/admin/orders') return <OrderManagement />
     if (path === '/admin/menu') return <MenuManagement />
+    if (path === '/admin/addons') return <AddonsManagement />
     if (path === '/admin/users') return <UserManagement />
     if (path === '/admin/analytics') return <AnalyticsPage />
     if (path === '/admin/marketing') return <MarketingPage />

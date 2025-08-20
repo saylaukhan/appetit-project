@@ -1,0 +1,418 @@
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.modal {
+  background: white;
+  border-radius: 20px;
+  max-width: 900px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.closeButton {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  transition: background-color 0.2s;
+}
+
+.closeButton:hover {
+  background: rgba(255, 255, 255, 1);
+}
+
+.loading,
+.error {
+  padding: 40px;
+  text-align: center;
+  font-size: 16px;
+  color: #6b7280;
+}
+
+.content {
+  display: flex;
+  flex-direction: row;
+  min-height: 500px;
+}
+
+.leftSection {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 30px;
+  background: #f8f9fa;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  max-height: 90vh;
+}
+
+.rightSection {
+  flex: 1;
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+}
+
+.dishImage {
+  position: relative;
+  width: 400px;
+  height: 400px;
+  overflow: hidden;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.dishImage img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.dishInfo {
+  margin-bottom: 25px;
+}
+
+.dishName {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 10px;
+}
+
+.dishDescription {
+  color: #6b7280;
+  font-size: 14px;
+  line-height: 1.5;
+  margin-bottom: 20px;
+}
+
+.section {
+  margin-bottom: 25px;
+}
+
+.sectionTitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 15px;
+}
+
+/* Варианты */
+.variantGroupTitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 12px;
+}
+
+.variantOptions {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.variantOption {
+  flex: 1;
+  min-width: 120px;
+  padding: 12px 16px;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  background: white;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.variantOption:hover {
+  border-color: #e94a4e;
+}
+
+.variantOption.selected {
+  border-color: #e94a4e;
+  background: #e94a4e;
+  color: white;
+}
+
+.variantLabel {
+  font-weight: 600;
+}
+
+.variantPrice {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+/* Добавки */
+.addonCategory {
+  margin-bottom: 20px;
+}
+
+.categoryTitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 10px;
+}
+
+.addonsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.addonItem {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  text-align: left;
+  padding: 15px;
+  border: 2px solid #f3f4f6;
+  border-radius: 12px;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.addonItem:hover {
+  border-color: #e5e7eb;
+}
+
+.addonInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.addonName {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: #1f2937;
+  line-height: 1.2;
+}
+
+.addonPrice {
+  font-size: 12px;
+  font-weight: 600;
+  color: #e94a4e;
+}
+
+.addButton {
+  background: #e74c3c;
+  border: none;
+  border-radius: 8px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: white;
+  transition: background-color 0.2s;
+}
+
+.addButton:hover {
+  background: #c0392b;
+}
+
+.quantityControls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.quantityBtn {
+  background: #f3f4f6;
+  border: none;
+  border-radius: 6px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #6b7280;
+  transition: all 0.2s;
+}
+
+.quantityBtn:hover {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.quantity {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f2937;
+  min-width: 20px;
+  text-align: center;
+}
+
+/* Футер */
+.footer {
+  margin-top: auto;
+  padding-top: 20px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.quantitySection {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 8px;
+}
+
+.quantitySection .quantityBtn {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: white;
+  border: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #6b7280;
+  transition: all 0.2s;
+}
+
+.quantitySection .quantityBtn:hover:not(:disabled) {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+}
+
+.quantitySection .quantityBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.quantitySection .quantity {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f2937;
+  min-width: 24px;
+  text-align: center;
+}
+
+.addToCartButton {
+  flex: 1;
+  background: #e94a4e;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 16px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.addToCartButton:hover {
+  background: #b91c1c;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  .modalOverlay {
+    padding: 10px;
+  }
+  
+  .modal {
+    max-height: 95vh;
+    border-radius: 16px;
+    max-width: 95vw;
+  }
+  
+  .content {
+    flex-direction: column;
+    min-height: auto;
+  }
+  
+  .leftSection {
+    padding: 20px;
+  }
+  
+  .dishImage {
+    width: 100%;
+    max-width: 300px;
+    height: 250px;
+  }
+  
+  .rightSection {
+    padding: 20px;
+  }
+  
+  .dishName {
+    font-size: 20px;
+  }
+  
+  .variantOptions {
+    flex-direction: column;
+  }
+  
+  .variantOption {
+    flex: none;
+    min-width: auto;
+  }
+  
+  .addonsGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  
+  .addonItem {
+    padding: 10px;
+  }
+  
+  .footer {
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .quantitySection {
+    align-self: center;
+  }
+  
+  .addToCartButton {
+    width: 100%;
+  }
+}
