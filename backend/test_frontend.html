@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Promo Code API Test</title>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+</head>
+<body>
+    <h1>Promo Code API Test</h1>
+
+    <div>
+        <h2>Get Promo Codes</h2>
+        <button onclick="getPromoCodes()">Get Promo Codes</button>
+        <pre id="getResult"></pre>
+    </div>
+
+    <div>
+        <h2>Create Promo Code</h2>
+        <button onclick="createPromoCode()">Create Test Promo Code</button>
+        <pre id="createResult"></pre>
+    </div>
+
+    <div>
+        <h2>Apply Promo Code</h2>
+        <button onclick="applyPromoCode()">Apply WELCOME10 (order total: 2500)</button>
+        <button onclick="applyPromoCodeLow()">Apply WELCOME10 (order total: 500) - Should Fail</button>
+        <pre id="applyResult"></pre>
+    </div>
+
+    <div>
+        <h2>Errors</h2>
+        <pre id="errors"></pre>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8000/api/v1';
+
+        async function getPromoCodes() {
+            try {
+                document.getElementById('errors').textContent = '';
+                const response = await axios.get(`${API_BASE}/promo-codes/`);
+                document.getElementById('getResult').textContent = JSON.stringify(response.data, null, 2);
+            } catch (error) {
+                document.getElementById('errors').textContent = `Error: ${error.message}\n${error.response?.data ? JSON.stringify(error.response.data, null, 2) : ''}`;
+            }
+        }
+
+        async function createPromoCode() {
+            try {
+                document.getElementById('errors').textContent = '';
+                const promoData = {
+                    code: "FRONTEND" + Math.floor(Math.random() * 1000),
+                    name: "Frontend Test Promo",
+                    description: "Created from frontend test",
+                    discount_type: "percentage",
+                    discount_value: 15.0,
+                    min_order_amount: 500.0,
+                    is_active: true
+                };
+
+                const response = await axios.post(`${API_BASE}/promo-codes/`, promoData);
+                document.getElementById('createResult').textContent = JSON.stringify(response.data, null, 2);
+            } catch (error) {
+                document.getElementById('errors').textContent = `Error: ${error.message}\n${error.response?.data ? JSON.stringify(error.response.data, null, 2) : ''}`;
+            }
+        }
+
+        async function applyPromoCode() {
+            try {
+                document.getElementById('errors').textContent = '';
+                const response = await axios.post(`${API_BASE}/promo-codes/apply/WELCOME10`, {
+                    order_total: 2500
+                });
+                document.getElementById('applyResult').textContent = JSON.stringify(response.data, null, 2);
+            } catch (error) {
+                document.getElementById('applyResult').textContent = `Error: ${error.message}\n${error.response?.data ? JSON.stringify(error.response.data, null, 2) : ''}`;
+            }
+        }
+
+        async function applyPromoCodeLow() {
+            try {
+                document.getElementById('errors').textContent = '';
+                const response = await axios.post(`${API_BASE}/promo-codes/apply/WELCOME10`, {
+                    order_total: 500
+                });
+                document.getElementById('applyResult').textContent = JSON.stringify(response.data, null, 2);
+            } catch (error) {
+                document.getElementById('applyResult').textContent = `Error: ${error.message}\n${error.response?.data ? JSON.stringify(error.response.data, null, 2) : ''}`;
+            }
+        }
+    </script>
+</body>
+</html>

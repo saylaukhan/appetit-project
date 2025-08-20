@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
 from datetime import datetime
+from typing import Optional
 from pydantic import BaseModel
 from app.core.database import get_db_session
 from app.models.promo_code import PromoCode, DiscountType
@@ -15,33 +16,36 @@ router = APIRouter()
 class PromoCodeCreateRequest(BaseModel):
     code: str
     name: str
-    description: str = None
+    description: Optional[str] = None
     discount_type: DiscountType
     discount_value: float
-    min_order_amount: float = None
-    max_discount_amount: float = None
-    usage_limit: int = None
+    min_order_amount: Optional[float] = None
+    max_discount_amount: Optional[float] = None
+    usage_limit: Optional[int] = None
     usage_limit_per_user: int = 1
-    valid_from: datetime = None
-    valid_until: datetime = None
+    valid_from: Optional[datetime] = None
+    valid_until: Optional[datetime] = None
     is_active: bool = True
 
 class PromoCodeResponse(BaseModel):
     id: int
     code: str
     name: str
-    description: str = None
+    description: Optional[str] = None
     discount_type: DiscountType
     discount_value: float
-    min_order_amount: float = None
-    max_discount_amount: float = None
-    usage_limit: int = None
-    usage_limit_per_user: int
+    min_order_amount: Optional[float] = None
+    max_discount_amount: Optional[float] = None
+    usage_limit: Optional[int] = None
+    usage_limit_per_user: Optional[int] = None
     total_used: int
-    valid_from: datetime = None
-    valid_until: datetime = None
+    valid_from: Optional[datetime] = None
+    valid_until: Optional[datetime] = None
     is_active: bool
     created_at: datetime
+
+    class Config:
+        from_attributes = True  # Включаем автоматическое преобразование из SQLAlchemy моделей
 
 @router.get("/{code}")
 async def validate_promo_code(
@@ -51,78 +55,86 @@ async def validate_promo_code(
     db: AsyncSession = Depends(get_db_session)
 ):
     """Валидация промокода и возврат информации о скидке."""
-    
-    # Поиск промокода
-    query = select(PromoCode).where(
-        PromoCode.code == code.upper(),
-        PromoCode.is_active == True
-    )
-    result = await db.execute(query)
-    promo_code = result.scalar_one_or_none()
-    
-    if not promo_code:
-        raise HTTPException(status_code=404, detail="Промокод не найден")
-    
-    # Проверка временных ограничений
-    now = datetime.now()
-    
-    if promo_code.valid_from and now < promo_code.valid_from:
-        raise HTTPException(status_code=400, detail="Промокод еще не активен")
-    
-    if promo_code.valid_until and now > promo_code.valid_until:
-        raise HTTPException(status_code=400, detail="Промокод истек")
-    
-    # Проверка лимита использований
-    if promo_code.usage_limit and promo_code.total_used >= promo_code.usage_limit:
-        raise HTTPException(status_code=400, detail="Промокод больше не действует")
-    
-    # Проверка минимальной суммы заказа
-    if promo_code.min_order_amount and order_total < promo_code.min_order_amount:
-        raise HTTPException(
-            status_code=400, 
-            detail=f"Минимальная сумма заказа для промокода: {promo_code.min_order_amount} ₸"
+    try:
+        # Поиск промокода
+        query = select(PromoCode).where(
+            PromoCode.code == code.upper(),
+            PromoCode.is_active == True
         )
-    
-    # Проверка лимита на пользователя
-    if current_user and promo_code.usage_limit_per_user:
-        user_usage_query = select(func.count(PromoCodeUsage.id)).where(
-            PromoCodeUsage.promo_code_id == promo_code.id,
-            PromoCodeUsage.user_id == current_user.id,
-            PromoCodeUsage.is_active == True
-        )
-        user_usage_result = await db.execute(user_usage_query)
-        user_usage_count = user_usage_result.scalar()
-        
-        if user_usage_count >= promo_code.usage_limit_per_user:
+        result = await db.execute(query)
+        promo_code = result.scalar_one_or_none()
+
+        if not promo_code:
+            raise HTTPException(status_code=404, detail="Промокод не найден")
+
+        # Проверка временных ограничений
+        now = datetime.now()
+
+        if promo_code.valid_from and now < promo_code.valid_from:
+            raise HTTPException(status_code=400, detail="Промокод еще не активен")
+
+        if promo_code.valid_until and now > promo_code.valid_until:
+            raise HTTPException(status_code=400, detail="Промокод истек")
+
+        # Проверка лимита использований
+        if promo_code.usage_limit and promo_code.total_used >= promo_code.usage_limit:
+            raise HTTPException(status_code=400, detail="Промокод больше не действует")
+
+        # Проверка минимальной суммы заказа
+        if promo_code.min_order_amount and order_total < promo_code.min_order_amount:
             raise HTTPException(
-                status_code=400, 
-                detail=f"Вы уже использовали этот промокод максимальное количество раз ({promo_code.usage_limit_per_user})"
+                status_code=400,
+                detail=f"Минимальная сумма заказа для промокода: {promo_code.min_order_amount} ₸"
             )
-    
-    # Расчет скидки
-    if promo_code.discount_type == DiscountType.PERCENTAGE:
-        discount_amount = order_total * (promo_code.discount_value / 100)
-        # Применяем максимальную сумму скидки если установлена
-        if promo_code.max_discount_amount:
-            discount_amount = min(discount_amount, promo_code.max_discount_amount)
-    else:  # FIXED
-        discount_amount = min(promo_code.discount_value, order_total)
-    
-    return {
-        "code": promo_code.code,
-        "name": promo_code.name,
-        "description": promo_code.description,
-        "discount_type": promo_code.discount_type,
-        "discount_value": promo_code.discount_value,
-        "discount_amount": round(discount_amount, 2),
-        "discount": round((discount_amount / order_total) * 100, 1) if order_total > 0 else 0,
-        "min_order_amount": promo_code.min_order_amount,
-        "max_discount_amount": promo_code.max_discount_amount,
-        "usage_limit": promo_code.usage_limit,
-        "total_used": promo_code.total_used,
-        "valid_from": promo_code.valid_from,
-        "valid_until": promo_code.valid_until
-    }
+
+        # Проверка лимита на пользователя
+        if current_user and promo_code.usage_limit_per_user:
+            user_usage_query = select(func.count(PromoCodeUsage.id)).where(
+                PromoCodeUsage.promo_code_id == promo_code.id,
+                PromoCodeUsage.user_id == current_user.id,
+                PromoCodeUsage.is_active == True
+            )
+            user_usage_result = await db.execute(user_usage_query)
+            user_usage_count = user_usage_result.scalar()
+
+            if user_usage_count >= promo_code.usage_limit_per_user:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Вы уже использовали этот промокод максимальное количество раз ({promo_code.usage_limit_per_user})"
+                )
+
+        # Расчет скидки
+        if promo_code.discount_type == DiscountType.PERCENTAGE:
+            discount_amount = order_total * (promo_code.discount_value / 100)
+            # Применяем максимальную сумму скидки если установлена
+            if promo_code.max_discount_amount:
+                discount_amount = min(discount_amount, promo_code.max_discount_amount)
+        else:  # FIXED
+            discount_amount = min(promo_code.discount_value, order_total)
+
+        # Исправляем сериализацию discount_type
+        discount_type_value = promo_code.discount_type.value if hasattr(promo_code.discount_type, 'value') else str(promo_code.discount_type)
+
+        return {
+            "code": promo_code.code,
+            "name": promo_code.name,
+            "description": promo_code.description,
+            "discount_type": discount_type_value,
+            "discount_value": promo_code.discount_value,
+            "discount_amount": round(discount_amount, 2),
+            "discount": round((discount_amount / order_total) * 100, 1) if order_total > 0 else 0,
+            "min_order_amount": promo_code.min_order_amount,
+            "max_discount_amount": promo_code.max_discount_amount,
+            "usage_limit": promo_code.usage_limit,
+            "total_used": promo_code.total_used,
+            "valid_from": promo_code.valid_from,
+            "valid_until": promo_code.valid_until
+        }
+    except Exception as e:
+        print(f"Error in validate_promo_code: {e}")
+        import traceback
+        traceback.print_exc()
+        raise
 
 
 class ApplyPromoRequest(BaseModel):
@@ -141,36 +153,42 @@ async def apply_promo_code(
     db: AsyncSession = Depends(get_db_session)
 ):
     """Применение промокода - увеличивает счетчик использований."""
-    
-    # Сначала валидируем промокод
-    promo_data = await validate_promo_code(code, request.order_total, current_user, db)
-    
-    # Получаем промокод для записи использования
-    query = select(PromoCode).where(
-        PromoCode.code == code.upper(),
-        PromoCode.is_active == True
-    )
-    result = await db.execute(query)
-    promo_code = result.scalar_one_or_none()
-    
-    if promo_code:
-        # Создаем запись об использовании
-        usage = PromoCodeUsage(
-            promo_code_id=promo_code.id,
-            user_id=current_user.id if current_user else None,
-            user_phone=getattr(current_user, 'phone', None) if current_user else None,
-            user_email=getattr(current_user, 'email', None) if current_user else None,
+    try:
+        # Сначала валидируем промокод
+        promo_data = await validate_promo_code(code, request.order_total, current_user, db)
+
+        # Получаем промокод для записи использования
+        query = select(PromoCode).where(
+            PromoCode.code == code.upper(),
+            PromoCode.is_active == True
         )
-        db.add(usage)
-        
-        # Обновляем общий счетчик использований
-        promo_code.total_used += 1
-        await db.commit()
-        
-        # Обновляем данные в ответе
-        promo_data["total_used"] = promo_code.total_used
-    
-    return promo_data
+        result = await db.execute(query)
+        promo_code = result.scalar_one_or_none()
+
+        if promo_code:
+            # Создаем запись об использовании
+            usage = PromoCodeUsage(
+                promo_code_id=promo_code.id,
+                user_id=current_user.id if current_user else None,
+                user_phone=getattr(current_user, 'phone', None) if current_user else None,
+                user_email=getattr(current_user, 'email', None) if current_user else None,
+            )
+            db.add(usage)
+
+            # Обновляем общий счетчик использований
+            promo_code.total_used += 1
+            await db.commit()
+
+            # Обновляем данные в ответе
+            promo_data["total_used"] = promo_code.total_used
+
+        print(f"Apply promo code successful for {code}")
+        return promo_data
+    except Exception as e:
+        print(f"Error in apply_promo_code: {e}")
+        import traceback
+        traceback.print_exc()
+        raise
 
 
 @router.get("/", response_model=list[PromoCodeResponse])
@@ -180,10 +198,46 @@ async def get_promo_codes(
     db: AsyncSession = Depends(get_db_session)
 ):
     """Получение списка промокодов."""
-    query = select(PromoCode).offset(skip).limit(limit).order_by(PromoCode.created_at.desc())
-    result = await db.execute(query)
-    promo_codes = result.scalars().all()
-    return promo_codes
+    try:
+        query = select(PromoCode).offset(skip).limit(limit).order_by(PromoCode.created_at.desc())
+        result = await db.execute(query)
+        promo_codes = result.scalars().all()
+
+        print(f"Found {len(promo_codes)} promo codes")
+        for promo in promo_codes:
+            print(f"Promo: {promo.code}, type: {type(promo)}")
+
+        # Попробуем сериализовать каждый промокод отдельно
+        for i, promo in enumerate(promo_codes):
+            try:
+                promo_dict = {
+                    "id": promo.id,
+                    "code": promo.code,
+                    "name": promo.name,
+                    "description": promo.description,
+                    "discount_type": promo.discount_type,
+                    "discount_value": float(promo.discount_value),
+                    "min_order_amount": float(promo.min_order_amount) if promo.min_order_amount else None,
+                    "max_discount_amount": float(promo.max_discount_amount) if promo.max_discount_amount else None,
+                    "usage_limit": promo.usage_limit,
+                    "usage_limit_per_user": promo.usage_limit_per_user,
+                    "total_used": promo.total_used,
+                    "valid_from": promo.valid_from,
+                    "valid_until": promo.valid_until,
+                    "is_active": promo.is_active,
+                    "created_at": promo.created_at
+                }
+                print(f"Promo {i} serialized successfully")
+            except Exception as e:
+                print(f"Error serializing promo {i}: {e}")
+                raise
+
+        return promo_codes
+    except Exception as e:
+        print(f"Error in get_promo_codes: {e}")
+        import traceback
+        traceback.print_exc()
+        raise
 
 
 @router.post("/", response_model=PromoCodeResponse)
