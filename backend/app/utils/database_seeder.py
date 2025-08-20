@@ -11,7 +11,6 @@ from datetime import datetime, timedelta
 
 from app.models.user import User, UserRole
 from app.models.menu import Category, Dish, VariantGroup, Variant, Addon
-from app.models.menu import Category, Dish, Modifier
 from app.models.promo_code import PromoCode, DiscountType
 from app.models.banner import Banner
 
@@ -73,7 +72,6 @@ class DatabaseSeeder:
             # Проверяем, существует ли пользователь с таким телефоном
             result = await self.db.execute(
                 select(User).where(User.phone == user_data["phone"])
-            hashed_password = pwd_context.hash(user_data["password"])
             )
             existing_user = result.scalar_one_or_none()
             
@@ -155,13 +153,23 @@ class DatabaseSeeder:
             {"name": "Объем напитка", "is_required": True, "sort_order": 1},
         ]
 
-            group = VariantGroup(
-                name=group_data["name"],
-                is_required=group_data["is_required"],
-                sort_order=group_data["sort_order"]
+        for group_data in groups_data:
+            # Проверяем, существует ли группа с таким именем
+            result = await self.db.execute(
+                select(VariantGroup).where(VariantGroup.name == group_data["name"])
             )
-            self.db.add(group)
-            print(f"  ✓ Группа: {group_data['name']}")
+            existing_group = result.scalar_one_or_none()
+            
+            if existing_group is None:
+                group = VariantGroup(
+                    name=group_data["name"],
+                    is_required=group_data["is_required"],
+                    sort_order=group_data["sort_order"]
+                )
+                self.db.add(group)
+                print(f"  ✓ Группа: {group_data['name']}")
+            else:
+                print(f"  ⚠️ {group_data['name']} - уже существует, пропускаем")
 
     async def seed_variants(self):
         """Создание вариантов."""
@@ -218,23 +226,6 @@ class DatabaseSeeder:
             
             self.db.add(addon)
             print(f"  ✓ {addon_data['name']}")
-        for mod_data in modifiers_data:
-            # Проверяем, существует ли модификатор с таким именем
-            result = await self.db.execute(
-                select(Modifier).where(Modifier.name == mod_data["name"])
-            )
-            existing_modifier = result.scalar_one_or_none()
-            
-            if existing_modifier is None:
-                modifier = Modifier(
-                    name=mod_data["name"],
-                    price=mod_data["price"]
-                )
-                self.db.add(modifier)
-                print(f"  ✓ {mod_data['name']}")
-            else:
-                print(f"  ⚠️ {mod_data['name']} - уже существует, пропускаем")
-        for group_data in groups_data:
 
     async def seed_dishes(self):
         """Создание блюд."""

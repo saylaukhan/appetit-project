@@ -2,9 +2,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy import insert
 from typing import List, Optional
 from fastapi import HTTPException, status
-from app.models.menu import Category, Dish, VariantGroup, Variant, Addon
+from app.models.menu import Category, Dish, VariantGroup, Variant, Addon, dish_addon_table, dish_variant_table
 from app.schemas.menu import DishCreateRequest, DishUpdateRequest, AddonCreateRequest, AddonUpdateRequest
 
 class MenuService:
@@ -148,6 +149,10 @@ class MenuService:
             self.db.add(new_dish)
             await self.db.flush()  # Получаем ID блюда без коммита
             
+            # Сохраняем блюдо сначала
+            await self.db.commit()
+            await self.db.refresh(new_dish)
+            
             # Связываем с добавками если указаны
             if dish_data.addon_ids:
                 addons_result = await self.db.execute(
@@ -158,11 +163,21 @@ class MenuService:
                 found_addon_ids = [addon.id for addon in addons]
                 missing_addon_ids = set(dish_data.addon_ids) - set(found_addon_ids)
                 if missing_addon_ids:
+                    # Удаляем созданное блюдо если добавки не найдены
+                    await self.db.delete(new_dish)
+                    await self.db.commit()
                     raise HTTPException(
                         status_code=status.HTTP_404_NOT_FOUND,
                         detail=f"Добавки с ID {list(missing_addon_ids)} не найдены"
                     )
-                new_dish.addons = list(addons)
+                # Создаем связи напрямую через INSERT
+                for addon_id in found_addon_ids:
+                    await self.db.execute(
+                        insert(dish_addon_table).values(
+                            dish_id=new_dish.id,
+                            addon_id=addon_id
+                        )
+                    )
             
             # Связываем с вариантами если указаны
             if dish_data.variant_ids:
@@ -174,15 +189,29 @@ class MenuService:
                 found_variant_ids = [variant.id for variant in variants]
                 missing_variant_ids = set(dish_data.variant_ids) - set(found_variant_ids)
                 if missing_variant_ids:
+                    # Удаляем созданное блюдо если варианты не найдены
+                    await self.db.delete(new_dish)
+                    await self.db.commit()
                     raise HTTPException(
                         status_code=status.HTTP_404_NOT_FOUND,
                         detail=f"Варианты с ID {list(missing_variant_ids)} не найдены"
                     )
-                new_dish.variants = list(variants)
+                # Создаем связи напрямую через INSERT
+                for variant_id in found_variant_ids:
+                    await self.db.execute(
+                        insert(dish_variant_table).values(
+                            dish_id=new_dish.id,
+                            variant_id=variant_id
+                        )
+                    )
             
-            await self.db.commit()
-            await self.db.refresh(new_dish)
+            # Финальный коммит для связей
+            if dish_data.addon_ids or dish_data.variant_ids:
+                await self.db.commit()
             return new_dish
+        except HTTPException:
+            # Переподнимаем HTTPException без изменений
+            raise
         except IntegrityError as e:
             await self.db.rollback()
             print(f"IntegrityError при создании блюда: {e}")
@@ -195,7 +224,7 @@ class MenuService:
             print(f"Неожиданная ошибка при создании блюда: {e}")
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"В��утренняя ошибка сервера: {str(e)}"
+                detail=f"Внутренняя ошибка сервера: {str(e)}"
             )
 
     async def update_dish(self, dish_id: int, dish_data: DishUpdateRequest) -> Optional[Dish]:
