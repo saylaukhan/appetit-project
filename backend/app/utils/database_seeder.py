@@ -4,11 +4,13 @@
 """
 
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 from passlib.context import CryptContext
 from decimal import Decimal
 from datetime import datetime, timedelta
 
 from app.models.user import User, UserRole
+from app.models.menu import Category, Dish, VariantGroup, Variant, Addon
 from app.models.menu import Category, Dish, Modifier
 from app.models.promo_code import PromoCode, DiscountType
 from app.models.banner import Banner
@@ -26,7 +28,9 @@ class DatabaseSeeder:
         
         await self.seed_users()
         await self.seed_categories()
-        await self.seed_modifiers()
+        await self.seed_variant_groups()
+        await self.seed_variants()
+        await self.seed_addons()
         await self.seed_dishes()
         await self.seed_promo_codes()
         await self.seed_banners()
@@ -66,19 +70,29 @@ class DatabaseSeeder:
         ]
 
         for user_data in users_data:
+            # Проверяем, существует ли пользователь с таким телефоном
+            result = await self.db.execute(
+                select(User).where(User.phone == user_data["phone"])
             hashed_password = pwd_context.hash(user_data["password"])
-            
-            user = User(
-                phone=user_data["phone"],
-                name=user_data["name"],
-                role=user_data["role"],
-                hashed_password=hashed_password,
-                is_active=True,
-                is_verified=True
             )
+            existing_user = result.scalar_one_or_none()
             
-            self.db.add(user)
-            print(f"  ✓ {user_data['name']} ({user_data['role']})")
+            if existing_user is None:
+                hashed_password = pwd_context.hash(user_data["password"])
+                
+                user = User(
+                    phone=user_data["phone"],
+                    name=user_data["name"],
+                    role=user_data["role"],
+                    hashed_password=hashed_password,
+                    is_active=True,
+                    is_verified=True
+                )
+                
+                self.db.add(user)
+                print(f"  ✓ {user_data['name']} ({user_data['role']})")
+            else:
+                print(f"  ⚠️ {user_data['name']} ({user_data['phone']}) - уже существует, пропускаем")
 
     async def seed_categories(self):
         """Создание категорий блюд."""
@@ -113,55 +127,114 @@ class DatabaseSeeder:
         ]
 
         for cat_data in categories_data:
-            category = Category(
-                name=cat_data["name"],
-                description=cat_data["description"],
-                sort_order=cat_data["sort_order"],
-                is_active=True
+            # Проверяем, существует ли категория с таким именем
+            result = await self.db.execute(
+                select(Category).where(Category.name == cat_data["name"])
             )
-            self.db.add(category)
-            print(f"  ✓ {cat_data['name']}")
+            existing_category = result.scalar_one_or_none()
+            
+            if existing_category is None:
+                category = Category(
+                    name=cat_data["name"],
+                    description=cat_data["description"],
+                    sort_order=cat_data["sort_order"],
+                    is_active=True
+                )
+                self.db.add(category)
+                print(f"  ✓ {cat_data['name']}")
+            else:
+                print(f"  ⚠️ {cat_data['name']} - уже существует, пропускаем")
 
-    async def seed_modifiers(self):
-        """Создание модификаторов."""
-        print("🔧 Создаем модификаторы...")
+    async def seed_variant_groups(self):
+        """Создание групп вариантов."""
+        print("🔧 Создаем группы вариантов...")
         
-        modifiers_data = [
-            # Размеры пиццы
-            {"name": "Маленькая 25см", "price": Decimal("0")},
-            {"name": "Средняя 30см", "price": Decimal("500")},
-            {"name": "Большая 35см", "price": Decimal("1000")},
-            
-            # Добавки для бургеров
-            {"name": "Дополнительная котлета", "price": Decimal("800")},
-            {"name": "Бекон", "price": Decimal("400")},
-            {"name": "Сыр Чеддер", "price": Decimal("200")},
-            {"name": "Острый соус", "price": Decimal("0")},
-            
-            # Дополнения к роллам
-            {"name": "Имбирь", "price": Decimal("0")},
-            {"name": "Васаби", "price": Decimal("0")},
-            {"name": "Соевый соус", "price": Decimal("0")},
-            {"name": "Кунжут", "price": Decimal("100")},
-            
-            # Заправки для салатов
-            {"name": "Оливковое масло", "price": Decimal("0")},
-            {"name": "Цезарь соус", "price": Decimal("150")},
-            {"name": "Бальзамик", "price": Decimal("100")},
-            
-            # Размеры напитков
-            {"name": "0.3л", "price": Decimal("0")},
-            {"name": "0.5л", "price": Decimal("200")},
-            {"name": "1л", "price": Decimal("400")},
+        groups_data = [
+            {"name": "Размер", "is_required": True, "sort_order": 1},
+            {"name": "Тип теста", "is_required": True, "sort_order": 2},
+            {"name": "Объем напитка", "is_required": True, "sort_order": 1},
         ]
 
-        for mod_data in modifiers_data:
-            modifier = Modifier(
-                name=mod_data["name"],
-                price=mod_data["price"]
+            group = VariantGroup(
+                name=group_data["name"],
+                is_required=group_data["is_required"],
+                sort_order=group_data["sort_order"]
             )
-            self.db.add(modifier)
-            print(f"  ✓ {mod_data['name']}")
+            self.db.add(group)
+            print(f"  ✓ Группа: {group_data['name']}")
+
+    async def seed_variants(self):
+        """Создание вариантов."""
+        print("🎯 Создаем варианты...")
+        
+        variants_data = [
+            # Размеры (group_id: 1)
+            {"name": "Средняя", "price": Decimal("0"), "group_id": 1, "is_default": True, "sort_order": 1},
+            {"name": "Большая", "price": Decimal("500"), "group_id": 1, "is_default": False, "sort_order": 2},
+            
+            # Тип теста (group_id: 2)
+            {"name": "Традиционное", "price": Decimal("0"), "group_id": 2, "is_default": True, "sort_order": 1},
+            {"name": "Тонкое", "price": Decimal("0"), "group_id": 2, "is_default": False, "sort_order": 2},
+            
+            # Объем напитков (group_id: 3)
+            {"name": "0.3л", "price": Decimal("0"), "group_id": 3, "is_default": True, "sort_order": 1},
+            {"name": "0.5л", "price": Decimal("200"), "group_id": 3, "is_default": False, "sort_order": 2},
+            {"name": "1л", "price": Decimal("400"), "group_id": 3, "is_default": False, "sort_order": 3},
+        ]
+
+        for variant_data in variants_data:
+            variant = Variant(
+                name=variant_data["name"],
+                price=variant_data["price"],
+                group_id=variant_data["group_id"],
+                is_default=variant_data["is_default"],
+                sort_order=variant_data["sort_order"]
+            )
+            self.db.add(variant)
+            print(f"  ✓ {variant_data['name']} (группа {variant_data['group_id']})")
+
+    async def seed_addons(self):
+        """Создание добавок из скриншота."""
+        print("🧄 Создаем добавки...")
+        
+        addons_data = [
+            # Соусы
+            {"name": "соус Горчичный во внутрь", "price": Decimal("240"), "category": "соусы"},
+            {"name": "соус Барбекю во внутрь", "price": Decimal("240"), "category": "соусы"},
+            {"name": "соус Сырный во внутрь", "price": Decimal("240"), "category": "соусы"},
+            {"name": "перчики острые во внутрь", "price": Decimal("240"), "category": "соусы"},
+            {"name": "соус Томатный во внутрь", "price": Decimal("240"), "category": "соусы"},
+            {"name": "соус Острый во внутрь", "price": Decimal("240"), "category": "соусы"},
+            {"name": "соус Чесночный во внутрь", "price": Decimal("240"), "category": "соусы"},
+        ]
+
+        for addon_data in addons_data:
+            addon = Addon(
+                name=addon_data["name"],
+                price=addon_data["price"],
+                category=addon_data["category"],
+                is_active=True
+            )
+            
+            self.db.add(addon)
+            print(f"  ✓ {addon_data['name']}")
+        for mod_data in modifiers_data:
+            # Проверяем, существует ли модификатор с таким именем
+            result = await self.db.execute(
+                select(Modifier).where(Modifier.name == mod_data["name"])
+            )
+            existing_modifier = result.scalar_one_or_none()
+            
+            if existing_modifier is None:
+                modifier = Modifier(
+                    name=mod_data["name"],
+                    price=mod_data["price"]
+                )
+                self.db.add(modifier)
+                print(f"  ✓ {mod_data['name']}")
+            else:
+                print(f"  ⚠️ {mod_data['name']} - уже существует, пропускаем")
+        for group_data in groups_data:
 
     async def seed_dishes(self):
         """Создание блюд."""
@@ -419,7 +492,7 @@ class DatabaseSeeder:
                 "price": Decimal("490"),
                 "category_id": 5,
                 "is_popular": False,
-                "image": "https://cdn-kz11.foodpicasso.com/assets/2025/02/10/fe29ee0ab3100a6b940d873ea691e9ac---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
+                "image": "https://cdn-kz11.foodpicasso.com/assets/2025/02/10/8efdca35c475f581483df64ff8337bbb---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
             },
             {
                 "name": "Айран 1ст",
@@ -427,7 +500,7 @@ class DatabaseSeeder:
                 "price": Decimal("390"),
                 "category_id": 5,
                 "is_popular": False,
-                "image": "https://cdn-kz11.foodpicasso.com/assets/2025/02/10/8efdca35c475f581483df64ff8337bbb---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
+                "image": "https://cdn-kz11.foodpicasso.com/assets/2025/02/10/8c5dd0e3612f293fe87d01a7a817669d---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
             },
             {
                 "name": "Пепси 1л",
@@ -436,7 +509,7 @@ class DatabaseSeeder:
                 "category_id": 5,
                 "weight": "1л",
                 "is_popular": False,
-                "image": "https://cdn-kz11.foodpicasso.com/assets/2025/02/10/8c5dd0e3612f293fe87d01a7a817669d---jpeg_420x420:whitepadding15_94310_convert.webp?v2"
+                "image": "https://cdn-kz11.foodpicasso.com/assets/2025/02/10/b8e35534332c0d9853bb8ee9fe29646f---jpeg_1100_1e6e0_convert.webp "
             },
             {
                 "name": "Пепси 0,5л",
@@ -514,18 +587,53 @@ class DatabaseSeeder:
         ]
 
         for dish_data in dishes_data:
-            dish = Dish(
-                name=dish_data["name"],
-                description=dish_data["description"],
-                price=dish_data["price"],
-                category_id=dish_data["category_id"],
-                image=dish_data.get("image"),
-                weight=dish_data.get("weight"),
-                is_available=True,
-                is_popular=dish_data.get("is_popular", False)
+            # Проверяем, существует ли блюдо с таким именем
+            result = await self.db.execute(
+                select(Dish).where(Dish.name == dish_data["name"])
             )
-            self.db.add(dish)
-            print(f"  ✓ {dish_data['name']} - {dish_data['price']} тг")
+            existing_dish = result.scalar_one_or_none()
+            
+            if existing_dish is None:
+                dish = Dish(
+                    name=dish_data["name"],
+                    description=dish_data["description"],
+                    price=dish_data["price"],
+                    category_id=dish_data["category_id"],
+                    image=dish_data.get("image"),
+                    weight=dish_data.get("weight"),
+                    is_available=True,
+                    is_popular=dish_data.get("is_popular", False)
+                )
+                self.db.add(dish)
+                print(f"  ✓ {dish_data['name']} - {dish_data['price']} тг")
+            else:
+                print(f"  ⚠️ {dish_data['name']} - уже существует, пропускаем")
+
+        # Связываем блюда с добавками (отложено для отдельного скрипта)
+        # await self.link_dishes_with_addons()
+
+    async def link_dishes_with_addons(self):
+        """Связывание блюд с добавками."""
+        print("🔗 Связываем блюда с добавками...")
+        
+        # Получаем все блюда категории "Блюда" (шаурма, донер и т.д.)
+        dishes_result = await self.db.execute(
+            select(Dish).where(Dish.category_id == 2)  # Категория "Блюда"
+        )
+        dishes = dishes_result.scalars().all()
+        
+        # Получаем все добавки
+        addons_result = await self.db.execute(select(Addon))
+        addons = addons_result.scalars().all()
+        
+        print(f"Найдено {len(dishes)} блюд и {len(addons)} добавок")
+        
+        # Связываем каждое блюдо со всеми добавками
+        for dish in dishes:
+            # Очищаем существующие связи и добавляем новые
+            dish.addons.clear()
+            dish.addons.extend(addons)
+            print(f"  ✓ {dish.name} связано с {len(addons)} добавками")
 
     async def seed_promo_codes(self):
         """Создание промокодов."""
@@ -562,18 +670,28 @@ class DatabaseSeeder:
         ]
 
         for promo_data in promo_codes_data:
-            promo = PromoCode(
-                code=promo_data["code"],
-                name=promo_data["name"],
-                description=promo_data["description"],
-                discount_type=promo_data["discount_type"],
-                discount_value=promo_data["discount_value"],
-                min_order_amount=promo_data["min_order_amount"],
-                valid_until=promo_data["valid_until"],
-                is_active=True
+            # Проверяем, существует ли промокод с таким кодом
+            result = await self.db.execute(
+                select(PromoCode).where(PromoCode.code == promo_data["code"])
             )
-            self.db.add(promo)
-            print(f"  ✓ {promo_data['code']} - {promo_data['discount_value']}{'%' if promo_data['discount_type'] == DiscountType.PERCENTAGE else 'тг'}")
+            existing_promo = result.scalar_one_or_none()
+            
+            if existing_promo is None:
+                # Создаем новый промокод только если его еще нет
+                promo = PromoCode(
+                    code=promo_data["code"],
+                    name=promo_data["name"],
+                    description=promo_data["description"],
+                    discount_type=promo_data["discount_type"],
+                    discount_value=promo_data["discount_value"],
+                    min_order_amount=promo_data["min_order_amount"],
+                    valid_until=promo_data["valid_until"],
+                    is_active=True
+                )
+                self.db.add(promo)
+                print(f"  ✓ {promo_data['code']} - {promo_data['discount_value']}{'%' if promo_data['discount_type'] == DiscountType.PERCENTAGE else 'тг'}")
+            else:
+                print(f"  ⚠️ {promo_data['code']} - уже существует, пропускаем")
 
     async def seed_banners(self):
         """Создание баннеров."""
@@ -605,17 +723,26 @@ class DatabaseSeeder:
         ]
 
         for banner_data in banners_data:
-            banner = Banner(
-                title=banner_data["title"],
-                description=banner_data["description"],
-                image=banner_data["image"],
-                position=banner_data["position"],
-                sort_order=banner_data["sort_order"],
-                show_until=banner_data.get("show_until"),
-                is_active=True
+            # Проверяем, существует ли баннер с таким заголовком
+            result = await self.db.execute(
+                select(Banner).where(Banner.title == banner_data["title"])
             )
-            self.db.add(banner)
-            print(f"  ✓ {banner_data['title']}")
+            existing_banner = result.scalar_one_or_none()
+            
+            if existing_banner is None:
+                banner = Banner(
+                    title=banner_data["title"],
+                    description=banner_data["description"],
+                    image=banner_data["image"],
+                    position=banner_data["position"],
+                    sort_order=banner_data["sort_order"],
+                    show_until=banner_data.get("show_until"),
+                    is_active=True
+                )
+                self.db.add(banner)
+                print(f"  ✓ {banner_data['title']}")
+            else:
+                print(f"  ⚠️ {banner_data['title']} - уже существует, пропускаем")
 
 
 # Функция для запуска сидера

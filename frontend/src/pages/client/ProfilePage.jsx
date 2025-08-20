@@ -1,12 +1,484 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
+import { useAuth } from '../../contexts/AuthContext'
 import styles from './ProfilePage.module.css'
 
 function ProfilePage() {
+  const { user, logout, updateUser } = useAuth()
+  const [activeTab, setActiveTab] = useState('personal')
+  const [profileData, setProfileData] = useState({
+    name: '',
+    phone: '',
+    email: '',
+    address: '',
+    birth_day: '',
+    birth_month: '',
+    birth_year: '',
+    birth_date: ''
+  })
+  
+  const [editingBirthDate, setEditingBirthDate] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [isLoadingProfile, setIsLoadingProfile] = useState(true)
+
+  // Функция для загрузки профиля пользователя
+  const loadUserProfile = async () => {
+    if (!user) {
+      setIsLoadingProfile(false)
+      return
+    }
+
+    try {
+      setIsLoadingProfile(true)
+      const token = localStorage.getItem('auth_token')
+      
+      if (!token) {
+        console.log('Нет токена авторизации')
+        setIsLoadingProfile(false)
+        return
+      }
+
+      const response = await fetch('http://localhost:8000/api/v1/users/me/profile', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+
+      if (response.ok) {
+        const userData = await response.json()
+        console.log('Загружены данные пользователя:', userData)
+        
+        // Парсим дату рождения если она есть
+        let birth_day = '', birth_month = '', birth_year = ''
+        if (userData.birth_date) {
+          const date = new Date(userData.birth_date)
+          birth_day = date.getDate().toString()
+          birth_month = (date.getMonth() + 1).toString()
+          birth_year = date.getFullYear().toString()
+        }
+
+        setProfileData({
+          name: userData.name || '',
+          phone: userData.phone || '',
+          email: userData.email || '',
+          address: userData.address || '',
+          birth_day,
+          birth_month, 
+          birth_year,
+          birth_date: userData.birth_date || ''
+        })
+      } else {
+        const errorData = await response.json().catch(() => ({}))
+        console.error('Ошибка загрузки профиля:', response.status, errorData)
+        if (response.status === 401) {
+          alert('Сессия истекла. Необходимо войти в систему заново.')
+          logout && logout()
+        }
+      }
+    } catch (error) {
+      console.error('Ошибка при загрузке профиля:', error)
+      alert('Не удалось загрузить данные профиля. Проверьте подключение к серверу.')
+    } finally {
+      setIsLoadingProfile(false)
+    }
+  }
+
+  // Загружаем профиль при монтировании компонента и изменении пользователя
+  useEffect(() => {
+    loadUserProfile()
+  }, [user])
+
+  const handleInputChange = (e) => {
+    const { name, value, type, checked } = e.target
+    setProfileData(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value
+    }))
+    
+
+  }
+
+  const handleSaveProfile = async () => {
+    setIsLoading(true)
+    try {
+      const token = localStorage.getItem('auth_token')
+      
+      // Формируем дату рождения из компонентов
+      let birth_date = null
+      if (profileData.birth_year && profileData.birth_month && profileData.birth_day) {
+        const year = parseInt(profileData.birth_year)
+        const month = parseInt(profileData.birth_month)
+        const day = parseInt(profileData.birth_day)
+        birth_date = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`
+      }
+      
+      // Подготавливаем данные для отправки
+      const dataToSend = {
+        name: profileData.name,
+        email: profileData.email,
+        address: profileData.address
+      }
+      
+      // Добавляем дату рождения если она заполнена
+      if (birth_date) {
+        dataToSend.birth_date = birth_date
+      }
+
+      const response = await fetch('http://localhost:8000/api/v1/users/me/profile', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(dataToSend)
+      })
+
+      const responseData = await response.json()
+
+      if (response.ok) {
+        alert('Профиль успешно обновлен!')
+        console.log('Профиль обновлен:', responseData)
+        // Обновляем локальное состояние с данными от сервера
+        setProfileData(prev => ({
+          ...prev,
+          ...responseData
+        }))
+        // Обновляем AuthContext
+        updateUser(responseData)
+      } else {
+        alert(`Ошибка при обновлении профиля: ${responseData.detail || 'Неизвестная ошибка'}`)
+      }
+    } catch (error) {
+      console.error('Error updating profile:', error)
+      alert('Ошибка при обновлении профиля')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleSaveName = async () => {
+    if (!profileData.name.trim()) {
+      alert('Пожалуйста, введите имя')
+      return
+    }
+    
+    setIsLoading(true)
+    try {
+      const token = localStorage.getItem('auth_token')
+      
+      const response = await fetch('http://localhost:8000/api/v1/users/me/profile', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ name: profileData.name })
+      })
+
+      const responseData = await response.json()
+
+      if (response.ok) {
+        alert('Имя сохранено!')
+        console.log('Имя обновлено:', responseData)
+        // Обновляем локальное состояние данных пользователя
+        setProfileData(prev => ({ ...prev, name: responseData.name }))
+        // Обновляем AuthContext для отображения в хедере
+        updateUser({ name: responseData.name })
+      } else {
+        alert(`Ошибка при сохранении имени: ${responseData.detail || 'Неизвестная ошибка'}`)
+      }
+    } catch (error) {
+      console.error('Error saving name:', error)
+      alert('Ошибка при сохранении имени')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleEditBirthDate = () => {
+    setEditingBirthDate(true)
+  }
+
+  const handleSaveBirthDate = async () => {
+    if (!profileData.birth_year || !profileData.birth_month || !profileData.birth_day) {
+      alert('Пожалуйста, выберите полную дату рождения')
+      return
+    }
+    
+    setIsLoading(true)
+    try {
+      const token = localStorage.getItem('auth_token')
+      
+      // Формируем дату рождения
+      const year = parseInt(profileData.birth_year)
+      const month = parseInt(profileData.birth_month)
+      const day = parseInt(profileData.birth_day)
+      const birth_date = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`
+      
+      const response = await fetch('http://localhost:8000/api/v1/users/me/profile', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ birth_date })
+      })
+
+      const responseData = await response.json()
+
+      if (response.ok) {
+        alert('Дата рождения сохранена!')
+        console.log('Дата рождения обновлена:', responseData)
+        setProfileData(prev => ({ ...prev, birth_date: birth_date }))
+        setEditingBirthDate(false)
+        // Обновляем AuthContext
+        updateUser({ birth_date: birth_date })
+      } else {
+        alert(`Ошибка при сохранении даты: ${responseData.detail || 'Неизвестная ошибка'}`)
+      }
+    } catch (error) {
+      console.error('Error saving birth date:', error)
+      alert('Ошибка при сохранении даты рождения')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleCancelBirthDate = () => {
+    // Возвращаем исходные значения
+    const birthDate = profileData.birth_date
+    if (birthDate) {
+      const date = new Date(birthDate)
+      setProfileData(prev => ({
+        ...prev,
+        birth_day: date.getDate().toString(),
+        birth_month: (date.getMonth() + 1).toString(),
+        birth_year: date.getFullYear().toString()
+      }))
+    } else {
+      setProfileData(prev => ({
+        ...prev,
+        birth_day: '',
+        birth_month: '',
+        birth_year: ''
+      }))
+    }
+    setEditingBirthDate(false)
+  }
+
+  const handleSaveEmail = async () => {
+    if (!profileData.email || !profileData.email.trim()) {
+      alert('Пожалуйста, введите email')
+      return
+    }
+    
+    setIsLoading(true)
+    try {
+      const token = localStorage.getItem('auth_token')
+      
+      const response = await fetch('http://localhost:8000/api/v1/users/me/profile', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ email: profileData.email })
+      })
+
+      const responseData = await response.json()
+
+      if (response.ok) {
+        alert('Email сохранен!')
+        console.log('Email обновлен:', responseData)
+        setProfileData(prev => ({ ...prev, email: responseData.email }))
+        // Обновляем AuthContext
+        updateUser({ email: responseData.email })
+      } else {
+        alert(`Ошибка при сохранении email: ${responseData.detail || 'Неизвестная ошибка'}`)
+      }
+    } catch (error) {
+      console.error('Error saving email:', error)
+      alert('Ошибка при сохранении email')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+
+
+  // Если пользователь не авторизован
+  if (!user && !isLoadingProfile) {
+    return (
+      <div className={styles.profileContainer}>
+        <div className="container">
+          <div className={styles.loadingContainer}>
+            <h2>Необходима авторизация</h2>
+            <p>Для просмотра профиля необходимо войти в систему</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className={styles.profileContainer}>
       <div className="container">
-        <h1>Личный кабинет</h1>
-        <p>Профиль пользователя и история заказов</p>
+        <div className={styles.profileHeader}>
+          <div className={styles.headerLeft}>
+            <h1>Личный кабинет</h1>
+            <p>Профиль пользователя и история заказов</p>
+          </div>
+          <div className={styles.headerRight}>
+            <div className={styles.userInfo}>
+              <span className={styles.userName}>Клиент</span>
+              <span className={styles.userBadge}>
+                {isLoadingProfile ? 'Загрузка...' : (profileData.name || 'Пользователь')}
+              </span>
+              <button className={styles.logoutBtn} onClick={() => logout && logout()}>
+                Выйти
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div className={styles.profileContent}>
+          {isLoadingProfile ? (
+            <div className={styles.loadingContainer}>
+              <div className={styles.loadingSpinner}></div>
+              <p>Загрузка профиля...</p>
+            </div>
+          ) : (
+            <>
+          {/* Личные данные */}
+          <section className={styles.personalSection}>
+            <h2>Личные данные</h2>
+            
+            <div className={styles.formGrid}>
+              <div className={styles.formGroup}>
+                <label>Имя</label>
+                <input
+                  type="text"
+                  name="name"
+                  value={profileData.name}
+                  onChange={handleInputChange}
+                  placeholder="Введите имя"
+                  className={styles.formInput}
+                />
+                <button className={styles.changeBtn} onClick={handleSaveName} disabled={isLoading}>
+                  {isLoading ? 'Сохранение...' : 'Изменить'}
+                </button>
+              </div>
+
+              <div className={styles.formGroup}>
+                <label>Номер телефона</label>
+                <input
+                  type="tel"
+                  name="phone"
+                  value={profileData.phone}
+                  readOnly
+                  placeholder="Номер телефона"
+                  className={`${styles.formInput} ${styles.readOnlyInput}`}
+                />
+                <small className={styles.fieldNote}>Номер телефона нельзя изменить</small>
+              </div>
+
+              <div className={styles.formGroup}>
+                <label>Email</label>
+                <input
+                  type="email"
+                  name="email"
+                  value={profileData.email}
+                  onChange={handleInputChange}
+                  placeholder="Введите email"
+                  className={styles.formInput}
+                />
+                <button className={styles.changeBtn} onClick={handleSaveEmail} disabled={isLoading}>
+                  {isLoading ? 'Сохранение...' : 'Изменить'}
+                </button>
+              </div>
+
+              <div className={styles.formGroup}>
+                <label>Дата рождения</label>
+                {!editingBirthDate ? (
+                  <>
+                    <div className={styles.birthDateDisplay}>
+                      {profileData.birth_date ? 
+                        new Date(profileData.birth_date).toLocaleDateString('ru-RU') : 
+                        'Дата рождения не указана'
+                      }
+                    </div>
+                    <button className={styles.changeBtn} onClick={handleEditBirthDate}>
+                      Изменить
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <div className={styles.dateInputs}>
+                      <select 
+                        name="birth_day" 
+                        value={profileData.birth_day}
+                        className={styles.dateSelect}
+                        onChange={handleInputChange}
+                      >
+                        <option value="">День</option>
+                        {[...Array(31)].map((_, i) => (
+                          <option key={i + 1} value={i + 1}>{i + 1}</option>
+                        ))}
+                      </select>
+                      <select 
+                        name="birth_month" 
+                        value={profileData.birth_month}
+                        className={styles.dateSelect}
+                        onChange={handleInputChange}
+                      >
+                        <option value="">Месяц</option>
+                        {[...Array(12)].map((_, i) => (
+                          <option key={i + 1} value={i + 1}>{i + 1}</option>
+                        ))}
+                      </select>
+                      <select 
+                        name="birth_year" 
+                        value={profileData.birth_year}
+                        className={styles.dateSelect}
+                        onChange={handleInputChange}
+                      >
+                        <option value="">Год</option>
+                        {[...Array(50)].map((_, i) => {
+                          const year = new Date().getFullYear() - i
+                          return <option key={year} value={year}>{year}</option>
+                        })}
+                      </select>
+                    </div>
+                    <div className={styles.buttonGroup}>
+                      <button className={styles.saveBtn} onClick={handleSaveBirthDate} disabled={isLoading}>
+                        {isLoading ? 'Сохранение...' : 'Сохранить'}
+                      </button>
+                      <button className={styles.cancelBtn} onClick={handleCancelBirthDate} disabled={isLoading}>
+                        Отмена
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+
+
+            </div>
+          </section>
+
+
+
+          {/* История заказов */}
+          <section className={styles.orderSection}>
+            <h2>История заказов</h2>
+            <p>Последние 90 дней заказов не было</p>
+            <button className={styles.exitBtn} onClick={() => logout && logout()}>
+              Выйти
+            </button>
+          </section>
+            </>
+          )}
+        </div>
       </div>
     </div>
   )

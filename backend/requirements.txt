@@ -20,13 +20,14 @@ httpx==0.25.2
 email-validator==2.1.0
 python-dateutil==2.8.2
 
-# CORS (встроено в FastAPI, дополнительный пакет не нужен)
+# CORS (встроен в FastAPI)
 
 # Логирование
 loguru==0.7.2
 
 # Обработка изображений
 Pillow==10.4.0
+Pillow==10.1.0
 
 # SMS (заглушка для разработки)
 twilio==8.10.0

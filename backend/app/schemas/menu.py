@@ -13,11 +13,32 @@ class CategoryResponse(BaseModel):
     class Config:
         from_attributes = True
 
-class ModifierResponse(BaseModel):
+class VariantResponse(BaseModel):
     id: int
     name: str
-    price: Decimal = Field(description="Цена модификатора (может быть 0)")
-    is_required: bool = False
+    price: Decimal = Field(description="Цена варианта (может быть 0)")
+    is_default: bool = False
+    sort_order: int = 0
+
+    class Config:
+        from_attributes = True
+
+class VariantGroupResponse(BaseModel):
+    id: int
+    name: str
+    is_required: bool = True
+    is_multiple: bool = False
+    sort_order: int = 0
+    variants: List[VariantResponse] = []
+
+    class Config:
+        from_attributes = True
+
+class AddonResponse(BaseModel):
+    id: int
+    name: str
+    price: Decimal
+    category: Optional[str] = None
 
     class Config:
         from_attributes = True
@@ -46,7 +67,8 @@ class DishDetailResponse(BaseModel):
     category_name: str
     is_available: bool = True
     weight: Optional[str] = None
-    modifiers: List[ModifierResponse] = []
+    variant_groups: List[VariantGroupResponse] = []
+    addons: List[AddonResponse] = []
 
     class Config:
         from_attributes = True
@@ -61,6 +83,8 @@ class DishCreateRequest(BaseModel):
     is_available: bool = Field(True)
     is_popular: bool = Field(False)
     sort_order: int = Field(0)
+    addon_ids: Optional[List[int]] = Field(None, description="Список ID добавок для блюда")
+    variant_ids: Optional[List[int]] = Field(None, description="Список ID вариантов для блюда")
 
     @validator('name')
     def name_must_not_be_empty(cls, v):
@@ -78,3 +102,37 @@ class DishUpdateRequest(BaseModel):
     is_available: Optional[bool] = None
     is_popular: Optional[bool] = None
     sort_order: Optional[int] = None
+    addon_ids: Optional[List[int]] = Field(None, description="Список ID добавок для блюда")
+    variant_ids: Optional[List[int]] = Field(None, description="Список ID вариантов для блюда")
+
+# Схемы для добавок (Addons)
+
+class AddonCreateRequest(BaseModel):
+    name: str = Field(..., min_length=1, max_length=100)
+    price: Decimal = Field(..., ge=0)
+    category: Optional[str] = Field(None, max_length=50)
+
+    @validator('name')
+    def name_must_not_be_empty(cls, v):
+        if not v.strip():
+            raise ValueError('Название добавки не может быть пустым')
+        return v.strip()
+
+class AddonUpdateRequest(BaseModel):
+    name: Optional[str] = Field(None, min_length=1, max_length=100)
+    price: Optional[Decimal] = Field(None, ge=0)
+    category: Optional[str] = Field(None, max_length=50)
+
+# Схемы для вариантов
+class VariantCreateRequest(BaseModel):
+    name: str = Field(..., min_length=1, max_length=100)
+    price: Decimal = Field(0, ge=0)
+    group_id: int = Field(..., gt=0)
+    is_default: bool = False
+    sort_order: int = 0
+
+class VariantGroupCreateRequest(BaseModel):
+    name: str = Field(..., min_length=1, max_length=100)
+    is_required: bool = True
+    is_multiple: bool = False
+    sort_order: int = 0

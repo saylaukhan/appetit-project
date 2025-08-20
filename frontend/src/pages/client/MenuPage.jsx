@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { menuAPI } from '../../services/api'
 import { useCart } from '../../contexts/CartContext'
 import LoadingSpinner from '../../components/common/LoadingSpinner'
+import DishModal from '../../components/common/DishModal'
 import styles from './MenuPage.module.css'
 
 function MenuPage() {
@@ -16,6 +17,8 @@ function MenuPage() {
   const [sortBy, setSortBy] = useState('category') // 'alphabet', 'new', 'category'
   const [sortDropdownOpen, setSortDropdownOpen] = useState(false)
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 })
+  const [selectedDish, setSelectedDish] = useState(null)
+  const [dishModalOpen, setDishModalOpen] = useState(false)
   const { addItem, isInCart, getItemQuantity } = useCart()
 
   // Загрузка категорий при монтировании компонента
@@ -180,8 +183,18 @@ function MenuPage() {
     }
   }
 
-  const handleAddToCart = (dish) => {
-    addItem(dish)
+  const handleDishClick = (dish) => {
+    setSelectedDish(dish)
+    setDishModalOpen(true)
+  }
+
+  const handleAddToCart = (dish, modifiers = [], addons = [], quantity = 1) => {
+    addItem(dish, modifiers, addons, quantity)
+  }
+
+  const handleCloseDishModal = () => {
+    setDishModalOpen(false)
+    setSelectedDish(null)
   }
 
   const handleSortChange = (newSortBy) => {
@@ -441,7 +454,7 @@ function MenuPage() {
                       <DishCard 
                         key={dish.id} 
                         dish={dish} 
-                        onAddToCart={handleAddToCart}
+                        onAddToCart={handleDishClick}
                         isInCart={isInCart}
                         getItemQuantity={getItemQuantity}
                         formatPrice={formatPrice}
@@ -468,7 +481,7 @@ function MenuPage() {
                           <DishCard 
                             key={dish.id} 
                             dish={dish} 
-                            onAddToCart={handleAddToCart}
+                            onAddToCart={handleDishClick}
                             isInCart={isInCart}
                             getItemQuantity={getItemQuantity}
                             formatPrice={formatPrice}
@@ -488,6 +501,14 @@ function MenuPage() {
           )}
         </main>
       </div>
+
+      {/* Модальное окно выбора блюда */}
+      <DishModal
+        isOpen={dishModalOpen}
+        onClose={handleCloseDishModal}
+        dishId={selectedDish?.id}
+        onAddToCart={handleAddToCart}
+      />
     </div>
   )
 }
@@ -546,11 +567,11 @@ function DishCard({ dish, onAddToCart, isInCart, getItemQuantity, formatPrice, c
           
           <button
             onClick={() => onAddToCart(dish)}
-            className={`${styles.addToCartBtn} ${isInCart(dish.id) ? styles.inCart : ''}`}
+            className={`${styles.addToCartBtn} ${isInCart(dish.id, [], []) ? styles.inCart : ''}`}
             disabled={!dish.is_available}
           >
             {!dish.is_available ? 'Недоступно' :
-             isInCart(dish.id) ? `В корзине (${getItemQuantity(dish.id)})` : 'Добавить'}
+             isInCart(dish.id, [], []) ? `В корзине (${getItemQuantity(dish.id, [], [])})` : 'Добавить'}
           </button>
         </div>
       </div>

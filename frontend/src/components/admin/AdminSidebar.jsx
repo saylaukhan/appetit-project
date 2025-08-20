@@ -11,7 +11,8 @@ import {
   TrendingUp,
   LogOut,
   Home,
-  X
+  X,
+  Plus
 } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 import styles from './AdminSidebar.module.css'
@@ -36,6 +37,11 @@ function AdminSidebar({ isOpen = false, onClose = () => {} }) {
       path: '/admin/menu',
       icon: <ChefHat />,
       label: 'Меню'
+    },
+    {
+      path: '/admin/addons',
+      icon: <Plus />,
+      label: 'Добавки'
     },
     {
       path: '/admin/users',

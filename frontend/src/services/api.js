@@ -76,6 +76,14 @@ export const menuAPI = {
   updateDish: (dishId, dishData) => api.put(`/api/v1/menu/dishes/${dishId}`, dishData),
   deleteDish: (dishId) => api.delete(`/api/v1/menu/dishes/${dishId}`),
   toggleDishAvailability: (dishId) => api.patch(`/api/v1/menu/dishes/${dishId}/toggle-availability`),
+  
+  // Добавки
+  getAddons: (params = {}) => api.get('/api/v1/menu/addons', { params }),
+  getAddon: (addonId) => api.get(`/api/v1/menu/addons/${addonId}`),
+  createAddon: (addonData) => api.post('/api/v1/menu/addons', addonData),
+  updateAddon: (addonId, addonData) => api.put(`/api/v1/menu/addons/${addonId}`, addonData),
+  deleteAddon: (addonId) => api.delete(`/api/v1/menu/addons/${addonId}`),
+  toggleAddonActive: (addonId) => api.patch(`/api/v1/menu/addons/${addonId}/toggle-active`),
 }
 
 // Заказы
