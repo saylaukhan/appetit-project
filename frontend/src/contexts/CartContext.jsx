@@ -11,6 +11,7 @@ const initialState = {
   deliveryType: 'delivery', // 'delivery' или 'pickup'
   promoCode: null,
   discount: 0,
+  promoData: null,
 }
 
 // Reducer для управления корзиной
@@ -56,7 +57,7 @@ function cartReducer(state, action) {
       const newState = {
         ...state,
         items: newItems,
-        ...calculateTotals(newItems, state.discount)
+        ...(state.promoData ? calculateTotalsWithPromo(newItems, state.promoData) : calculateTotals(newItems, state.discount))
       }
 
       return newState
@@ -67,7 +68,7 @@ function cartReducer(state, action) {
       return {
         ...state,
         items: newItems,
-        ...calculateTotals(newItems, state.discount)
+        ...(state.promoData ? calculateTotalsWithPromo(newItems, state.promoData) : calculateTotals(newItems, state.discount))
       }
     }
 
@@ -85,7 +86,7 @@ function cartReducer(state, action) {
       return {
         ...state,
         items: newItems,
-        ...calculateTotals(newItems, state.discount)
+        ...(state.promoData ? calculateTotalsWithPromo(newItems, state.promoData) : calculateTotals(newItems, state.discount))
       }
     }
 
@@ -101,12 +102,13 @@ function cartReducer(state, action) {
       }
 
     case 'APPLY_PROMO_CODE': {
-      const { code, discount } = action.payload
+      const { code, discount, discountAmount, promoData } = action.payload
       const newState = {
         ...state,
         promoCode: code,
         discount,
-        ...calculateTotals(state.items, discount)
+        promoData,
+        ...calculateTotalsWithPromo(state.items, promoData)
       }
       return newState
     }
@@ -116,6 +118,7 @@ function cartReducer(state, action) {
         ...state,
         promoCode: null,
         discount: 0,
+        promoData: null,
         ...calculateTotals(state.items, 0)
       }
 
@@ -132,23 +135,47 @@ function generateItemId(dishId, modifiers, addons = []) {
 }
 
 function calculateItemPrice(basePrice, modifiers, addons = []) {
-  const modifiersPrice = modifiers.reduce((sum, modifier) => sum + (modifier.price || 0), 0)
-  const addonsPrice = addons.reduce((sum, addon) => sum + ((addon.price || 0) * (addon.quantity || 1)), 0)
-  return basePrice + modifiersPrice + addonsPrice
+  const modifiersPrice = modifiers.reduce((sum, modifier) => sum + (parseFloat(modifier.price) || 0), 0)
+  const addonsPrice = addons.reduce((sum, addon) => sum + ((parseFloat(addon.price) || 0) * (addon.quantity || 1)), 0)
+  const totalPrice = parseFloat(basePrice) + modifiersPrice + addonsPrice
+  return Math.round(totalPrice * 100) / 100 // Округляем до 2 знаков
 }
 
 function calculateTotals(items, discount = 0) {
   const itemsCount = items.reduce((sum, item) => sum + item.quantity, 0)
-  const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+  const subtotal = items.reduce((sum, item) => sum + (parseFloat(item.price) * item.quantity), 0)
   const discountAmount = subtotal * (discount / 100)
   const total = subtotal - discountAmount
 
   return {
     itemsCount,
-    subtotal,
+    subtotal: Math.round(subtotal * 100) / 100, // Округляем до 2 знаков
     discount,
-    discountAmount,
-    total: Math.max(0, total)
+    discountAmount: Math.round(discountAmount * 100) / 100,
+    total: Math.round(Math.max(0, total) * 100) / 100
+  }
+}
+
+function calculateTotalsWithPromo(items, promoData = null) {
+  const itemsCount = items.reduce((sum, item) => sum + item.quantity, 0)
+  const subtotal = items.reduce((sum, item) => sum + (parseFloat(item.price) * item.quantity), 0)
+  
+  let discountAmount = 0
+  let discount = 0
+  
+  if (promoData) {
+    discountAmount = parseFloat(promoData.discount_amount) || 0
+    discount = parseFloat(promoData.discount) || 0
+  }
+  
+  const total = Math.max(0, subtotal - discountAmount)
+
+  return {
+    itemsCount,
+    subtotal: Math.round(subtotal * 100) / 100,
+    discount,
+    discountAmount: Math.round(discountAmount * 100) / 100,
+    total: Math.round(total * 100) / 100
   }
 }
 
@@ -214,27 +241,45 @@ export function CartProvider({ children }) {
   // Применение промокода
   const applyPromoCode = async (code) => {
     try {
-      // Здесь будет API запрос для проверки промокода
-      const response = await fetch(`/api/v1/promo-codes/${code}`)
+      // Импортируем API
+      const { promoAPI } = await import('../services/api')
       
-      if (!response.ok) {
-        throw new Error('Промокод не найден или недействителен')
-      }
-
-      const promoData = await response.json()
+      // Рассчитываем текущую сумму заказа
+      const orderTotal = state.items.reduce((sum, item) => sum + (parseFloat(item.price) * item.quantity), 0)
+      
+      // API запрос для применения промокода (увеличивает счетчик)
+      const response = await promoAPI.applyPromo(code, orderTotal)
+      const promoData = response.data
       
       dispatch({
         type: 'APPLY_PROMO_CODE',
         payload: {
-          code,
-          discount: promoData.discount
+          code: promoData.code,
+          discount: promoData.discount,
+          discountAmount: promoData.discount_amount,
+          promoData: promoData
         }
       })
 
       toast.success(`Промокод применен! Скидка ${promoData.discount}%`)
       return true
     } catch (error) {
-      toast.error(error.message)
+      console.error('Ошибка промокода:', error)
+      
+      // Обработка различных типов ошибок
+      let errorMessage = 'Промокод не найден или недействителен'
+      
+      if (error.response?.data?.detail) {
+        if (typeof error.response.data.detail === 'string') {
+          errorMessage = error.response.data.detail
+        } else if (Array.isArray(error.response.data.detail)) {
+          errorMessage = error.response.data.detail[0]?.msg || 'Ошибка валидации'
+        }
+      } else if (error.message) {
+        errorMessage = error.message
+      }
+      
+      toast.error(errorMessage)
       return false
     }
   }

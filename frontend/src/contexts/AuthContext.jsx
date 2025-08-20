@@ -1,11 +1,6 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react'
+import { toast } from 'react-hot-toast'
 import api from '../services/api'
-
-// Простой toast для уведомлений
-const toast = {
-  success: (message) => console.log('SUCCESS:', message),
-  error: (message) => console.error('ERROR:', message)
-}
 
 const AuthContext = createContext()
 

@@ -1,0 +1,235 @@
+/* Delivery Selector Styles */
+.deliverySelector {
+  margin: var(--spacing-lg) 0;
+}
+
+.selectorTitle {
+  margin: 0 0 var(--spacing-md) 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.optionsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.deliveryOption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-md);
+  border: 2px solid var(--border-light);
+  border-radius: var(--radius-medium);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: var(--surface);
+}
+
+.deliveryOption:hover {
+  border-color: var(--primary-light);
+  background: var(--surface-hover);
+}
+
+.deliveryOption.selected {
+  border-color: var(--primary-color);
+  background: rgba(233, 74, 78, 0.05);
+}
+
+.hiddenRadio {
+  display: none;
+}
+
+.optionContent {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: var(--spacing-md);
+}
+
+.optionHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  flex: 1;
+}
+
+.optionIcon {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--background);
+  border-radius: var(--radius-medium);
+  color: var(--text-secondary);
+  transition: all 0.2s ease;
+}
+
+.deliveryOption.selected .optionIcon {
+  background: var(--primary-color);
+  color: var(--text-white);
+}
+
+.optionInfo {
+  flex: 1;
+}
+
+.optionTitle {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-xs);
+}
+
+.optionDescription {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.optionPrice {
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--text-primary);
+  margin-right: var(--spacing-sm);
+}
+
+.deliveryOption.selected .optionPrice {
+  color: var(--primary-color);
+}
+
+/* Radio Indicator */
+.radioIndicator {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--border-color);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.deliveryOption.selected .radioIndicator {
+  border-color: var(--primary-color);
+  background: var(--primary-color);
+}
+
+.radioInner {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--text-white);
+  opacity: 0;
+  transition: all 0.2s ease;
+}
+
+.deliveryOption.selected .radioInner {
+  opacity: 1;
+}
+
+/* Info Sections */
+.deliveryInfo,
+.pickupInfo {
+  margin-top: var(--spacing-md);
+}
+
+.deliveryNote,
+.pickupNote {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+  background: var(--background);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-medium);
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.deliveryNote svg,
+.pickupNote svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: var(--primary-color);
+}
+
+.deliveryNote strong,
+.pickupNote strong {
+  color: var(--text-primary);
+}
+
+/* Mobile Adaptivity */
+@media (max-width: 768px) {
+  .deliveryOption {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-md);
+  }
+
+  .optionContent {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-sm);
+  }
+
+  .optionHeader {
+    justify-content: flex-start;
+  }
+
+  .optionPrice {
+    text-align: center;
+    margin: 0;
+    font-size: 1.1rem;
+  }
+
+  .radioIndicator {
+    position: absolute;
+    top: var(--spacing-md);
+    right: var(--spacing-md);
+  }
+
+  .deliveryOption {
+    position: relative;
+    padding-right: calc(var(--spacing-md) + 30px);
+  }
+}
+
+@media (max-width: 480px) {
+  .deliverySelector {
+    margin: var(--spacing-md) 0;
+  }
+
+  .selectorTitle {
+    font-size: 1rem;
+  }
+
+  .deliveryOption {
+    padding: var(--spacing-md) var(--spacing-sm);
+  }
+
+  .optionIcon {
+    width: 36px;
+    height: 36px;
+  }
+
+  .optionTitle {
+    font-size: 0.95rem;
+  }
+
+  .optionDescription {
+    font-size: 0.85rem;
+  }
+
+  .deliveryNote,
+  .pickupNote {
+    padding: var(--spacing-sm);
+    font-size: 0.85rem;
+  }
+}

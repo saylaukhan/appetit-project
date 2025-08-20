@@ -63,3 +63,20 @@ def get_admin_or_kitchen(current_user: User = Depends(require_roles([UserRole.AD
 def get_admin_or_courier(current_user: User = Depends(require_roles([UserRole.ADMIN, UserRole.COURIER]))) -> User:
     """Получить администратора или курьера."""
     return current_user
+
+async def get_current_user_optional(
+    credentials: HTTPAuthorizationCredentials = Depends(HTTPBearer(auto_error=False)),
+    db: AsyncSession = Depends(get_db_session)
+) -> User | None:
+    """Получить текущего пользователя из токена (опционально, без ошибки если токен отсутствует)."""
+    if not credentials:
+        return None
+    
+    auth_service = AuthService(db)
+    try:
+        user = await auth_service.get_current_user(credentials.credentials)
+        if user and user.is_active:
+            return user
+        return None
+    except Exception:
+        return None

@@ -1,5 +1,6 @@
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, Enum as SQLEnum, Numeric
 from sqlalchemy.sql import func
+from sqlalchemy.orm import relationship
 from enum import Enum
 from app.core.database import Base
 
@@ -37,6 +38,9 @@ class PromoCode(Base):
     
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    
+    # Отношения
+    usages = relationship("PromoCodeUsage", back_populates="promo_code", cascade="all, delete-orphan")
 
     def __repr__(self):
         return f"<PromoCode(id={self.id}, code='{self.code}', discount={self.discount_value})>"

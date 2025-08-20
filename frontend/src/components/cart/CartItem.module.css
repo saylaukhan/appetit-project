@@ -1,0 +1,242 @@
+/* Cart Item Styles */
+.cartItem {
+  display: flex;
+  gap: var(--spacing-md);
+  padding: var(--spacing-lg);
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-medium);
+  transition: all 0.2s ease;
+}
+
+.cartItem:hover {
+  border-color: var(--primary-light);
+  box-shadow: var(--shadow-small);
+}
+
+/* Item Image */
+.itemImage {
+  flex-shrink: 0;
+  width: 80px;
+  height: 80px;
+  border-radius: var(--radius-medium);
+  overflow: hidden;
+  background: var(--background);
+}
+
+.itemImage img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.imagePlaceholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  background: var(--background);
+}
+
+/* Item Details */
+.itemDetails {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.itemHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.itemName {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.3;
+}
+
+.removeButton {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: var(--text-muted);
+  transition: all 0.2s ease;
+  margin-left: var(--spacing-sm);
+}
+
+.removeButton:hover {
+  color: var(--error);
+  background: rgba(225, 112, 85, 0.1);
+}
+
+/* Item Options */
+.itemOptions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.modifiers,
+.addons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+}
+
+.optionLabel {
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-right: var(--spacing-xs);
+}
+
+/* Item Footer */
+.itemFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+}
+
+/* Quantity Controls */
+.quantityControls {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  background: var(--background);
+  border-radius: var(--radius-medium);
+  padding: var(--spacing-xs);
+}
+
+.quantityButton {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  color: var(--text-primary);
+  transition: all 0.2s ease;
+}
+
+.quantityButton:hover:not(:disabled) {
+  background: var(--primary-color);
+  color: var(--text-white);
+  border-color: var(--primary-color);
+}
+
+.quantityButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.quantity {
+  min-width: 24px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--text-primary);
+}
+
+/* Price Info */
+.priceInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--spacing-xs);
+}
+
+.unitPrice {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.totalPrice {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--primary-color);
+}
+
+/* Mobile Adaptivity */
+@media (max-width: 768px) {
+  .cartItem {
+    padding: var(--spacing-md);
+    gap: var(--spacing-sm);
+  }
+
+  .itemImage {
+    width: 60px;
+    height: 60px;
+  }
+
+  .itemName {
+    font-size: 1rem;
+  }
+
+  .itemFooter {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-sm);
+  }
+
+  .priceInfo {
+    align-items: center;
+    flex-direction: row;
+    justify-content: space-between;
+  }
+
+  .quantityControls {
+    align-self: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .cartItem {
+    padding: var(--spacing-sm);
+    flex-direction: column;
+  }
+
+  .itemImage {
+    width: 100%;
+    height: 120px;
+    align-self: center;
+    max-width: 200px;
+  }
+
+  .itemHeader {
+    text-align: center;
+  }
+
+  .itemOptions {
+    text-align: center;
+  }
+
+  .itemFooter {
+    flex-direction: column;
+    gap: var(--spacing-md);
+  }
+
+  .priceInfo {
+    text-align: center;
+  }
+
+  .removeButton {
+    position: absolute;
+    top: var(--spacing-sm);
+    right: var(--spacing-sm);
+  }
+}

@@ -99,11 +99,11 @@ def create_application() -> FastAPI:
         ]
     )
     
-    # CORS настройки
+    # CORS настройки - исправленные для разработки
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=settings.ALLOWED_ORIGINS,
-        allow_credentials=True,
+        allow_origins=["*"],  # Разрешаем все источники для разработки
+        allow_credentials=False,  # При allow_origins=["*"] должно быть False
         allow_methods=["*"],
         allow_headers=["*"],
     )

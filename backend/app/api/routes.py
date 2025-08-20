@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.api.endpoints import auth, menu, orders, admin, courier, kitchen, analytics, marketing, users
+from app.api.endpoints import auth, menu, orders, admin, courier, kitchen, analytics, marketing, users, promo_codes
 
 # Главный роутер API
 api_router = APIRouter()
@@ -57,4 +57,10 @@ api_router.include_router(
     users.router, 
     prefix="/users", 
     tags=["users"]
+)
+
+api_router.include_router(
+    promo_codes.router, 
+    prefix="/promo-codes", 
+    tags=["promo-codes"]
 )

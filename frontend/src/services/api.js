@@ -97,11 +97,16 @@ export const ordersAPI = {
 
 // Промокоды
 export const promoAPI = {
-  validatePromo: (code) => api.post('/api/v1/promo-codes/validate', { code }),
+  validatePromo: (code, orderTotal = 0) => api.get(`/api/v1/promo-codes/${code}?order_total=${orderTotal}`),
+  applyPromo: (code, orderTotal) => {
+    const payload = { order_total: parseFloat(orderTotal) }
+    return api.post(`/api/v1/promo-codes/apply/${code}`, payload)
+  },
   getPromos: () => api.get('/api/v1/promo-codes'),
   createPromo: (promoData) => api.post('/api/v1/promo-codes', promoData),
   updatePromo: (promoId, promoData) => api.put(`/api/v1/promo-codes/${promoId}`, promoData),
   deletePromo: (promoId) => api.delete(`/api/v1/promo-codes/${promoId}`),
+  togglePromo: (promoId) => api.patch(`/api/v1/promo-codes/${promoId}/toggle`),
 }
 
 // Пользователи

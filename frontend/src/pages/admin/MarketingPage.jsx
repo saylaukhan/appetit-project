@@ -10,8 +10,10 @@ import {
   CheckCircle,
   AlertCircle
 } from 'lucide-react'
-import { marketingAPI } from '../../services/api'
+import { promoAPI } from '../../services/api'
+import { toast } from 'react-hot-toast'
 import LoadingSpinner from '../../components/common/LoadingSpinner'
+import PromoCodeModal from '../../components/admin/PromoCodeModal'
 import styles from './MarketingPage.module.css'
 
 function MarketingPage() {
@@ -19,6 +21,7 @@ function MarketingPage() {
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [showAddForm, setShowAddForm] = useState(false)
+  const [editingPromo, setEditingPromo] = useState(null)
 
   useEffect(() => {
     fetchPromoCodes()
@@ -27,72 +30,56 @@ function MarketingPage() {
   const fetchPromoCodes = async () => {
     try {
       setLoading(true)
-      // Моковые данные
-      setTimeout(() => {
-        const mockPromoCodes = [
-          {
-            id: 1,
-            code: 'WELCOME10',
-            name: 'Скидка для новых клиентов',
-            description: '10% скидка на первый заказ',
-            discountType: 'PERCENTAGE',
-            discountValue: 10,
-            minOrderAmount: 2000,
-            totalUsed: 156,
-            usageLimit: null,
-            validUntil: '2025-12-31T23:59:59Z',
-            isActive: true
-          },
-          {
-            id: 2,
-            code: 'PIZZA20',
-            name: 'Скидка на пиццу',
-            description: '20% скидка на любую пиццу',
-            discountType: 'PERCENTAGE',
-            discountValue: 20,
-            minOrderAmount: 2500,
-            totalUsed: 89,
-            usageLimit: 500,
-            validUntil: '2025-02-15T23:59:59Z',
-            isActive: true
-          },
-          {
-            id: 3,
-            code: 'DELIVERY500',
-            name: 'Бесплатная доставка',
-            description: '500 тг скидка на доставку',
-            discountType: 'FIXED',
-            discountValue: 500,
-            minOrderAmount: 1500,
-            totalUsed: 234,
-            usageLimit: 1000,
-            validUntil: '2025-03-01T23:59:59Z',
-            isActive: false
-          }
-        ]
-        
-        setPromoCodes(mockPromoCodes)
-        setLoading(false)
-      }, 1000)
+      const response = await promoAPI.getPromos()
+      setPromoCodes(response.data || [])
     } catch (error) {
       console.error('Ошибка загрузки промокодов:', error)
+      toast.error('Ошибка загрузки промокодов')
+      setPromoCodes([])
+    } finally {
       setLoading(false)
     }
   }
 
   const copyPromoCode = (code) => {
     navigator.clipboard.writeText(code)
+    toast.success('Промокод скопирован!')
+  }
+
+  const handleCreateSuccess = () => {
+    fetchPromoCodes()
+    setShowAddForm(false)
+    setEditingPromo(null)
+  }
+
+  const handleEdit = (promo) => {
+    setEditingPromo(promo)
+    setShowAddForm(true)
   }
 
   const togglePromoCodeStatus = async (id, currentStatus) => {
-    setPromoCodes(prev => prev.map(code => 
-      code.id === id ? { ...code, isActive: !currentStatus } : code
-    ))
+    try {
+      await promoAPI.togglePromo(id)
+      setPromoCodes(prev => prev.map(code => 
+        code.id === id ? { ...code, is_active: !currentStatus } : code
+      ))
+      toast.success('Статус промокода изменен')
+    } catch (error) {
+      toast.error('Ошибка при изменении статуса')
+      console.error('Ошибка toggle:', error)
+    }
   }
 
   const deletePromoCode = async (id) => {
     if (window.confirm('Вы уверены, что хотите удалить этот промокод?')) {
-      setPromoCodes(prev => prev.filter(code => code.id !== id))
+      try {
+        await promoAPI.deletePromo(id)
+        setPromoCodes(prev => prev.filter(code => code.id !== id))
+        toast.success('Промокод удален')
+      } catch (error) {
+        toast.error('Ошибка при удалении')
+        console.error('Ошибка delete:', error)
+      }
     }
   }
 
@@ -102,7 +89,7 @@ function MarketingPage() {
   }
 
   const getDiscountText = (type, value) => {
-    return type === 'PERCENTAGE' ? `${value}%` : `${value}₸`
+    return type === 'percentage' ? `${value}%` : `${value}₸`
   }
 
   const getUsageText = (used, limit) => {
@@ -162,8 +149,8 @@ function MarketingPage() {
                   <Copy size={14} />
                 </button>
               </div>
-              <div className={`${styles.promoCodeStatus} ${code.isActive ? styles.active : styles.inactive}`}>
-                {code.isActive ? (
+              <div className={`${styles.promoCodeStatus} ${code.is_active ? styles.active : styles.inactive}`}>
+                {code.is_active ? (
                   <>
                     <CheckCircle size={14} />
                     Активен
@@ -184,24 +171,24 @@ function MarketingPage() {
               <div className={styles.promoCodeDetails}>
                 <div className={styles.detailRow}>
                   <span>Скидка:</span>
-                  <span>{getDiscountText(code.discountType, code.discountValue)}</span>
+                  <span>{getDiscountText(code.discount_type, code.discount_value)}</span>
                 </div>
                 
-                {code.minOrderAmount && (
+                {code.min_order_amount && (
                   <div className={styles.detailRow}>
                     <span>Мин. заказ:</span>
-                    <span>{code.minOrderAmount}₸</span>
+                    <span>{code.min_order_amount}₸</span>
                   </div>
                 )}
                 
                 <div className={styles.detailRow}>
                   <span>Использований:</span>
-                  <span>{getUsageText(code.totalUsed, code.usageLimit)}</span>
+                  <span>{getUsageText(code.total_used, code.usage_limit)}</span>
                 </div>
                 
                 <div className={styles.detailRow}>
                   <span>Действует до:</span>
-                  <span>{formatDate(code.validUntil)}</span>
+                  <span>{formatDate(code.valid_until)}</span>
                 </div>
               </div>
             </div>
@@ -209,16 +196,16 @@ function MarketingPage() {
             <div className={styles.promoCodeActions}>
               <button 
                 className={styles.actionButton}
-                onClick={() => console.log('Редактировать', code.id)}
+                onClick={() => handleEdit(code)}
               >
                 <Edit3 size={16} />
               </button>
               
               <button 
-                className={`${styles.actionButton} ${code.isActive ? styles.disableButton : styles.enableButton}`}
-                onClick={() => togglePromoCodeStatus(code.id, code.isActive)}
+                className={`${styles.actionButton} ${code.is_active ? styles.disableButton : styles.enableButton}`}
+                onClick={() => togglePromoCodeStatus(code.id, code.is_active)}
               >
-                {code.isActive ? '⏸' : '▶'}
+                {code.is_active ? '⏸' : '▶'}
               </button>
               
               <button 
@@ -239,6 +226,17 @@ function MarketingPage() {
           <p>Создайте первый промокод для своих клиентов</p>
         </div>
       )}
+      
+      {/* Модальное окно создания/редактирования промокода */}
+      <PromoCodeModal
+        isOpen={showAddForm}
+        onClose={() => {
+          setShowAddForm(false)
+          setEditingPromo(null)
+        }}
+        onSuccess={handleCreateSuccess}
+        editingPromo={editingPromo}
+      />
     </div>
   )
 }
