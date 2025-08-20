@@ -101,7 +101,7 @@
   align-items: center;
   gap: var(--spacing-sm);
   padding: var(--spacing-md) var(--spacing-lg);
-  background: var(--primary-color);
+  background: #e74c3c;
   color: var(--text-white);
   border: none;
   border-radius: var(--radius-medium);
@@ -111,7 +111,7 @@
 }
 
 .addButton:hover {
-  background: var(--primary-dark);
+  background: #c0392b;
 }
 
 /* Filters */

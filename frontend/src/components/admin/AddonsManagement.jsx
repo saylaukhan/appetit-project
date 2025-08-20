@@ -82,13 +82,15 @@ const AddonsManagement = () => {
     } else {
       // Добавление новой добавки
       setAddons(prev => [...prev, savedAddon])
-      
-      // Обновляем список категорий если добавилась новая
-      if (savedAddon.category && !categories.includes(savedAddon.category)) {
-        setCategories(prev => [...prev, savedAddon.category])
-      }
     }
+    
+    // Обновляем список категорий если добавилась новая
+    if (savedAddon.category && !categories.includes(savedAddon.category)) {
+      setCategories(prev => [...prev, savedAddon.category])
+    }
+    
     setShowModal(false)
+    setEditingAddon(null)
   }
 
   // Фильтрация добавок
@@ -250,7 +252,10 @@ const AddonsManagement = () => {
       {/* Модальное окно для создания/редактирования добавки */}
       <AddAddonModal
         isOpen={showModal}
-        onClose={() => setShowModal(false)}
+        onClose={() => {
+          setShowModal(false)
+          setEditingAddon(null)
+        }}
         onAddonSaved={handleAddonSaved}
         editingAddon={editingAddon}
         existingCategories={categories}

@@ -69,8 +69,9 @@ const AddAddonModal = ({ isOpen, onClose, onAddonSaved, editingAddon = null, exi
       newErrors.name = 'Название обязательно'
     }
 
-    if (!formData.price || parseFloat(formData.price) < 0) {
-      newErrors.price = 'Цена должна быть больше или равна 0'
+    const price = parseFloat(formData.price)
+    if (!formData.price || isNaN(price) || price < 0) {
+      newErrors.price = 'Цена должна быть числом больше или равным 0'
     }
 
     setErrors(newErrors)
@@ -93,29 +94,20 @@ const AddAddonModal = ({ isOpen, onClose, onAddonSaved, editingAddon = null, exi
       }
 
       // Отправляем на сервер
-      try {
-        let response
-        if (isEditMode) {
-          // Обновляем существующую добавку
-          response = await menuAPI.updateAddon(editingAddon.id, addonData)
-        } else {
-          // Создаем новую добавку
-          response = await menuAPI.createAddon(addonData)
-        }
-        
-        onAddonSaved(response.data)
-      } catch (apiError) {
-        console.error('Ошибка при сохранении добавки:', apiError)
-        setErrors({ submit: `Ошибка при ${isEditMode ? 'обновлении' : 'создании'} добавки. Попробуйте еще раз.` })
-        setIsSubmitting(false)
-        return
+      let response
+      if (isEditMode) {
+        // Обновляем существующую добавку
+        response = await menuAPI.updateAddon(editingAddon.id, addonData)
+      } else {
+        // Создаем новую добавку
+        response = await menuAPI.createAddon(addonData)
       }
       
-      // Закрываем модал
+      onAddonSaved(response.data)
       onClose()
 
     } catch (error) {
-      console.error('Ошибка создания добавки:', error)
+      console.error('Ошибка при сохранении добавки:', error)
       
       if (error.response?.data?.detail) {
         if (typeof error.response.data.detail === 'string') {
@@ -131,7 +123,7 @@ const AddAddonModal = ({ isOpen, onClose, onAddonSaved, editingAddon = null, exi
           setErrors(validationErrors)
         }
       } else {
-        setErrors({ submit: 'Произошла ошибка при создании добавки' })
+        setErrors({ submit: `Ошибка при ${isEditMode ? 'обновлении' : 'создании'} добавки. Попробуйте еще раз.` })
       }
     } finally {
       setIsSubmitting(false)
@@ -253,10 +245,10 @@ const AddAddonModal = ({ isOpen, onClose, onAddonSaved, editingAddon = null, exi
             <button
               type="submit"
               className={styles.submitButton}
-              disabled={isSubmitting || uploadingImage}
+              disabled={isSubmitting}
             >
               {isSubmitting 
-                ? (uploadingImage ? 'Загружается изображение...' : (isEditMode ? 'Сохранение...' : 'Создание...'))
+                ? (isEditMode ? 'Сохранение...' : 'Создание...')
                 : (isEditMode ? 'Сохранить изменения' : 'Создать добавку')
               }
             </button>

@@ -302,12 +302,12 @@
 }
 
 .submitButton {
-  background: #3b82f6;
+  background: #e74c3c;
   color: white;
 }
 
 .submitButton:hover {
-  background: #2563eb;
+  background: #c0392b;
 }
 
 .cancelButton:disabled,
@@ -317,7 +317,7 @@
 }
 
 .submitButton:disabled:hover {
-  background: #3b82f6;
+  background: #e74c3c;
 }
 
 /* Адаптивность */
@@ -371,13 +371,13 @@
 }
 
 .addonOption:hover {
-  border-color: #ff6b35;
+  border-color: #e94a4e;
   background: #fef7f3;
 }
 
 .addonOption.selected {
-  border-color: #ff6b35;
-  background: #ff6b35;
+  border-color: #e94a4e;
+  background: #e94a4e;
   color: white;
 }
 

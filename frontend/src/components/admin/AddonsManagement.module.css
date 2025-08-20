@@ -19,7 +19,7 @@
 }
 
 .addButton {
-  background: #ff6b35;
+  background: #e74c3c;
   color: white;
   border: none;
   border-radius: 8px;
@@ -34,7 +34,7 @@
 }
 
 .addButton:hover {
-  background: #e55a2b;
+  background: #c0392b;
 }
 
 /* Фильтры */
@@ -69,7 +69,7 @@
 }
 
 .searchInput:focus {
-  border-color: #ff6b35;
+  border-color: #e94a4e;
 }
 
 .categoryFilter {
@@ -84,7 +84,7 @@
 }
 
 .categoryFilter:focus {
-  border-color: #ff6b35;
+  border-color: #e94a4e;
 }
 
 /* Статистика */
@@ -296,12 +296,12 @@
 }
 
 .deleteButton {
-  border-color: #ef4444;
-  color: #ef4444;
+  border-color: #e94a4e;
+  color: #e94a4e;
 }
 
 .deleteButton:hover {
-  background: #ef4444;
+  background: #e94a4e;
   color: white;
 }
 

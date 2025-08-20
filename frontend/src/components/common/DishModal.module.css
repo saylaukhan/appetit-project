@@ -233,7 +233,7 @@
 }
 
 .addButton {
-  background: #e94a4e;
+  background: #e74c3c;
   border: none;
   border-radius: 8px;
   width: 32px;
@@ -247,7 +247,7 @@
 }
 
 .addButton:hover {
-  background: #d63a3e;
+  background: #c0392b;
 }
 
 .quantityControls {
@@ -347,7 +347,7 @@
 }
 
 .addToCartButton:hover {
-  background: #d63a3e;
+  background: #b91c1c;
 }
 
 /* Адаптивность */

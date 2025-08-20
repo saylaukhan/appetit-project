@@ -154,6 +154,14 @@ class MenuService:
                     select(Addon).where(Addon.id.in_(dish_data.addon_ids))
                 )
                 addons = addons_result.scalars().all()
+                # Проверяем, что все добавки найдены
+                found_addon_ids = [addon.id for addon in addons]
+                missing_addon_ids = set(dish_data.addon_ids) - set(found_addon_ids)
+                if missing_addon_ids:
+                    raise HTTPException(
+                        status_code=status.HTTP_404_NOT_FOUND,
+                        detail=f"Добавки с ID {list(missing_addon_ids)} не найдены"
+                    )
                 new_dish.addons = list(addons)
             
             # Связываем с вариантами если указаны
@@ -162,23 +170,44 @@ class MenuService:
                     select(Variant).where(Variant.id.in_(dish_data.variant_ids))
                 )
                 variants = variants_result.scalars().all()
+                # Проверяем, что все варианты найдены
+                found_variant_ids = [variant.id for variant in variants]
+                missing_variant_ids = set(dish_data.variant_ids) - set(found_variant_ids)
+                if missing_variant_ids:
+                    raise HTTPException(
+                        status_code=status.HTTP_404_NOT_FOUND,
+                        detail=f"Варианты с ID {list(missing_variant_ids)} не найдены"
+                    )
                 new_dish.variants = list(variants)
             
             await self.db.commit()
             await self.db.refresh(new_dish)
             return new_dish
-        except IntegrityError:
+        except IntegrityError as e:
             await self.db.rollback()
+            print(f"IntegrityError при создании блюда: {e}")
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Ошибка при создании блюда. Проверьте данные."
             )
+        except Exception as e:
+            await self.db.rollback()
+            print(f"Неожиданная ошибка при создании блюда: {e}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"В��утренняя ошибка сервера: {str(e)}"
+            )
 
     async def update_dish(self, dish_id: int, dish_data: DishUpdateRequest) -> Optional[Dish]:
         """Обновление блюда."""
-        # Получаем блюдо
+        # Получаем блюдо с его связями
         result = await self.db.execute(
-            select(Dish).where(Dish.id == dish_id)
+            select(Dish)
+            .options(
+                selectinload(Dish.addons),
+                selectinload(Dish.variants)
+            )
+            .where(Dish.id == dish_id)
         )
         dish = result.scalar_one_or_none()
         if not dish:
@@ -204,13 +233,21 @@ class MenuService:
         for field, value in update_data.items():
             setattr(dish, field, value)
 
-        # Обновляем связи с добавками если указаны
+        # Обновляем с��язи с добавками если указаны
         if addon_ids is not None:
             if addon_ids:
                 addons_result = await self.db.execute(
                     select(Addon).where(Addon.id.in_(addon_ids))
                 )
                 addons = addons_result.scalars().all()
+                # Проверяем, что все добавки найдены
+                found_addon_ids = [addon.id for addon in addons]
+                missing_addon_ids = set(addon_ids) - set(found_addon_ids)
+                if missing_addon_ids:
+                    raise HTTPException(
+                        status_code=status.HTTP_404_NOT_FOUND,
+                        detail=f"Добавки с ID {list(missing_addon_ids)} не найдены"
+                    )
                 dish.addons = list(addons)
             else:
                 dish.addons = []
@@ -222,6 +259,14 @@ class MenuService:
                     select(Variant).where(Variant.id.in_(variant_ids))
                 )
                 variants = variants_result.scalars().all()
+                # Проверяем, что все варианты найдены
+                found_variant_ids = [variant.id for variant in variants]
+                missing_variant_ids = set(variant_ids) - set(found_variant_ids)
+                if missing_variant_ids:
+                    raise HTTPException(
+                        status_code=status.HTTP_404_NOT_FOUND,
+                        detail=f"Варианты с ID {list(missing_variant_ids)} не найдены"
+                    )
                 dish.variants = list(variants)
             else:
                 dish.variants = []
@@ -230,11 +275,19 @@ class MenuService:
             await self.db.commit()
             await self.db.refresh(dish)
             return dish
-        except IntegrityError:
+        except IntegrityError as e:
             await self.db.rollback()
+            print(f"IntegrityError при обновлении блюда: {e}")
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Ошибка при обновлении блюда. Проверьте данные."
+            )
+        except Exception as e:
+            await self.db.rollback()
+            print(f"Неожиданная ошибка при обновлении блюда: {e}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Внутренняя ошибка сервера: {str(e)}"
             )
 
     async def delete_dish(self, dish_id: int) -> bool:
