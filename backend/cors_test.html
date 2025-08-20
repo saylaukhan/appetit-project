@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CORS Test for Promo Codes</title>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; }
+        button { padding: 10px 15px; margin: 5px; }
+        pre { background: #f5f5f5; padding: 10px; border-radius: 4px; max-height: 200px; overflow-y: auto; }
+        .success { color: green; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <h1>CORS Test for Promo Codes API</h1>
+
+    <div class="section">
+        <h2>Health Check</h2>
+        <button onclick="healthCheck()">Test Health</button>
+        <pre id="healthResult"></pre>
+    </div>
+
+    <div class="section">
+        <h2>Get All Promo Codes</h2>
+        <button onclick="getPromoCodes()">Get Promo Codes</button>
+        <pre id="promoCodesResult"></pre>
+    </div>
+
+    <div class="section">
+        <h2>Validate WELCOME10 (order_total: 2500)</h2>
+        <button onclick="validatePromoCode()">Validate WELCOME10</button>
+        <pre id="validateResult"></pre>
+    </div>
+
+    <div class="section">
+        <h2>Apply WELCOME10 (order_total: 2500)</h2>
+        <button onclick="applyPromoCode()">Apply WELCOME10</button>
+        <pre id="applyResult"></pre>
+    </div>
+
+    <div class="section">
+        <h2>Apply WELCOME10 (order_total: 1500) - Should Fail</h2>
+        <button onclick="applyPromoCodeFail()">Apply WELCOME10 (Low Amount)</button>
+        <pre id="applyFailResult"></pre>
+    </div>
+
+    <div class="section">
+        <h2>Errors</h2>
+        <pre id="errors"></pre>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8000/api/v1';
+
+        async function healthCheck() {
+            try {
+                document.getElementById('errors').textContent = '';
+                const response = await axios.get(`${API_BASE.replace('/api/v1', '')}/health`);
+                document.getElementById('healthResult').textContent = JSON.stringify(response.data, null, 2);
+            } catch (error) {
+                document.getElementById('healthResult').textContent = `Error: ${error.message}`;
+                document.getElementById('errors').textContent += `Health Check Error: ${error.message}\n`;
+            }
+        }
+
+        async function getPromoCodes() {
+            try {
+                document.getElementById('errors').textContent = '';
+                const response = await axios.get(`${API_BASE}/promo-codes/`);
+                document.getElementById('promoCodesResult').textContent = JSON.stringify(response.data, null, 2);
+            } catch (error) {
+                document.getElementById('promoCodesResult').textContent = `Error: ${error.message}`;
+                document.getElementById('errors').textContent += `Get Promo Codes Error: ${error.message}\n`;
+            }
+        }
+
+        async function validatePromoCode() {
+            try {
+                document.getElementById('errors').textContent = '';
+                const response = await axios.get(`${API_BASE}/promo-codes/WELCOME10?order_total=2500`);
+                document.getElementById('validateResult').textContent = JSON.stringify(response.data, null, 2);
+            } catch (error) {
+                document.getElementById('validateResult').textContent = `Error: ${error.message}`;
+                document.getElementById('errors').textContent += `Validate Promo Code Error: ${error.message}\n`;
+            }
+        }
+
+        async function applyPromoCode() {
+            try {
+                document.getElementById('errors').textContent = '';
+                const response = await axios.post(`${API_BASE}/promo-codes/apply/WELCOME10`, {
+                    order_total: 2500
+                });
+                document.getElementById('applyResult').textContent = JSON.stringify(response.data, null, 2);
+            } catch (error) {
+                document.getElementById('applyResult').textContent = `Error: ${error.message}`;
+                document.getElementById('errors').textContent += `Apply Promo Code Error: ${error.message}\n`;
+            }
+        }
+
+        async function applyPromoCodeFail() {
+            try {
+                document.getElementById('errors').textContent = '';
+                const response = await axios.post(`${API_BASE}/promo-codes/apply/WELCOME10`, {
+                    order_total: 1500
+                });
+                document.getElementById('applyFailResult').textContent = JSON.stringify(response.data, null, 2);
+            } catch (error) {
+                document.getElementById('applyFailResult').textContent = `Error: ${error.response?.data?.detail || error.message}`;
+                document.getElementById('errors').textContent += `Apply Promo Code Fail Error: ${error.message}\n`;
+            }
+        }
+
+        // Auto-test health on page load
+        window.addEventListener('load', () => {
+            setTimeout(healthCheck, 1000);
+        });
+    </script>
+</body>
+</html>

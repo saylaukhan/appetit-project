@@ -56,6 +56,8 @@ async def validate_promo_code(
 ):
     """Валидация промокода и возврат информации о скидке."""
     try:
+        print(f"Validating promo code: {code}, order_total: {order_total}")
+
         # Поиск промокода
         query = select(PromoCode).where(
             PromoCode.code == code.upper(),
@@ -64,8 +66,12 @@ async def validate_promo_code(
         result = await db.execute(query)
         promo_code = result.scalar_one_or_none()
 
+        print(f"Found promo code: {promo_code}")
+
         if not promo_code:
             raise HTTPException(status_code=404, detail="Промокод не найден")
+
+        print(f"Promo code details - discount_type: {promo_code.discount_type}, discount_value: {promo_code.discount_value}")
 
         # Проверка временных ограничений
         now = datetime.now()
@@ -87,8 +93,11 @@ async def validate_promo_code(
                 detail=f"Минимальная сумма заказа для промокода: {promo_code.min_order_amount} ₸"
             )
 
+        print(f"Min order amount check passed: {promo_code.min_order_amount} <= {order_total}")
+
         # Проверка лимита на пользователя
         if current_user and promo_code.usage_limit_per_user:
+            print(f"Checking user usage limit for user: {current_user.id if current_user else None}")
             user_usage_query = select(func.count(PromoCodeUsage.id)).where(
                 PromoCodeUsage.promo_code_id == promo_code.id,
                 PromoCodeUsage.user_id == current_user.id,
@@ -103,19 +112,23 @@ async def validate_promo_code(
                     detail=f"Вы уже использовали этот промокод максимальное количество раз ({promo_code.usage_limit_per_user})"
                 )
 
+        print(f"User usage check passed")
+
         # Расчет скидки
         if promo_code.discount_type == DiscountType.PERCENTAGE:
-            discount_amount = order_total * (promo_code.discount_value / 100)
+            discount_amount = order_total * (float(promo_code.discount_value) / 100)
             # Применяем максимальную сумму скидки если установлена
             if promo_code.max_discount_amount:
-                discount_amount = min(discount_amount, promo_code.max_discount_amount)
+                discount_amount = min(discount_amount, float(promo_code.max_discount_amount))
         else:  # FIXED
-            discount_amount = min(promo_code.discount_value, order_total)
+            discount_amount = min(float(promo_code.discount_value), order_total)
+
+        print(f"Discount calculation: {discount_amount}")
 
         # Исправляем сериализацию discount_type
         discount_type_value = promo_code.discount_type.value if hasattr(promo_code.discount_type, 'value') else str(promo_code.discount_type)
 
-        return {
+        response_data = {
             "code": promo_code.code,
             "name": promo_code.name,
             "description": promo_code.description,
@@ -130,6 +143,9 @@ async def validate_promo_code(
             "valid_from": promo_code.valid_from,
             "valid_until": promo_code.valid_until
         }
+
+        print(f"Returning response data: {response_data}")
+        return response_data
     except Exception as e:
         print(f"Error in validate_promo_code: {e}")
         import traceback
