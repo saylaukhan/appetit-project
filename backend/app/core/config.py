@@ -1,11 +1,14 @@
 from pydantic_settings import BaseSettings
 from typing import List
+from dotenv import load_dotenv
 import os
+
+# Загружаем переменные окружения перед определением класса
+load_dotenv()
 
 
 class Settings(BaseSettings):
     """Настройки приложения."""
-    
     # Основные настройки
     APP_NAME: str = "APPETIT API"
     VERSION: str = "1.0.0"
@@ -26,15 +29,15 @@ class Settings(BaseSettings):
         "https://appetit.kz",
     ]
     
-    # SMS настройки (Twilio) - DEPRECATED
-    TWILIO_ACCOUNT_SID: str = "your_twilio_account_sid"
-    TWILIO_AUTH_TOKEN: str = "your_twilio_auth_token"
-    TWILIO_PHONE_NUMBER: str = "your_twilio_phone_number"
-    SMS_ENABLED: bool = False  # Отключено для разработки
+    # SMS настройки (Twilio)
+    TWILIO_ACCOUNT_SID: str = os.getenv("TWILIO_ACCOUNT_SID", "your_twilio_account_sid")
+    TWILIO_AUTH_TOKEN: str = os.getenv("TWILIO_AUTH_TOKEN", "your_twilio_auth_token")
+    TWILIO_PHONE_NUMBER: str = os.getenv("TWILIO_PHONE_NUMBER", "your_twilio_phone_number")
+    SMS_ENABLED: bool = os.getenv("SMS_ENABLED", "false").lower() == "true"
     
     # Telegram Bot настройки
-    TELEGRAM_BOT_TOKEN: str = "your_telegram_bot_token"  # Получить от @BotFather
-    TELEGRAM_BOT_USERNAME: str = "your_bot_username"  # Без @, например: appetit_bot
+    TELEGRAM_BOT_TOKEN: str = os.getenv("TELEGRAM_BOT_TOKEN", "")
+    TELEGRAM_BOT_USERNAME: str = os.getenv("TELEGRAM_BOT_USERNAME", "")
     
     # Firebase настройки
     FIREBASE_CREDENTIALS_PATH: str = "config/firebase-credentials.json"

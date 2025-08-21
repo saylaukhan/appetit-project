@@ -11,5 +11,12 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     sourcemap: false
+  },
+  server: {
+
+    allowedHosts: [
+      'f93ddae4f6a8.ngrok-free.app'
+    ]
   }
+
 })

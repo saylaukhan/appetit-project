@@ -1,10 +1,17 @@
 import React, { useEffect } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
+import useAuthConfig from '../../hooks/useAuthConfig'
 
-const TelegramLoginWidget = ({ botUsername = "appetit_bot", className = "" }) => {
+const TelegramLoginWidget = ({ className = "" }) => {
   const { telegramAuth } = useAuth()
+  const { telegram_bot_username, telegram_enabled, loading } = useAuthConfig()
 
   useEffect(() => {
+    // Ждем загрузки конфигурации
+    if (loading || !telegram_enabled || !telegram_bot_username) {
+      return
+    }
+
     // Создаем уникальный callback для этого виджета
     const callbackName = `telegramLoginCallback_${Date.now()}`
     
@@ -21,7 +28,7 @@ const TelegramLoginWidget = ({ botUsername = "appetit_bot", className = "" }) =>
     // Загружаем Telegram Widget Script
     const script = document.createElement('script')
     script.src = 'https://telegram.org/js/telegram-widget.js?22'
-    script.setAttribute('data-telegram-login', botUsername)
+    script.setAttribute('data-telegram-login', telegram_bot_username)
     script.setAttribute('data-size', 'large')
     script.setAttribute('data-onauth', callbackName)
     script.setAttribute('data-request-access', 'write')
@@ -43,7 +50,38 @@ const TelegramLoginWidget = ({ botUsername = "appetit_bot", className = "" }) =>
         container.innerHTML = ''
       }
     }
-  }, [botUsername, telegramAuth])
+  }, [telegram_bot_username, telegram_enabled, loading, telegramAuth])
+
+  if (loading) {
+    return (
+      <div className={className}>
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: '50px'
+        }}>
+          Загрузка...
+        </div>
+      </div>
+    )
+  }
+
+  if (!telegram_enabled) {
+    return (
+      <div className={className}>
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: '50px',
+          color: '#666'
+        }}>
+          Авторизация через Telegram временно недоступна
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className={className}>

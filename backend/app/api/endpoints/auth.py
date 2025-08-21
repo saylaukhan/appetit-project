@@ -55,6 +55,16 @@ async def telegram_auth(
     auth_service = AuthService(db)
     return await auth_service.telegram_auth(request)
 
+@router.get("/config")
+async def get_auth_config():
+    """Получить конфигурацию авторизации (публичная информация)."""
+    from app.core.config import settings
+    return {
+        "telegram_bot_username": settings.TELEGRAM_BOT_USERNAME,
+        "sms_enabled": settings.SMS_ENABLED,
+        "telegram_enabled": bool(settings.TELEGRAM_BOT_TOKEN and settings.TELEGRAM_BOT_USERNAME)
+    }
+
 @router.get("/me")
 async def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(security),
