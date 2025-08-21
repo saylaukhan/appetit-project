@@ -60,8 +60,6 @@ api.interceptors.response.use(
 export const authAPI = {
   login: (phone, password) => api.post('/api/v1/auth/login', { phone, password }),
   register: (phone, name, password) => api.post('/api/v1/auth/register', { phone, name, password }),
-  requestSMS: (phone) => api.post('/api/v1/auth/request-sms', { phone }),
-  verifySMS: (phone, code) => api.post('/api/v1/auth/verify-sms', { phone, code }),
   refreshToken: () => api.post('/api/v1/auth/refresh'),
   me: () => api.get('/api/v1/auth/me'),
 }

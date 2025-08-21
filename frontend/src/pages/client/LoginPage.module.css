@@ -255,14 +255,7 @@
   cursor: not-allowed;
 }
 
-/* SMS Code Input Special Styling */
-.loginCard form input[name="smsCode"] {
-  text-align: center;
-  font-size: 1.5rem;
-  font-weight: 700;
-  letter-spacing: 0.5em;
-  padding-left: var(--spacing-md);
-}
+
 
 /* Animations */
 @keyframes spin {
@@ -415,72 +408,7 @@
   text-decoration: underline;
 }
 
-/* SMS авторизация */
-.smsSection {
-  margin: var(--spacing-xl) 0;
-}
 
-.smsToggleButton {
-  width: 100%;
-  padding: var(--spacing-md) var(--spacing-lg);
-  background: linear-gradient(135deg, var(--accent-color), var(--accent-dark));
-  color: var(--text-white);
-  border: none;
-  border-radius: var(--radius-medium);
-  font-size: 1.1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--spacing-sm);
-}
-
-.smsToggleButton:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(76, 175, 80, 0.3);
-}
-
-.smsToggleButton:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-  transform: none;
-}
-
-.smsForm {
-  background: var(--background);
-  padding: var(--spacing-xl);
-  border-radius: var(--radius-medium);
-  border: 1px solid var(--border-color);
-}
-
-.smsForm .inputGroup {
-  margin-bottom: var(--spacing-lg);
-}
-
-.smsForm .inputGroup label {
-  display: block;
-  margin-bottom: var(--spacing-sm);
-  color: var(--text-primary);
-  font-weight: 500;
-}
-
-.smsForm .inputGroup input {
-  width: 100%;
-  padding: var(--spacing-md);
-  border: 2px solid var(--border-color);
-  border-radius: var(--radius-medium);
-  font-size: 1rem;
-  transition: border-color 0.3s ease;
-  background: var(--surface);
-  color: var(--text-primary);
-}
-
-.smsForm .inputGroup input:focus {
-  outline: none;
-  border-color: var(--accent-color);
-}
 
 .backButton {
   width: 100%;

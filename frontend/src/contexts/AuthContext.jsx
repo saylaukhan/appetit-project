@@ -153,47 +153,7 @@ export function AuthProvider({ children }) {
     }
   }
 
-  // Запрос SMS кода
-  const requestSMS = async (phone) => {
-    try {
-      await api.post('/api/v1/auth/request-sms', { phone })
-      toast.success('SMS код отправлен')
-      return true
-    } catch (error) {
-      const message = error.response?.data?.detail || 'Ошибка отправки SMS'
-      toast.error(message)
-      return false
-    }
-  }
 
-  // Подтверждение SMS кода
-  const verifySMS = async (phone, code) => {
-    try {
-      const response = await api.post('/api/v1/auth/verify-sms', {
-        phone,
-        code
-      })
-
-      const { access_token, user } = response.data
-
-      localStorage.setItem('auth_token', access_token)
-      localStorage.setItem('auth_user', JSON.stringify(user))
-
-      // Токен устанавливается автоматически через interceptor
-
-      dispatch({
-        type: 'LOGIN_SUCCESS',
-        payload: { token: access_token, user }
-      })
-
-      toast.success('Номер телефона подтвержден!')
-      return true
-    } catch (error) {
-      const message = error.response?.data?.detail || 'Неверный код'
-      toast.error(message)
-      return false
-    }
-  }
 
   // Авторизация через Telegram
   const telegramAuth = async (telegramData) => {
@@ -262,8 +222,6 @@ export function AuthProvider({ children }) {
     ...state,
     login,
     register,
-    requestSMS,
-    verifySMS,
     telegramAuth,
     logout,
     updateUser,

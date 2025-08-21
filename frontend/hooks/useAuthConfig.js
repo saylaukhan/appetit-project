@@ -7,7 +7,6 @@ import api from '../services/api'
 export const useAuthConfig = () => {
   const [config, setConfig] = useState({
     telegram_bot_username: 'AppetitAuthBot', // fallback
-    sms_enabled: false,
     telegram_enabled: true,
     loading: true,
     error: null

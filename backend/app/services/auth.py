@@ -7,8 +7,7 @@ from datetime import datetime, timedelta
 from app.models.user import User
 from app.schemas.auth import LoginRequest, RegisterRequest, TelegramAuthRequest
 from app.core.config import settings
-import secrets
-import string
+
 import hashlib
 import hmac
 
@@ -131,59 +130,7 @@ class AuthService:
             }
         }
 
-    def generate_sms_code(self) -> str:
-        """Генерация SMS кода."""
-        return ''.join(secrets.choice(string.digits) for _ in range(6))
 
-    async def request_sms(self, phone: str):
-        """Запрос SMS кода."""
-        # В реальном проекте здесь будет отправка SMS через Twilio
-        sms_code = self.generate_sms_code()
-        
-        # Логирование кода для разработки
-        print(f"SMS код для {phone}: {sms_code}")
-        
-        # Сохранение кода в базе (если пользователь существует)
-        user = await self.get_user_by_phone(phone)
-        if user:
-            user.sms_code = sms_code
-            user.sms_code_expires = datetime.utcnow() + timedelta(minutes=10)
-            await self.db.commit()
-        
-        return {"message": "SMS код отправлен"}
-
-    async def verify_sms(self, phone: str, code: str):
-        """Подтверждение SMS кода."""
-        user = await self.get_user_by_phone(phone)
-        if not user:
-            raise HTTPException(status_code=404, detail="Пользователь не найден")
-        
-        if user.sms_code != code:
-            raise HTTPException(status_code=400, detail="Неверный код")
-        
-        if user.sms_code_expires < datetime.utcnow():
-            raise HTTPException(status_code=400, detail="Код истек")
-        
-        # Подтверждение пользователя
-        user.is_verified = True
-        user.sms_code = None
-        user.sms_code_expires = None
-        await self.db.commit()
-        
-        # Возвращение токена
-        access_token = self.create_access_token(data={"sub": str(user.id)})
-        
-        return {
-            "access_token": access_token,
-            "token_type": "bearer",
-            "user": {
-                "id": user.id,
-                "phone": user.phone,
-                "name": user.name,
-                "role": user.role,
-                "is_active": user.is_active
-            }
-        }
 
     async def get_current_user(self, token: str) -> User:
         """Получение текущего пользователя по токену."""
@@ -204,7 +151,10 @@ class AuthService:
 
     def verify_telegram_auth(self, auth_data: dict) -> bool:
         """Проверка подлинности данных от Telegram Login Widget"""
-        if not settings.TELEGRAM_BOT_TOKEN:
+        # Очищаем токен от кавычек
+        bot_token = settings.TELEGRAM_BOT_TOKEN.strip().strip('"').strip("'") if settings.TELEGRAM_BOT_TOKEN else ""
+        
+        if not bot_token or bot_token in ["your_bot_token_here", "your_telegram_bot_token"]:
             raise HTTPException(
                 status_code=500,
                 detail="Telegram Bot Token не настроен"
@@ -217,7 +167,7 @@ class AuthService:
         data_check_string = '\n'.join([f'{k}={v}' for k, v in sorted(auth_data.items())])
         
         # Создаем секретный ключ из токена бота
-        secret_key = hashlib.sha256(settings.TELEGRAM_BOT_TOKEN.encode()).digest()
+        secret_key = hashlib.sha256(bot_token.encode()).digest()
         
         # Вычисляем хеш
         computed_hash = hmac.new(secret_key, data_check_string.encode(), hashlib.sha256).hexdigest()

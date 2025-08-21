@@ -28,15 +28,7 @@ class RegisterRequest(BaseModel):
             raise ValueError('Неверный формат номера телефона. Используйте +7XXXXXXXXXX')
         return v
 
-class SMSRequest(BaseModel):
-    phone: str = Field(..., description="Номер телефона в формате +7XXXXXXXXXX")
 
-    @validator('phone')
-    def validate_phone(cls, v):
-        phone_pattern = r'^\+7\d{10}$'
-        if not re.match(phone_pattern, v):
-            raise ValueError('Неверный формат номера телефона. Используйте +7XXXXXXXXXX')
-        return v
 
 class TokenResponse(BaseModel):
     access_token: str

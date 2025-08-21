@@ -4,7 +4,23 @@ from dotenv import load_dotenv
 import os
 
 # Загружаем переменные окружения перед определением класса
-load_dotenv()
+# Ищем .env файл в разных местах
+import pathlib
+current_dir = pathlib.Path(__file__).parent
+project_root = current_dir.parent.parent.parent
+env_paths = [
+    current_dir / ".env",  # backend/app/core/.env
+    project_root / "backend" / ".env",  # backend/.env
+    project_root / ".env"  # корень проекта
+]
+
+for env_path in env_paths:
+    if env_path.exists():
+        load_dotenv(env_path)
+        break
+else:
+    # Если .env не найден, загружаем из системных переменных
+    load_dotenv()
 
 
 class Settings(BaseSettings):
@@ -29,11 +45,7 @@ class Settings(BaseSettings):
         "https://appetit.kz",
     ]
     
-    # SMS настройки (Twilio)
-    TWILIO_ACCOUNT_SID: str = os.getenv("TWILIO_ACCOUNT_SID", "your_twilio_account_sid")
-    TWILIO_AUTH_TOKEN: str = os.getenv("TWILIO_AUTH_TOKEN", "your_twilio_auth_token")
-    TWILIO_PHONE_NUMBER: str = os.getenv("TWILIO_PHONE_NUMBER", "your_twilio_phone_number")
-    SMS_ENABLED: bool = os.getenv("SMS_ENABLED", "false").lower() == "true"
+
     
     # Telegram Bot настройки
     TELEGRAM_BOT_TOKEN: str = os.getenv("TELEGRAM_BOT_TOKEN", "")

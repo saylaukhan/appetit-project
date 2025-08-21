@@ -41,9 +41,7 @@ class User(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     last_login = Column(DateTime(timezone=True), nullable=True)
     
-    # SMS верификация - DEPRECATED
-    sms_code = Column(String(6), nullable=True)
-    sms_code_expires = Column(DateTime, nullable=True)
+
     
     # Telegram авторизация
     telegram_id = Column(String(50), unique=True, nullable=True, index=True)
