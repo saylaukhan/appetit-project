@@ -195,6 +195,36 @@ export function AuthProvider({ children }) {
     }
   }
 
+  // Авторизация через Telegram
+  const telegramAuth = async (telegramData) => {
+    try {
+      dispatch({ type: 'LOGIN_START' })
+
+      const response = await api.post('/api/v1/auth/telegram', telegramData)
+
+      const { access_token, user } = response.data
+
+      // Сохранение в localStorage
+      localStorage.setItem('auth_token', access_token)
+      localStorage.setItem('auth_user', JSON.stringify(user))
+
+      // Токен устанавливается автоматически через interceptor
+
+      dispatch({
+        type: 'LOGIN_SUCCESS',
+        payload: { token: access_token, user }
+      })
+
+      toast.success('Добро пожаловать!')
+      return true
+    } catch (error) {
+      dispatch({ type: 'LOGIN_ERROR' })
+      const message = error.response?.data?.detail || 'Ошибка авторизации через Telegram'
+      toast.error(message)
+      return false
+    }
+  }
+
   // Выход из системы
   const logout = () => {
     localStorage.removeItem('auth_token')
@@ -234,6 +264,7 @@ export function AuthProvider({ children }) {
     register,
     requestSMS,
     verifySMS,
+    telegramAuth,
     logout,
     updateUser,
     hasRole,

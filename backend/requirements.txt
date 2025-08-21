@@ -21,13 +21,14 @@ email-validator==2.1.0
 python-dateutil==2.8.2
 
 # CORS (встроен в FastAPI)
+aiosqlite==0.21.0
+greenlet
 
 # Логирование
 loguru==0.7.2
 
 # Обработка изображений
 Pillow==10.4.0
-Pillow==10.1.0
 
 # SMS (заглушка для разработки)
 twilio==8.10.0

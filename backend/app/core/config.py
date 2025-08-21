@@ -26,11 +26,15 @@ class Settings(BaseSettings):
         "https://appetit.kz",
     ]
     
-    # SMS настройки (Twilio)
+    # SMS настройки (Twilio) - DEPRECATED
     TWILIO_ACCOUNT_SID: str = "your_twilio_account_sid"
     TWILIO_AUTH_TOKEN: str = "your_twilio_auth_token"
     TWILIO_PHONE_NUMBER: str = "your_twilio_phone_number"
     SMS_ENABLED: bool = False  # Отключено для разработки
+    
+    # Telegram Bot настройки
+    TELEGRAM_BOT_TOKEN: str = "your_telegram_bot_token"  # Получить от @BotFather
+    TELEGRAM_BOT_USERNAME: str = "your_bot_username"  # Без @, например: appetit_bot
     
     # Firebase настройки
     FIREBASE_CREDENTIALS_PATH: str = "config/firebase-credentials.json"

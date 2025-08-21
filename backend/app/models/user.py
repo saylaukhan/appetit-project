@@ -41,9 +41,16 @@ class User(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     last_login = Column(DateTime(timezone=True), nullable=True)
     
-    # SMS верификация
+    # SMS верификация - DEPRECATED
     sms_code = Column(String(6), nullable=True)
     sms_code_expires = Column(DateTime, nullable=True)
+    
+    # Telegram авторизация
+    telegram_id = Column(String(50), unique=True, nullable=True, index=True)
+    telegram_username = Column(String(100), nullable=True)
+    telegram_first_name = Column(String(100), nullable=True)
+    telegram_last_name = Column(String(100), nullable=True)
+    telegram_photo_url = Column(String(500), nullable=True)
 
     def __repr__(self):
         return f"<User(id={self.id}, phone='{self.phone}', role='{self.role}')>"

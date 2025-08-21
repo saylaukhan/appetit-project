@@ -336,6 +336,85 @@
   }
 }
 
+/* Telegram Section */
+.telegramSection {
+  margin: var(--spacing-xl) 0;
+  text-align: center;
+}
+
+.telegramWidget {
+  margin: var(--spacing-lg) 0;
+  display: flex;
+  justify-content: center;
+}
+
+.telegramDescription {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin-top: var(--spacing-md);
+  margin-bottom: 0;
+}
+
+/* Divider */
+.divider {
+  margin: var(--spacing-xl) 0;
+  text-align: center;
+  position: relative;
+}
+
+.divider::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--border-light);
+}
+
+.divider span {
+  background: var(--surface);
+  color: var(--text-secondary);
+  padding: 0 var(--spacing-md);
+  font-size: 0.85rem;
+  position: relative;
+}
+
+/* Bot Setup Info */
+.botSetupInfo {
+  margin-top: var(--spacing-xl);
+  padding: var(--spacing-lg);
+  background: var(--background);
+  border-radius: var(--radius-medium);
+  border-left: 4px solid var(--accent-color);
+}
+
+.setupTitle {
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: var(--spacing-sm);
+}
+
+.setupDescription {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.botFatherLink {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.2s ease;
+}
+
+.botFatherLink:hover {
+  color: var(--primary-dark);
+  text-decoration: underline;
+}
+
 /* Dark mode support */
 @media (prefers-color-scheme: dark) {
   .loginContainer {
