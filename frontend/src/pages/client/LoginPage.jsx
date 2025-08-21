@@ -1,15 +1,13 @@
 import React, { useState } from 'react'
 import { Link, Navigate, useLocation } from 'react-router-dom'
-import { Phone, Lock, User, AlertCircle, Loader, MessageCircle } from 'lucide-react'
+import { Phone, Lock, User, AlertCircle, Loader } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
-import TelegramAuth from '../../components/auth/TelegramAuth'
 import styles from './LoginPage.module.css'
 
 function LoginPage() {
   const [isLogin, setIsLogin] = useState(true)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [authMethod, setAuthMethod] = useState('standard') // 'standard' or 'telegram'
   const [formData, setFormData] = useState({
     phone: '',
     password: '',
@@ -72,7 +70,7 @@ function LoginPage() {
         // Вход в систему
         const success = await login(formData.phone, formData.password)
         if (!success) {
-          setError('Неверный номер телефона или п��роль')
+          setError('Неверный номер телефона или пароль')
         }
       } else {
         // Регистрация - сначала запрашиваем SMS
@@ -131,22 +129,11 @@ function LoginPage() {
     setSmsStep(false)
     setSmsCode('')
     setError('')
-    setAuthMethod('standard')
   }
 
   const toggleMode = () => {
     setIsLogin(!isLogin)
     resetForm()
-  }
-
-  const handleTelegramSuccess = () => {
-    // Успешная авторизация через Telegram - пользователь будет перенаправлен автоматически
-    // благодаря проверке isAuthenticated в начале компонента
-  }
-
-  const handleTelegramCancel = () => {
-    setAuthMethod('standard')
-    setError('')
   }
 
   // Быстрый вход для тестирования
@@ -166,20 +153,6 @@ function LoginPage() {
       setError('Ошибка входа в тестовый аккаунт')
     }
     setLoading(false)
-  }
-
-  // Если выбран Telegram метод авторизации
-  if (authMethod === 'telegram') {
-    return (
-      <div className={styles.loginContainer}>
-        <div className={styles.loginCard}>
-          <TelegramAuth 
-            onSuccess={handleTelegramSuccess}
-            onCancel={handleTelegramCancel}
-          />
-        </div>
-      </div>
-    )
   }
 
   if (smsStep) {
@@ -263,21 +236,6 @@ function LoginPage() {
           </div>
         )}
 
-        {/* Кнопка авторизации через Telegram */}
-        <div className={styles.telegramSection}>
-          <button 
-            onClick={() => setAuthMethod('telegram')}
-            className={styles.telegramButton}
-            disabled={loading}
-          >
-            <MessageCircle size={20} />
-            Войти через Telegram
-          </button>
-          <div className={styles.divider}>
-            <span>или</span>
-          </div>
-        </div>
-
         <form onSubmit={handleSubmit}>
           <div className={styles.inputGroup}>
             <label htmlFor="phone">Номер телефона</label>
@@ -346,7 +304,7 @@ function LoginPage() {
                   name="confirmPassword"
                   value={formData.confirmPassword}
                   onChange={handleInputChange}
-                  placeholder="Повторите паро��ь"
+                  placeholder="Повторите пароль"
                   required
                   className={styles.input}
                   autoComplete="new-password"

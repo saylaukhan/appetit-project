@@ -5,9 +5,8 @@ from jose import JWTError, jwt
 from fastapi import HTTPException, status
 from datetime import datetime, timedelta
 from app.models.user import User
-from app.schemas.auth import LoginRequest, RegisterRequest, TelegramAuthRequest, TelegramVerifyRequest
+from app.schemas.auth import LoginRequest, RegisterRequest
 from app.core.config import settings
-from app.services.telegram import telegram_service
 import secrets
 import string
 
@@ -193,114 +192,3 @@ class AuthService:
             select(User).where(User.id == int(user_id))
         )
         return result.scalar_one_or_none()
-
-    async def request_telegram_auth(self, request: TelegramAuthRequest):
-        """Запрос авторизации через Telegram."""
-        try:
-            result = await telegram_service.request_telegram_code(request.phone)
-            
-            if not result['success']:
-                raise HTTPException(
-                    status_code=400,
-                    detail=result['error']
-                )
-            
-            return {
-                "message": result['message'],
-                "phone_code_hash": result.get('phone_code_hash'),
-                "dev_mode": result.get('dev_mode', False),
-                "dev_code": result.get('dev_code')  # Только для разработки
-            }
-            
-        except Exception as e:
-            raise HTTPException(
-                status_code=500,
-                detail=f"Ошибка при запросе Telegram авторизации: {str(e)}"
-            )
-
-    async def verify_telegram_auth(self, request: TelegramVerifyRequest):
-        """Подтверждение авторизации через Telegram."""
-        try:
-            # Проверка код�� через Telegram API
-            result = await telegram_service.verify_telegram_code(
-                request.phone, 
-                request.code, 
-                request.phone_code_hash
-            )
-            
-            if not result['success']:
-                raise HTTPException(
-                    status_code=400,
-                    detail=result['error']
-                )
-            
-            # Поиск существующего пользователя
-            user = await self.get_user_by_phone(request.phone)
-            
-            if not user:
-                # Создание нового пользователя, если не существует
-                if not request.name:
-                    raise HTTPException(
-                        status_code=400,
-                        detail="Для новых пользователей требуется указать имя"
-                    )
-                
-                # Создаем пользователя без пароля (авторизация только через Telegram)
-                user = User(
-                    phone=request.phone,
-                    name=request.name,
-                    hashed_password=self.get_password_hash(secrets.token_urlsafe(32)),  # Случайный пароль
-                    is_verified=True  # Сразу подтверждаем, так как прошел через Telegram
-                )
-                
-                self.db.add(user)
-                await self.db.commit()
-                await self.db.refresh(user)
-            else:
-                # Подтверждение существующего пользователя
-                user.is_verified = True
-                await self.db.commit()
-            
-            # Создание токена
-            access_token = self.create_access_token(data={"sub": str(user.id)})
-            
-            return {
-                "access_token": access_token,
-                "token_type": "bearer",
-                "user": {
-                    "id": user.id,
-                    "phone": user.phone,
-                    "name": user.name,
-                    "role": user.role,
-                    "is_active": user.is_active,
-                    "is_verified": user.is_verified
-                },
-                "auth_method": "telegram"
-            }
-            
-        except HTTPException:
-            raise
-        except Exception as e:
-            raise HTTPException(
-                status_code=500,
-                detail=f"Ошибка при подтверждении Telegram авторизации: {str(e)}"
-            )
-
-    async def create_user_telegram(self, phone: str, name: str) -> User:
-        """Создание пользователя через Telegram авторизацию."""
-        # Генерируем случайный пароль для пользователей, зарегистрированных через Telegram
-        random_password = secrets.token_urlsafe(32)
-        hashed_password = self.get_password_hash(random_password)
-        
-        db_user = User(
-            phone=phone,
-            name=name,
-            hashed_password=hashed_password,
-            is_verified=True  # Сразу подтверждаем через Telegram
-        )
-        
-        self.db.add(db_user)
-        await self.db.commit()
-        await self.db.refresh(db_user)
-        
-        return db_user

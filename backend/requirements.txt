@@ -27,12 +27,10 @@ loguru==0.7.2
 
 # Обработка изображений
 Pillow==10.4.0
+Pillow==10.1.0
 
 # SMS (заглушка для разработки)
 twilio==8.10.0
-
-# Telegram API
-telethon==1.36.0
 
 # Push уведомления
 firebase-admin==6.4.0

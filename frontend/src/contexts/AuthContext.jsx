@@ -132,7 +132,7 @@ export function AuthProvider({ children }) {
 
       const { access_token, user } = response.data
 
-      // Сохранени�� в localStorage
+      // Сохранение в localStorage
       localStorage.setItem('auth_token', access_token)
       localStorage.setItem('auth_user', JSON.stringify(user))
 
@@ -195,61 +195,6 @@ export function AuthProvider({ children }) {
     }
   }
 
-  // Запрос кода через Telegram
-  const requestTelegramCode = async (phone) => {
-    try {
-      const response = await api.post('/api/v1/auth/telegram/request-code', { phone })
-      
-      if (response.data.dev_mode) {
-        toast.success(`Код отправлен через Telegram. Код для разработки: ${response.data.dev_code}`)
-      } else {
-        toast.success('Код отправлен через Telegram')
-      }
-      
-      return {
-        success: true,
-        phone_code_hash: response.data.phone_code_hash,
-        dev_code: response.data.dev_code
-      }
-    } catch (error) {
-      const message = error.response?.data?.detail || 'Ошибка отправки кода через Telegram'
-      toast.error(message)
-      return { success: false, error: message }
-    }
-  }
-
-  // Подтверждение кода из Telegram
-  const verifyTelegramCode = async (phone, code, phoneCodeHash, name = null) => {
-    try {
-      dispatch({ type: 'LOGIN_START' })
-
-      const response = await api.post('/api/v1/auth/telegram/verify', {
-        phone,
-        code,
-        phone_code_hash: phoneCodeHash,
-        name
-      })
-
-      const { access_token, user } = response.data
-
-      localStorage.setItem('auth_token', access_token)
-      localStorage.setItem('auth_user', JSON.stringify(user))
-
-      dispatch({
-        type: 'LOGIN_SUCCESS',
-        payload: { token: access_token, user }
-      })
-
-      toast.success('Авторизация через Telegram успешна!')
-      return true
-    } catch (error) {
-      dispatch({ type: 'LOGIN_ERROR' })
-      const message = error.response?.data?.detail || 'Ошибка подтверждения кода'
-      toast.error(message)
-      return false
-    }
-  }
-
   // Выход из системы
   const logout = () => {
     localStorage.removeItem('auth_token')
@@ -289,8 +234,6 @@ export function AuthProvider({ children }) {
     register,
     requestSMS,
     verifySMS,
-    requestTelegramCode,
-    verifyTelegramCode,
     logout,
     updateUser,
     hasRole,
