@@ -63,6 +63,16 @@ class AuthService:
         
         return db_user
 
+    async def update_user_telegram_id(self, phone: str, telegram_id: int) -> User:
+        """Обновление telegram_id пользователя после успешной авторизации через Telegram."""
+        user = await self.get_user_by_phone(phone)
+        if user:
+            user.telegram_id = telegram_id
+            await self.db.commit()
+            await self.db.refresh(user)
+            return user
+        return None
+
     async def authenticate_user(self, phone: str, password: str) -> User:
         """Аутентификация пользователя."""
         user = await self.get_user_by_phone(phone)
@@ -234,6 +244,11 @@ class AuthService:
                     detail=result['error']
                 )
             
+            # Получение telegram_id из результата авторизации
+            telegram_id = None
+            if 'user_info' in result and result['user_info'].get('telegram_id'):
+                telegram_id = result['user_info']['telegram_id']
+            
             # Поиск существующего пользователя
             user = await self.get_user_by_phone(request.phone)
             
@@ -250,15 +265,18 @@ class AuthService:
                     phone=request.phone,
                     name=request.name,
                     hashed_password=self.get_password_hash(secrets.token_urlsafe(32)),  # Случайный пароль
-                    is_verified=True  # Сразу подтверждаем, так как прошел через Telegram
+                    is_verified=True,  # Сразу подтверждаем, так как прошел через Telegram
+                    telegram_id=telegram_id  # Сохраняем telegram_id
                 )
                 
                 self.db.add(user)
                 await self.db.commit()
                 await self.db.refresh(user)
             else:
-                # Подтверждение существующего пользователя
+                # Подтверждение существующего пользователя и обновление telegram_id
                 user.is_verified = True
+                if telegram_id:
+                    user.telegram_id = telegram_id
                 await self.db.commit()
             
             # Создание токена

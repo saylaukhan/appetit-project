@@ -12,7 +12,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from app.core.database import create_db_and_tables
 from app.models.user import User
-from app.models.menu import Category, Dish, DishModifier
+from app.models.menu import Category, Dish, Variant, VariantGroup, Addon
 from app.models.order import Order, OrderItem
 from app.models.banner import Banner
 from app.models.promo_code import PromoCode
@@ -29,7 +29,9 @@ async def create_tables():
         print("  - User (пользователи)")
         print("  - Category (категории меню)")
         print("  - Dish (блюда)")
-        print("  - DishModifier (модификаторы блюд)")
+        print("  - Variant (варианты блюд)")
+        print("  - VariantGroup (группы вариантов)")
+        print("  - Addon (добавки)")
         print("  - Order (заказы)")
         print("  - OrderItem (позиции заказов)")
         print("  - Banner (баннеры)")

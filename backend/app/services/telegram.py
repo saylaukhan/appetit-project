@@ -12,7 +12,16 @@ from datetime import datetime, timedelta
 logger = logging.getLogger(__name__)
 
 class TelegramAuthService:
-    """Сервис для авторизации через Telegram API."""
+    """
+    Сервис для авторизации через Telegram API.
+    
+    ВАЖНО: Использует временные in-memory сессии вместо файловых сессий.
+    Это означает, что:
+    - При перезапуске приложения сессии теряются
+    - Файлы типа session_*.session не создаются на диске  
+    - Каждая авторизация - одноразовая
+    - Меньше засорения файловой системы
+    """
     
     def __init__(self):
         self.api_id = settings.TELEGRAM_API_ID
@@ -24,9 +33,12 @@ class TelegramAuthService:
     def _get_client(self, phone: str) -> TelegramClient:
         """Получить или создать Telegram клиент для номера телефона."""
         if phone not in self._clients:
-            session_name = f"session_{phone.replace('+', '')}"
+            # Используем временные in-memory сессии вместо файловых
+            # Это означает что при перезапуске приложения нужно заново авторизоваться
+            # но файлы сессий не засоряют файловую систему
+            from telethon.sessions import MemorySession
             self._clients[phone] = TelegramClient(
-                session_name, 
+                MemorySession(), 
                 self.api_id, 
                 self.api_hash
             )
@@ -172,18 +184,24 @@ class TelegramAuthService:
                 phone_code=code
             ))
             
+            # Получение информации о пользователе Telegram
+            user_info = {
+                'phone': phone,
+                'telegram_id': result.user.id if hasattr(result, 'user') else None
+            }
+            
             # Очистка данных после успешной проверки
             del self._verification_codes[phone]
+            
+            # Отключение клиента после успешной авторизации для экономии ресурсов
+            await self.disconnect_client(phone)
             
             logger.info(f"Код успешно подтвержден через Telegram для {phone}")
             
             return {
                 'success': True,
                 'message': 'Код успешно подтвержден',
-                'user_info': {
-                    'phone': phone,
-                    'telegram_id': result.user.id if hasattr(result, 'user') else None
-                }
+                'user_info': user_info
             }
             
         except SessionPasswordNeededError:
@@ -217,8 +235,15 @@ class TelegramAuthService:
     async def disconnect_client(self, phone: str):
         """Отключение клиента для номера телефона."""
         if phone in self._clients:
-            await self._clients[phone].disconnect()
-            del self._clients[phone]
+            try:
+                await self._clients[phone].disconnect()
+            except Exception as e:
+                logger.error(f"Ошибка при отключении клиента для {phone}: {str(e)}")
+            finally:
+                del self._clients[phone]
+                # Также очищаем коды для этого номера
+                if phone in self._verification_codes:
+                    del self._verification_codes[phone]
     
     async def disconnect_all_clients(self):
         """Отключение всех клиентов."""
