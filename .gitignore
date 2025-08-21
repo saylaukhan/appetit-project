@@ -259,3 +259,7 @@ temp/
 # Alembic
 backend/alembic/versions/*.py
 !backend/alembic/versions/.gitkeep
+
+# Telegram session files (should not be in repository)
+*.session
+session_*

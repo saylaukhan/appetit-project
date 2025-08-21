@@ -44,6 +44,9 @@ class User(Base):
     # SMS верификация
     sms_code = Column(String(6), nullable=True)
     sms_code_expires = Column(DateTime, nullable=True)
+    
+    # Telegram интеграция (опционально)
+    telegram_id = Column(String(50), nullable=True, unique=True, index=True)
 
     def __repr__(self):
         return f"<User(id={self.id}, phone='{self.phone}', role='{self.role}')>"
