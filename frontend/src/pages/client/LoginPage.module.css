@@ -54,6 +54,68 @@
   margin: 0;
 }
 
+/* Telegram Auth Section */
+.telegramSection {
+  margin-bottom: var(--spacing-xl);
+}
+
+.telegramButton {
+  width: 100%;
+  padding: var(--spacing-md) var(--spacing-lg);
+  background: linear-gradient(135deg, #0088cc 0%, #006699 100%);
+  color: white;
+  border: none;
+  border-radius: var(--radius-medium);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-lg);
+}
+
+.telegramButton:hover:not(:disabled) {
+  background: linear-gradient(135deg, #006699 0%, #004466 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 136, 204, 0.3);
+}
+
+.telegramButton:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.telegramButton:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.divider {
+  position: relative;
+  text-align: center;
+  margin: var(--spacing-lg) 0;
+}
+
+.divider::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--border-light);
+}
+
+.divider span {
+  background: var(--surface);
+  padding: 0 var(--spacing-md);
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
 /* Form Elements */
 .inputGroup {
   margin-bottom: var(--spacing-lg);
@@ -334,11 +396,25 @@
     padding: var(--spacing-md);
     font-size: 1rem;
   }
+  
+  .telegramButton {
+    padding: var(--spacing-md);
+    font-size: 0.9rem;
+  }
 }
 
 /* Dark mode support */
 @media (prefers-color-scheme: dark) {
   .loginContainer {
     background: linear-gradient(135deg, rgba(233, 74, 78, 0.1) 0%, #1a1a1a 50%, #2d2d2d 100%);
+  }
+  
+  .telegramButton {
+    background: linear-gradient(135deg, #4da6d9 0%, #0088cc 100%);
+  }
+  
+  .telegramButton:hover:not(:disabled) {
+    background: linear-gradient(135deg, #0088cc 0%, #006699 100%);
+    box-shadow: 0 4px 12px rgba(77, 166, 217, 0.3);
   }
 }

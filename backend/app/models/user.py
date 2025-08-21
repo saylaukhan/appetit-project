@@ -24,7 +24,7 @@ class User(Base):
     hashed_password = Column(String(255), nullable=False)
     role = Column(SQLEnum(UserRole), default=UserRole.CLIENT, nullable=False)
     is_active = Column(Boolean, default=True)
-    is_verified = Column(Boolean, default=False)  # Подтвержден ли номер телефона
+    is_verified = Column(Boolean, default=False)  # Подтвержден ли номер т��лефона
     
     # Дополнительные поля профиля
     avatar = Column(String(255), nullable=True)
@@ -44,6 +44,9 @@ class User(Base):
     # SMS верификация
     sms_code = Column(String(6), nullable=True)
     sms_code_expires = Column(DateTime, nullable=True)
+    
+    # Telegram интеграция
+    telegram_id = Column(Integer, nullable=True, index=True)
 
     def __repr__(self):
         return f"<User(id={self.id}, phone='{self.phone}', role='{self.role}')>"

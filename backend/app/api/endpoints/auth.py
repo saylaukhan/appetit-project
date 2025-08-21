@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import get_db_session
-from app.schemas.auth import LoginRequest, RegisterRequest, TokenResponse, SMSRequest
+from app.schemas.auth import LoginRequest, RegisterRequest, TokenResponse, SMSRequest, TelegramAuthRequest, TelegramVerifyRequest
 from app.services.auth import AuthService
 from app.models.user import User
 
@@ -45,6 +45,24 @@ async def verify_sms(
     """Подтверждение SMS кода и завершение регистрации."""
     auth_service = AuthService(db)
     return await auth_service.verify_sms(phone, code)
+
+@router.post("/telegram/request-code")
+async def request_telegram_code(
+    request: TelegramAuthRequest,
+    db: AsyncSession = Depends(get_db_session)
+):
+    """Запрос кода подтверждения через Telegram."""
+    auth_service = AuthService(db)
+    return await auth_service.request_telegram_auth(request)
+
+@router.post("/telegram/verify", response_model=TokenResponse)
+async def verify_telegram_code(
+    request: TelegramVerifyRequest,
+    db: AsyncSession = Depends(get_db_session)
+):
+    """Подтверждение кода из Telegram и авторизация/регистрация пользователя."""
+    auth_service = AuthService(db)
+    return await auth_service.verify_telegram_auth(request)
 
 @router.get("/me")
 async def get_current_user(

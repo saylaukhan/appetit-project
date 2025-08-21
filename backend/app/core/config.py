@@ -32,6 +32,12 @@ class Settings(BaseSettings):
     TWILIO_PHONE_NUMBER: str = "your_twilio_phone_number"
     SMS_ENABLED: bool = False  # Отключено для разработки
     
+    # Telegram настройки
+    TELEGRAM_API_ID: str = "your_telegram_api_id"
+    TELEGRAM_API_HASH: str = "your_telegram_api_hash"
+    TELEGRAM_BOT_TOKEN: str = "your_telegram_bot_token"
+    TELEGRAM_ENABLED: bool = True  # Включено для Telegram авторизации
+    
     # Firebase настройки
     FIREBASE_CREDENTIALS_PATH: str = "config/firebase-credentials.json"
     FCM_ENABLED: bool = False  # Отключено для разработки
