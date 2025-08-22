@@ -73,11 +73,11 @@ const GlobalStyles = createGlobalStyle`
   }
 
   body {
-    font-family: 'TTHoves', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     line-height: 1.6;
     color: var(--text-primary);
     background-color: var(--background);
-    font-weight: 300;
+    font-weight: 400;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }

@@ -27,7 +27,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
             style: {
               background: '#333',
               color: '#fff',
-              fontFamily: 'TTHoves, sans-serif',
+              fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
             },
           }}
         />
