@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { X, Plus, Minus } from 'lucide-react'
+import { useAuth } from '../../contexts/AuthContext'
 import { menuAPI } from '../../services/api'
 import styles from './DishModal.module.css'
 
@@ -10,6 +12,9 @@ const DishModal = ({ isOpen, onClose, dishId, onAddToCart }) => {
   const [selectedAddons, setSelectedAddons] = useState({})
   const [totalPrice, setTotalPrice] = useState(0)
   const [quantity, setQuantity] = useState(1)
+  
+  const { isAuthenticated } = useAuth()
+  const navigate = useNavigate()
 
   // Загружаем данные блюда
   useEffect(() => {
@@ -99,6 +104,12 @@ const DishModal = ({ isOpen, onClose, dishId, onAddToCart }) => {
   }
 
   const handleAddToCart = () => {
+    if (!isAuthenticated) {
+      navigate('/login')
+      onClose()
+      return
+    }
+  
     if (!dish) return
 
     // Подготавливаем выбранные варианты
