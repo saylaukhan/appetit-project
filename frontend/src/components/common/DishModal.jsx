@@ -3,18 +3,21 @@ import { useNavigate } from 'react-router-dom'
 import { X, Plus, Minus } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 import { menuAPI } from '../../services/api'
+import { useAddress } from '../../hooks/useAddress'
 import styles from './DishModal.module.css'
 
-const DishModal = ({ isOpen, onClose, dishId, onAddToCart }) => {
+const DishModal = ({ isOpen, onClose, dishId, onAddToCart, onShowAddressModal }) => {
   const [dish, setDish] = useState(null)
   const [loading, setLoading] = useState(false)
   const [selectedVariants, setSelectedVariants] = useState({}) // { groupId: variantId }
   const [selectedAddons, setSelectedAddons] = useState({})
   const [totalPrice, setTotalPrice] = useState(0)
   const [quantity, setQuantity] = useState(1)
+
   
   const { isAuthenticated } = useAuth()
   const navigate = useNavigate()
+  const { checkUserAddress, getUserAddress } = useAddress()
 
   // Загружаем данные блюда
   useEffect(() => {
@@ -103,7 +106,7 @@ const DishModal = ({ isOpen, onClose, dishId, onAddToCart }) => {
     })
   }
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
     if (!isAuthenticated) {
       navigate('/login')
       onClose()
@@ -112,6 +115,29 @@ const DishModal = ({ isOpen, onClose, dishId, onAddToCart }) => {
   
     if (!dish) return
 
+    // Проверяем наличие адреса у пользователя
+    try {
+      const hasAddress = await checkUserAddress()
+      
+      if (!hasAddress) {
+        // Если адреса нет, закрываем модальное окно блюда и вызываем обработчик для показа адреса
+        const currentAddress = await getUserAddress()
+        onClose() // Закрываем текущее модальное окно блюда
+        if (onShowAddressModal) {
+          onShowAddressModal(currentAddress, dish, selectedVariants, selectedAddons, quantity)
+        }
+        return
+      }
+      
+      // Если адрес есть, продолжаем с добавлением в корзину
+      proceedToAddToCart()
+    } catch (error) {
+      console.error('Ошибка проверки адреса:', error)
+      alert('Произошла ошибка. Попробуйте снова.')
+    }
+  }
+
+  const proceedToAddToCart = () => {
     // Подготавливаем выбранные варианты
     const variants = Object.entries(selectedVariants).map(([groupId, variantId]) => {
       const group = dish.variant_groups?.find(g => g.id === parseInt(groupId))
@@ -139,6 +165,8 @@ const DishModal = ({ isOpen, onClose, dishId, onAddToCart }) => {
     onAddToCart(dish, variants, addons, quantity)
     onClose()
   }
+
+
 
   const groupedAddons = dish?.addons?.reduce((groups, addon) => {
     const category = addon.category || 'Другое'

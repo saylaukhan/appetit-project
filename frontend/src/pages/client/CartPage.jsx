@@ -1,6 +1,7 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useCart } from '../../contexts/CartContext'
+import { useAddress } from '../../hooks/useAddress'
 import CartItem from '../../components/cart/CartItem'
 import PromoCodeInput from '../../components/cart/PromoCodeInput'
 import DeliverySelector from '../../components/cart/DeliverySelector'
@@ -22,10 +23,29 @@ function CartPage() {
     setDeliveryType 
   } = useCart()
   
+  const { getUserAddress } = useAddress()
+  
   const [isLoading, setIsLoading] = useState(false)
+  const [userAddress, setUserAddress] = useState(null)
 
   const deliveryFee = deliveryType === 'delivery' ? 199 : 0
   const finalTotal = total + deliveryFee
+
+  // Загружаем адрес пользователя при загрузке компонента
+  useEffect(() => {
+    const loadUserAddress = async () => {
+      try {
+        const address = await getUserAddress()
+        if (address && address.has_address) {
+          setUserAddress(address)
+        }
+      } catch (error) {
+        console.error('Ошибка загрузки адреса:', error)
+      }
+    }
+
+    loadUserAddress()
+  }, [getUserAddress])
 
   const handleCheckout = async () => {
     if (items.length === 0) return
@@ -120,6 +140,7 @@ function CartPage() {
               <DeliverySelector 
                 selectedType={deliveryType}
                 onTypeChange={setDeliveryType}
+                userAddress={userAddress}
               />
 
               <PromoCodeInput />

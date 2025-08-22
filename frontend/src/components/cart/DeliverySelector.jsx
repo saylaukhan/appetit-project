@@ -1,7 +1,9 @@
 import React from 'react'
+import { useNavigate } from 'react-router-dom'
 import styles from './DeliverySelector.module.css'
 
-function DeliverySelector({ selectedType, onTypeChange }) {
+function DeliverySelector({ selectedType, onTypeChange, userAddress = null }) {
+  const navigate = useNavigate()
   const deliveryOptions = [
     {
       type: 'delivery',
@@ -92,21 +94,66 @@ function DeliverySelector({ selectedType, onTypeChange }) {
 
       {selectedType === 'delivery' && (
         <div className={styles.deliveryInfo}>
-          <div className={styles.deliveryNote}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-              <path 
-                d="M12 9V13M12 17H12.01M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" 
-                stroke="currentColor" 
-                strokeWidth="2" 
-                strokeLinecap="round" 
-                strokeLinejoin="round"
-              />
-            </svg>
-            <div>
-              <strong>Время доставки:</strong> 25-35 минут<br />
-              <strong>Зона доставки:</strong> Усть-Каменогорск
+          {userAddress ? (
+            <div className={styles.deliveryNote}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                <path 
+                  d="M21 10C21 7 18.5 5 16 5C13.5 5 11 7 11 10C11 13 16 21 16 21S21 13 21 10Z" 
+                  stroke="currentColor" 
+                  strokeWidth="2" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round"
+                />
+                <path 
+                  d="M16 8.5C16.8284 8.5 17.5 7.82843 17.5 7C17.5 6.17157 16.8284 5.5 16 5.5C15.1716 5.5 14.5 6.17157 14.5 7C14.5 7.82843 15.1716 8.5 16 8.5Z" 
+                  stroke="currentColor" 
+                  strokeWidth="2" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round"
+                />
+              </svg>
+              <div>
+                <strong>Адрес доставки:</strong><br />
+                {userAddress.address || `${userAddress.address_city || 'Усть-Каменогорск'}, ${userAddress.address_street || ''}`}
+                {(userAddress.address_entrance || userAddress.address_floor || userAddress.address_apartment) && (
+                  <>
+                    <br />
+                    {[
+                      userAddress.address_entrance && `подъезд ${userAddress.address_entrance}`,
+                      userAddress.address_floor && `этаж ${userAddress.address_floor}`,
+                      userAddress.address_apartment && `кв. ${userAddress.address_apartment}`
+                    ].filter(Boolean).join(', ')}
+                  </>
+                )}
+                <br />
+                <strong>Время доставки:</strong> 25-35 минут
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className={styles.deliveryNote}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                <path 
+                  d="M12 9V13M12 17H12.01M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" 
+                  stroke="currentColor" 
+                  strokeWidth="2" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round"
+                />
+              </svg>
+              <div>
+                <strong>Время доставки:</strong> 25-35 минут<br />
+                <strong>Зона доставки:</strong> Усть-Каменогорск<br />
+                <em>Для доставки необходимо указать адрес в профиле</em>
+                <br />
+                <button 
+                  className={styles.addAddressButton}
+                  onClick={() => navigate('/profile')}
+                >
+                  Указать адрес
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 

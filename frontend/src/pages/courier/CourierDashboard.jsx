@@ -200,12 +200,19 @@ function CourierDashboard() {
   }
 
   const openMaps = (address, coordinates) => {
+    // Используем универсальную схему для открытия карт (работает с картами по умолчанию на устройстве)
     if (coordinates) {
-      const url = `https://maps.google.com/maps?q=${coordinates.lat},${coordinates.lng}`
-      window.open(url, '_blank')
+      const url = `geo:${coordinates.lat},${coordinates.lng}?q=${coordinates.lat},${coordinates.lng}(${encodeURIComponent(address)})`
+      
+      // Fallback для веб-браузеров - используем OpenStreetMap
+      const fallbackUrl = `https://www.openstreetmap.org/?mlat=${coordinates.lat}&mlon=${coordinates.lng}&zoom=16#map=16/${coordinates.lat}/${coordinates.lng}`
+      
+      // Пытаемся открыть приложение карт, если не получается - используем веб
+      window.open(url, '_blank') || window.open(fallbackUrl, '_blank')
     } else {
-      const url = `https://maps.google.com/maps?q=${encodeURIComponent(address)}`
-      window.open(url, '_blank')
+      // Для браузеров используем OpenStreetMap поиск
+      const searchUrl = `https://www.openstreetmap.org/search?query=${encodeURIComponent(address)}`
+      window.open(searchUrl, '_blank')
     }
   }
 

@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react'
 import { menuAPI } from '../../services/api'
 import { useCart } from '../../contexts/CartContext'
+import { useAddress } from '../../hooks/useAddress'
 import LoadingSpinner from '../../components/common/LoadingSpinner'
 import DishModal from '../../components/common/DishModal'
+import AddressModal from '../../components/common/AddressModal'
 import styles from './MenuPage.module.css'
 
 function MenuPage() {
@@ -19,7 +21,11 @@ function MenuPage() {
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 })
   const [selectedDish, setSelectedDish] = useState(null)
   const [dishModalOpen, setDishModalOpen] = useState(false)
+  const [addressModalOpen, setAddressModalOpen] = useState(false)
+  const [currentAddress, setCurrentAddress] = useState(null)
+  const [pendingCartItem, setPendingCartItem] = useState(null) // Для сохранения данных о блюде до сохранения адреса
   const { addItem, isInCart, getItemQuantity } = useCart()
+  const { saveUserAddress } = useAddress()
 
   // Загрузка категорий при монтировании компонента
   useEffect(() => {
@@ -195,6 +201,63 @@ function MenuPage() {
   const handleCloseDishModal = () => {
     setDishModalOpen(false)
     setSelectedDish(null)
+  }
+
+  // Обработчик показа модального окна адреса при отсутствии адреса
+  const handleShowAddressModal = (currentAddress, dish, selectedVariants, selectedAddons, quantity) => {
+    setCurrentAddress(currentAddress)
+    setPendingCartItem({ dish, selectedVariants, selectedAddons, quantity })
+    setAddressModalOpen(true)
+  }
+
+  // Обработчик сохранения адреса и добавления товара в корзину
+  const handleSaveAddress = async (addressData) => {
+    try {
+      await saveUserAddress(addressData)
+      setAddressModalOpen(false)
+      
+      // Добавляем товар в корзину после сохранения адреса
+      if (pendingCartItem) {
+        const { dish, selectedVariants, selectedAddons, quantity } = pendingCartItem
+        
+        // Подготавливаем варианты
+        const variants = Object.entries(selectedVariants).map(([groupId, variantId]) => {
+          const group = dish.variant_groups?.find(g => g.id === parseInt(groupId))
+          const variant = group?.variants.find(v => v.id === variantId)
+          return {
+            groupId: parseInt(groupId),
+            groupName: group?.name,
+            variantId: variantId,
+            variantName: variant?.name,
+            price: parseFloat(variant?.price || 0)
+          }
+        }).filter(variant => variant.variantId)
+        
+        // Подготавливаем добавки
+        const addons = Object.entries(selectedAddons).map(([addonId, quantity]) => {
+          const addon = dish.addons?.find(a => a.id === parseInt(addonId))
+          return {
+            id: parseInt(addonId),
+            name: addon?.name,
+            price: parseFloat(addon?.price || 0),
+            quantity
+          }
+        }).filter(addon => addon.quantity > 0)
+
+        addItem(dish, variants, addons, quantity)
+        setPendingCartItem(null)
+      }
+    } catch (error) {
+      console.error('Ошибка сохранения адреса:', error)
+      alert('Ошибка сохранения адреса. Попробуйте снова.')
+    }
+  }
+
+  // Обработчик закрытия модального окна адреса
+  const handleCloseAddressModal = () => {
+    setAddressModalOpen(false)
+    setCurrentAddress(null)
+    setPendingCartItem(null)
   }
 
   const handleSortChange = (newSortBy) => {
@@ -508,6 +571,15 @@ function MenuPage() {
         onClose={handleCloseDishModal}
         dishId={selectedDish?.id}
         onAddToCart={handleAddToCart}
+        onShowAddressModal={handleShowAddressModal}
+      />
+
+      {/* Модальное окно адреса */}
+      <AddressModal
+        isOpen={addressModalOpen}
+        onClose={handleCloseAddressModal}
+        onSave={handleSaveAddress}
+        initialAddress={currentAddress}
       />
     </div>
   )

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, Enum as SQLEnum
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, Enum as SQLEnum, Float, Text
 from sqlalchemy.sql import func
 from enum import Enum
 from app.core.database import Base
@@ -28,8 +28,18 @@ class User(Base):
     
     # Дополнительные поля профиля
     avatar = Column(String(255), nullable=True)
-    address = Column(String(500), nullable=True)
+    address = Column(String(500), nullable=True)  # Основной текстовый адрес
     birth_date = Column(DateTime, nullable=True)
+    
+    # Детальная информация об адресе
+    address_city = Column(String(100), nullable=True)      # Город
+    address_street = Column(String(200), nullable=True)    # Улица и дом
+    address_entrance = Column(String(10), nullable=True)   # Подъезд
+    address_floor = Column(String(10), nullable=True)      # Этаж
+    address_apartment = Column(String(20), nullable=True)  # Квартира
+    address_comment = Column(Text, nullable=True)          # Комментарий к адресу
+    address_latitude = Column(Float, nullable=True)        # Широта
+    address_longitude = Column(Float, nullable=True)       # Долгота
     # gender = Column(SQLEnum(Gender), nullable=True)  # Временно отключено
     
     # Настройки подписок

@@ -319,3 +319,45 @@
     border-right: none;
   }
 }
+
+/* Address Styles */
+.addressDisplay {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: var(--radius-medium);
+  padding: var(--spacing-md);
+  margin: var(--spacing-sm) 0;
+}
+
+.addressInfo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.addressText {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 1rem;
+}
+
+.addressDetails {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.addressComment {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  font-style: italic;
+  margin-top: var(--spacing-xs);
+  padding-top: var(--spacing-xs);
+  border-top: 1px solid #e9ecef;
+}
+
+.noAddress {
+  color: var(--text-muted);
+  font-style: italic;
+  text-align: center;
+  padding: var(--spacing-md);
+}

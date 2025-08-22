@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import get_db_session
 from app.utils.auth_dependencies import get_current_admin, get_current_user
 from app.models.user import User
-from app.schemas.user import UserProfileUpdate, UserProfileResponse, NewsletterSubscription
+from app.schemas.user import UserProfileUpdate, UserProfileResponse, NewsletterSubscription, AddressUpdate
 
 router = APIRouter()
 
@@ -44,6 +44,44 @@ async def update_profile(
     except Exception as e:
         await db.rollback()
         raise HTTPException(status_code=400, detail=f"Ошибка обновления профиля: {str(e)}")
+
+@router.put("/me/address", response_model=UserProfileResponse)
+async def update_address(
+    address_data: AddressUpdate,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db_session)
+):
+    """Обновление адреса пользователя."""
+    try:
+        # Обновляем только переданные поля адреса
+        for field, value in address_data.dict(exclude_unset=True).items():
+            setattr(current_user, field, value)
+        
+        await db.commit()
+        await db.refresh(current_user)
+        
+        return current_user
+    except Exception as e:
+        await db.rollback()
+        raise HTTPException(status_code=400, detail=f"Ошибка обновления адреса: {str(e)}")
+
+@router.get("/me/address")
+async def get_address(
+    current_user: User = Depends(get_current_user)
+):
+    """Получение адреса пользователя."""
+    return {
+        "has_address": bool(current_user.address or current_user.address_street),
+        "address": current_user.address,
+        "address_city": current_user.address_city,
+        "address_street": current_user.address_street,
+        "address_entrance": current_user.address_entrance,
+        "address_floor": current_user.address_floor,
+        "address_apartment": current_user.address_apartment,
+        "address_comment": current_user.address_comment,
+        "address_latitude": current_user.address_latitude,
+        "address_longitude": current_user.address_longitude
+    }
 
 @router.post("/me/newsletter")
 async def subscribe_newsletter(

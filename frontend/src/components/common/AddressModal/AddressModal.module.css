@@ -1,0 +1,298 @@
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.modalContent {
+  background: var(--surface);
+  border-radius: var(--radius-large);
+  max-width: 800px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-large);
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 24px 0;
+  border-bottom: 1px solid var(--border-light);
+  padding-bottom: 16px;
+  margin-bottom: 24px;
+}
+
+.modalHeader h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.closeBtn {
+  background: none;
+  border: none;
+  font-size: 32px;
+  cursor: pointer;
+  color: var(--text-muted);
+  line-height: 1;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.closeBtn:hover {
+  background-color: var(--surface-hover);
+  color: var(--text-secondary);
+}
+
+.modalBody {
+  padding: 0 24px;
+}
+
+.mapSection {
+  margin-bottom: 32px;
+}
+
+.locationControls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.locationBtn {
+  background: var(--primary-color);
+  color: var(--text-white);
+  border: none;
+  padding: 10px 16px;
+  border-radius: var(--radius-medium);
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.locationBtn:hover:not(:disabled) {
+  background: var(--primary-dark);
+}
+
+.locationBtn:disabled {
+  background: var(--text-muted);
+  cursor: not-allowed;
+}
+
+.mapHint {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+.mapLoading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 300px;
+  background: var(--surface-hover);
+  border-radius: var(--radius-medium);
+  color: var(--text-secondary);
+}
+
+.mapContainer {
+  position: relative;
+  border-radius: var(--radius-medium);
+  overflow: hidden;
+}
+
+.mapOverlay {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 12px;
+  border-radius: var(--radius-medium);
+  box-shadow: var(--shadow-small);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.mapOverlay .mapHint {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin: 0;
+  font-weight: 500;
+}
+
+.changeLocationBtn {
+  background: var(--primary-color);
+  color: var(--text-white);
+  border: none;
+  padding: 6px 12px;
+  border-radius: var(--radius-small);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+  white-space: nowrap;
+}
+
+.changeLocationBtn:hover {
+  background: var(--primary-dark);
+}
+
+.formSection {
+  margin-bottom: 24px;
+}
+
+.formGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.formGroup label {
+  font-weight: 500;
+  color: var(--text-primary);
+  font-size: 14px;
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+}
+
+.addressInput,
+.smallInput,
+.commentInput {
+  padding: 12px 16px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-medium);
+  font-size: 14px;
+  transition: border-color 0.2s ease;
+  background: var(--surface);
+}
+
+.addressInput:focus,
+.smallInput:focus,
+.commentInput:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(233, 74, 78, 0.1);
+}
+
+.addressInput {
+  width: 100%;
+}
+
+.smallInput {
+  width: 100%;
+}
+
+.commentInput {
+  width: 100%;
+  resize: vertical;
+  min-height: 80px;
+  font-family: inherit;
+}
+
+.modalFooter {
+  padding: 24px;
+  border-top: 1px solid var(--border-light);
+}
+
+.saveBtn {
+  width: 100%;
+  background: var(--primary-color);
+  color: var(--text-white);
+  border: none;
+  padding: 16px 24px;
+  border-radius: var(--radius-medium);
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.saveBtn:hover {
+  background: var(--primary-dark);
+}
+
+.saveBtn:active {
+  background: var(--primary-dark);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .modalOverlay {
+    padding: 10px;
+  }
+  
+  .modalContent {
+    max-height: 95vh;
+  }
+  
+  .modalHeader {
+    padding: 16px 16px 0;
+  }
+  
+  .modalBody {
+    padding: 0 16px;
+  }
+  
+  .modalFooter {
+    padding: 16px;
+  }
+  
+  .formRow {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .locationControls {
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 480px) {
+  .modalHeader h2 {
+    font-size: 20px;
+  }
+  
+  .locationBtn {
+    width: 100%;
+    justify-content: center;
+  }
+}

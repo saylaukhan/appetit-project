@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
+import { useAddress } from '../../hooks/useAddress'
+import AddressModal from '../../components/common/AddressModal'
 import styles from './ProfilePage.module.css'
 
 function ProfilePage() {
@@ -19,6 +21,10 @@ function ProfilePage() {
   const [editingBirthDate, setEditingBirthDate] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [isLoadingProfile, setIsLoadingProfile] = useState(true)
+  const [showAddressModal, setShowAddressModal] = useState(false)
+  const [userAddressData, setUserAddressData] = useState(null)
+  
+  const { getUserAddress, saveUserAddress } = useAddress()
 
   // Функция для загрузки профиля пользователя
   const loadUserProfile = async () => {
@@ -68,6 +74,14 @@ function ProfilePage() {
           birth_year,
           birth_date: userData.birth_date || ''
         })
+
+        // Загружаем данные адреса
+        try {
+          const addressData = await getUserAddress()
+          setUserAddressData(addressData)
+        } catch (error) {
+          console.error('Ошибка загрузки адреса:', error)
+        }
       } else {
         const errorData = await response.json().catch(() => ({}))
         console.error('Ошибка загрузки профиля:', response.status, errorData)
@@ -267,6 +281,29 @@ function ProfilePage() {
     setEditingBirthDate(false)
   }
 
+  const handleEditAddress = () => {
+    setShowAddressModal(true)
+  }
+
+  const handleSaveAddress = async (addressData) => {
+    try {
+      await saveUserAddress(addressData)
+      
+      // Обновляем локальные данные
+      setUserAddressData(addressData)
+      setProfileData(prev => ({
+        ...prev,
+        address: addressData.address
+      }))
+      
+      setShowAddressModal(false)
+      alert('Адрес успешно сохранен!')
+    } catch (error) {
+      console.error('Ошибка сохранения адреса:', error)
+      alert('Ошибка сохранения адреса. Попробуйте снова.')
+    }
+  }
+
   const handleSaveEmail = async () => {
     if (!profileData.email || !profileData.email.trim()) {
       alert('Пожалуйста, введите email')
@@ -462,6 +499,37 @@ function ProfilePage() {
                 )}
               </div>
 
+              <div className={styles.formGroup}>
+                <label>Адрес доставки</label>
+                <div className={styles.addressDisplay}>
+                  {userAddressData?.has_address ? (
+                    <div className={styles.addressInfo}>
+                      <div className={styles.addressText}>
+                        {userAddressData.address}
+                      </div>
+                      {userAddressData.address_apartment && (
+                        <div className={styles.addressDetails}>
+                          Кв. {userAddressData.address_apartment}
+                          {userAddressData.address_entrance && `, подъезд ${userAddressData.address_entrance}`}
+                          {userAddressData.address_floor && `, этаж ${userAddressData.address_floor}`}
+                        </div>
+                      )}
+                      {userAddressData.address_comment && (
+                        <div className={styles.addressComment}>
+                          Комментарий: {userAddressData.address_comment}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className={styles.noAddress}>
+                      Адрес доставки не указан
+                    </div>
+                  )}
+                </div>
+                <button className={styles.changeBtn} onClick={handleEditAddress}>
+                  {userAddressData?.has_address ? 'Изменить' : 'Добавить адрес'}
+                </button>
+              </div>
 
             </div>
           </section>
@@ -479,6 +547,14 @@ function ProfilePage() {
             </>
           )}
         </div>
+
+        {/* Модальное окно для адреса */}
+        <AddressModal
+          isOpen={showAddressModal}
+          onClose={() => setShowAddressModal(false)}
+          onSave={handleSaveAddress}
+          initialAddress={userAddressData}
+        />
       </div>
     </div>
   )
