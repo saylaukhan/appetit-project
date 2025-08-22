@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Link, Navigate, useLocation } from 'react-router-dom'
+import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { Phone, Lock, User, AlertCircle, Loader, CheckCircle, Copy } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 import styles from './LoginPage.module.css'
@@ -20,8 +20,9 @@ function LoginPage() {
 
   const { login, initRegistration, verifyRegistrationCode, isAuthenticated } = useAuth()
   const location = useLocation()
+  const navigate = useNavigate()
   
-  // Если пользователь уже а��торизован, перенаправляем его
+  // Если пользователь уже авторизован, перенаправляем его
   if (isAuthenticated) {
     const from = location.state?.from?.pathname || '/'
     return <Navigate to={from} replace />
@@ -84,6 +85,7 @@ function LoginPage() {
         if (!success) {
           setError('Неверный номер телефона или пароль')
         }
+        // После успешного входа пользователь будет перенаправлен автоматически через Navigate выше
       } else {
         // Новый процесс регистрации - инициализация с получением кода
         const result = await initRegistration(formData.phone, formData.name, formData.password)
@@ -114,7 +116,11 @@ function LoginPage() {
       }
 
       const success = await verifyRegistrationCode(formData.phone, inputCode)
-      if (!success) {
+      if (success) {
+        // Явное перенаправление после успешной регистрации
+        const from = location.state?.from?.pathname || '/'
+        navigate(from, { replace: true })
+      } else {
         setError('Неверный код верификации')
       }
     } catch (error) {
@@ -328,7 +334,7 @@ function LoginPage() {
 
           {!isLogin && (
             <div className={styles.inputGroup}>
-              <label htmlFor="confirmPassword">Подтвердите пароль</label>
+              <label htmlFor="confirmPassword">Подтвердите пар��ль</label>
               <div className={styles.inputWithIcon}>
                 <Lock size={18} className={styles.inputIcon} />
                 <input
