@@ -5,7 +5,7 @@ from jose import JWTError, jwt
 from fastapi import HTTPException, status
 from datetime import datetime, timedelta
 from app.models.user import User
-from app.schemas.auth import LoginRequest, RegisterRequest
+from app.schemas.auth import LoginRequest, RegisterRequest, RegistrationInitRequest, VerifyCodeRequest
 from app.core.config import settings
 import secrets
 import string
@@ -122,9 +122,85 @@ class AuthService:
             }
         }
 
+    def generate_verification_code(self) -> str:
+        """Генерация 4-значного кода верификации."""
+        return ''.join(secrets.choice(string.digits) for _ in range(4))
+
     def generate_sms_code(self) -> str:
         """Генерация SMS кода."""
         return ''.join(secrets.choice(string.digits) for _ in range(6))
+
+    async def init_registration(self, request: RegistrationInitRequest):
+        """Инициализация регистрации - создание пользователя с кодом верификации."""
+        # Проверка, что пользователь не существует или удаление старого неподтвержденного
+        existing_user = await self.get_user_by_phone(request.phone)
+        if existing_user:
+            if existing_user.is_verified:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Пользователь с таким номером телефона уже существует"
+                )
+            else:
+                # Удаляем старого неподтвержденного пользователя
+                await self.db.delete(existing_user)
+                await self.db.commit()
+        
+        # Генерация кода верификации
+        verification_code = self.generate_verification_code()
+        
+        # Создание нового пользователя с кодом
+        hashed_password = self.get_password_hash(request.password)
+        
+        db_user = User(
+            phone=request.phone,
+            name=request.name,
+            hashed_password=hashed_password,
+            verification_code=verification_code,
+            is_verified=False
+        )
+        
+        self.db.add(db_user)
+        await self.db.commit()
+        await self.db.refresh(db_user)
+        
+        return {
+            "message": "Код верификации сгенерирован",
+            "verification_code": verification_code,
+            "phone": request.phone
+        }
+
+    async def verify_registration_code(self, request: VerifyCodeRequest):
+        """Подтверждение кода верификации и завершение регистрации."""
+        user = await self.get_user_by_phone(request.phone)
+        if not user:
+            raise HTTPException(status_code=404, detail="Пользователь не найден")
+        
+        if user.verification_code != request.code:
+            raise HTTPException(status_code=400, detail="Неверный код")
+        
+        if user.is_verified:
+            raise HTTPException(status_code=400, detail="Пользователь уже подтвержден")
+        
+        # Подтверждение пользователя
+        user.is_verified = True
+        user.verification_code = None
+        await self.db.commit()
+        
+        # Возвращение токена
+        access_token = self.create_access_token(data={"sub": str(user.id)})
+        
+        return {
+            "access_token": access_token,
+            "token_type": "bearer",
+            "user": {
+                "id": user.id,
+                "phone": user.phone,
+                "name": user.name,
+                "role": user.role,
+                "is_active": user.is_active,
+                "is_verified": user.is_verified
+            }
+        }
 
     async def request_sms(self, phone: str):
         """Запрос SMS кода."""
@@ -137,7 +213,7 @@ class AuthService:
         # Сохранение кода в базе (если пользователь существует)
         user = await self.get_user_by_phone(phone)
         if user:
-            user.sms_code = sms_code
+            user.verification_code = sms_code
             user.sms_code_expires = datetime.utcnow() + timedelta(minutes=10)
             await self.db.commit()
         
@@ -149,7 +225,7 @@ class AuthService:
         if not user:
             raise HTTPException(status_code=404, detail="Пользователь не найден")
         
-        if user.sms_code != code:
+        if user.verification_code != code:
             raise HTTPException(status_code=400, detail="Неверный код")
         
         if user.sms_code_expires < datetime.utcnow():
@@ -157,7 +233,7 @@ class AuthService:
         
         # Подтверждение пользователя
         user.is_verified = True
-        user.sms_code = None
+        user.verification_code = None
         user.sms_code_expires = None
         await self.db.commit()
         

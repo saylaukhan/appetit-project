@@ -1,6 +1,6 @@
-  import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link, Navigate, useLocation } from 'react-router-dom'
-import { Phone, Lock, User, AlertCircle, Loader } from 'lucide-react'
+import { Phone, Lock, User, AlertCircle, Loader, CheckCircle, Copy } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 import styles from './LoginPage.module.css'
 
@@ -14,17 +14,29 @@ function LoginPage() {
     name: '',
     confirmPassword: ''
   })
-  const [smsStep, setSmsStep] = useState(false)
-  const [smsCode, setSmsCode] = useState('')
+  const [verificationStep, setVerificationStep] = useState(false)
+  const [verificationCode, setVerificationCode] = useState('')
+  const [inputCode, setInputCode] = useState('')
 
-  const { login, register, requestSMS, verifySMS, isAuthenticated } = useAuth()
+  const { login, initRegistration, verifyRegistrationCode, isAuthenticated } = useAuth()
   const location = useLocation()
   
-  // Если пользователь уже авторизован, перенаправляем его
+  // Если пользователь уже а��торизован, перенаправляем его
   if (isAuthenticated) {
     const from = location.state?.from?.pathname || '/'
     return <Navigate to={from} replace />
   }
+
+  // Очистка кода при выходе со страницы регистрации
+  useEffect(() => {
+    return () => {
+      if (verificationStep) {
+        setVerificationStep(false)
+        setVerificationCode('')
+        setInputCode('')
+      }
+    }
+  }, [location.pathname])
 
   const handleInputChange = (e) => {
     setFormData({
@@ -73,12 +85,13 @@ function LoginPage() {
           setError('Неверный номер телефона или пароль')
         }
       } else {
-        // Регистрация - сначала запрашиваем SMS
-        const smsRequested = await requestSMS(formData.phone)
-        if (smsRequested) {
-          setSmsStep(true)
+        // Новый процесс регистрации - инициализация с получением кода
+        const result = await initRegistration(formData.phone, formData.name, formData.password)
+        if (result.success) {
+          setVerificationCode(result.data.verification_code)
+          setVerificationStep(true)
         } else {
-          setError('Ошибка отправки SMS кода')
+          setError(result.error || 'Ошибка регистрации')
         }
       }
     } catch (error) {
@@ -89,31 +102,24 @@ function LoginPage() {
     }
   }
 
-  const handleSmsSubmit = async (e) => {
+  const handleVerificationSubmit = async (e) => {
     e.preventDefault()
     setError('')
     setLoading(true)
 
     try {
-      if (smsCode.length !== 4) {
-        setError('Введите 4-значный код из SMS')
+      if (inputCode.length !== 4) {
+        setError('Введите 4-значный код')
         return
       }
 
-      // Сначала подтверждаем SMS
-      const smsVerified = await verifySMS(formData.phone, smsCode)
-      if (smsVerified) {
-        // Если SMS подтвержден, регистрируем пользователя
-        const success = await register(formData.phone, formData.name, formData.password)
-        if (!success) {
-          setError('Ошибка регистрации. Попробуйте еще раз.')
-        }
-      } else {
-        setError('Неверный SMS код')
+      const success = await verifyRegistrationCode(formData.phone, inputCode)
+      if (!success) {
+        setError('Неверный код верификации')
       }
     } catch (error) {
-      console.error('SMS verification error:', error)
-      setError('Произошла ошибка. Попробуй��е еще раз.')
+      console.error('Verification error:', error)
+      setError('Произошла ошибка. Попробуйте еще раз.')
     } finally {
       setLoading(false)
     }
@@ -126,14 +132,19 @@ function LoginPage() {
       name: '',
       confirmPassword: ''
     })
-    setSmsStep(false)
-    setSmsCode('')
+    setVerificationStep(false)
+    setVerificationCode('')
+    setInputCode('')
     setError('')
   }
 
   const toggleMode = () => {
     setIsLogin(!isLogin)
     resetForm()
+  }
+
+  const copyCodeToClipboard = () => {
+    navigator.clipboard.writeText(verificationCode)
   }
 
   // Быстрый вход для тестирования
@@ -155,14 +166,36 @@ function LoginPage() {
     setLoading(false)
   }
 
-  if (smsStep) {
+  if (verificationStep) {
     return (
       <div className={styles.loginContainer}>
         <div className={styles.loginCard}>
           <div className={styles.header}>
             <img src="/src/assets/Logo APPETIT.png" alt="APPETIT" className={styles.logo} />
-            <h1>Подтверждение номера</h1>
-            <p>Вв��дите 4-значный код, отправленный на номер {formData.phone}</p>
+            <h1>Подтверждение регистрации</h1>
+            <p>Введите 4-значный код для завершения регистрации</p>
+          </div>
+
+          {/* Баннер с кодом верификации */}
+          <div className={styles.verificationBanner}>
+            <div className={styles.bannerHeader}>
+              <CheckCircle size={20} className={styles.successIcon} />
+              <span>Код верификации сгенерирован</span>
+            </div>
+            <div className={styles.codeDisplay}>
+              <span className={styles.code}>{verificationCode}</span>
+              <button 
+                type="button" 
+                onClick={copyCodeToClipboard}
+                className={styles.copyButton}
+                title="Скопировать код"
+              >
+                <Copy size={16} />
+              </button>
+            </div>
+            <p className={styles.bannerNote}>
+              Этот код действителен только для текущей сессии регистрации
+            </p>
           </div>
 
           {error && (
@@ -172,15 +205,15 @@ function LoginPage() {
             </div>
           )}
 
-          <form onSubmit={handleSmsSubmit}>
+          <form onSubmit={handleVerificationSubmit}>
             <div className={styles.inputGroup}>
-              <label htmlFor="smsCode">SMS код</label>
+              <label htmlFor="inputCode">Введите код верификации</label>
               <input
                 type="text"
-                id="smsCode"
-                name="smsCode"
-                value={smsCode}
-                onChange={(e) => setSmsCode(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                id="inputCode"
+                name="inputCode"
+                value={inputCode}
+                onChange={(e) => setInputCode(e.target.value.replace(/\D/g, '').slice(0, 4))}
                 placeholder="1234"
                 maxLength={4}
                 required
@@ -200,13 +233,13 @@ function LoginPage() {
                   Проверяем код...
                 </>
               ) : (
-                'Подтвердить'
+                'Подтвердить регистрацию'
               )}
             </button>
           </form>
 
           <div className={styles.backLink}>
-            <button onClick={() => setSmsStep(false)}>
+            <button onClick={() => setVerificationStep(false)}>
               ← Назад к регистрации
             </button>
           </div>
@@ -353,7 +386,7 @@ function LoginPage() {
           <Link to="/">← Вернуться на главную</Link>
         </div>
 
-        {/* Быстрый вход д��я демо */}
+        {/* Быстрый вход для демо */}
         <div className={styles.demoSection}>
           <p className={styles.demoTitle}>Быстрый вход (демо):</p>
           <div className={styles.demoButtons}>

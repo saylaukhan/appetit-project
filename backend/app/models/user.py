@@ -42,7 +42,7 @@ class User(Base):
     last_login = Column(DateTime(timezone=True), nullable=True)
     
     # SMS верификация
-    sms_code = Column(String(6), nullable=True)
+    verification_code = Column(String(4), nullable=True)  # 4-значный код для верификации
     sms_code_expires = Column(DateTime, nullable=True)
 
     def __repr__(self):
