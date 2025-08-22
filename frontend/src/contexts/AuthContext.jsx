@@ -110,6 +110,18 @@ export function AuthProvider({ children }) {
       })
 
       toast.success('Добро пожаловать!')
+
+      // Если пользователь админ, кухня или курьер - перенаправляем в их панель
+      if (user.role === 'admin') {
+        window.location.href = '/admin'
+      } else if (user.role === 'kitchen') {
+        window.location.href = '/kitchen'
+      } else if (user.role === 'courier') {
+        window.location.href = '/courier'
+      } else {
+        window.location.href = '/'
+      }
+      
       return true
     } catch (error) {
       dispatch({ type: 'LOGIN_ERROR' })
