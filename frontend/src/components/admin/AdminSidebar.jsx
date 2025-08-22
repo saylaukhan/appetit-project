@@ -95,7 +95,7 @@ function AdminSidebar({ isOpen = false, onClose = () => {} }) {
       {/* Логотип и заголовок */}
       <div className={styles.sidebarHeader}>
         <div className={styles.logo}>
-          <img src="/assets/Logo APPETIT.png" alt="APPETIT" />
+          <img src="/src/assets/Logo APPETIT.png" alt="APPETIT" />
           <span>APPETIT</span>
         </div>
         <div className={styles.userInfo}>

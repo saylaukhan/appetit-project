@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+  import React, { useState } from 'react'
 import { Link, Navigate, useLocation } from 'react-router-dom'
 import { Phone, Lock, User, AlertCircle, Loader } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
@@ -113,7 +113,7 @@ function LoginPage() {
       }
     } catch (error) {
       console.error('SMS verification error:', error)
-      setError('Произошла ошибка. Попробуйте еще раз.')
+      setError('Произошла ошибка. Попробуй��е еще раз.')
     } finally {
       setLoading(false)
     }
@@ -160,9 +160,9 @@ function LoginPage() {
       <div className={styles.loginContainer}>
         <div className={styles.loginCard}>
           <div className={styles.header}>
-            <img src="/assets/Logo APPETIT.png" alt="APPETIT" className={styles.logo} />
+            <img src="/src/assets/Logo APPETIT.png" alt="APPETIT" className={styles.logo} />
             <h1>Подтверждение номера</h1>
-            <p>Введите 4-значный код, отправленный на номер {formData.phone}</p>
+            <p>Вв��дите 4-значный код, отправленный на номер {formData.phone}</p>
           </div>
 
           {error && (
@@ -219,7 +219,7 @@ function LoginPage() {
     <div className={styles.loginContainer}>
       <div className={styles.loginCard}>
         <div className={styles.header}>
-          <img src="/assets/Logo APPETIT.png" alt="APPETIT" className={styles.logo} />
+          <img src="/src/assets/Logo APPETIT.png" alt="APPETIT" className={styles.logo} />
           <h1>{isLogin ? 'Вход в систему' : 'Регистрация'}</h1>
           <p>
             {isLogin 
@@ -353,7 +353,7 @@ function LoginPage() {
           <Link to="/">← Вернуться на главную</Link>
         </div>
 
-        {/* Быстрый вход для демо */}
+        {/* Быстрый вход д��я демо */}
         <div className={styles.demoSection}>
           <p className={styles.demoTitle}>Быстрый вход (демо):</p>
           <div className={styles.demoButtons}>

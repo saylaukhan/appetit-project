@@ -8,6 +8,7 @@ function HomePage() {
     <div className={styles.homeContainer}>
       <section className={styles.heroSection}>
         <div className={styles.heroContent}>
+          <img src="/src/assets/Logo EXTRA.png" alt="APPETIT" className={styles.mainLogo} />
           <h1>Вкусная еда с доставкой на дом</h1>
           <p>
             Заказывайте любимые блюда из нашего ресторана APPETIT. 

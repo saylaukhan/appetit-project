@@ -139,6 +139,13 @@
   color: var(--text-primary);
 }
 
+/* Main Logo Styles */
+.mainLogo {
+  max-width: 200px;
+  height: auto;
+  margin-bottom: var(--spacing-lg);
+}
+
 /* Mobile Styles */
 @media (max-width: 768px) {
   .heroSection {
@@ -164,10 +171,18 @@
   .statCard .number {
     font-size: 2.5rem;
   }
+  
+  .mainLogo {
+    max-width: 150px;
+  }
 }
 
 @media (max-width: 480px) {
   .heroContent h1 {
     font-size: 2rem;
+  }
+  
+  .mainLogo {
+    max-width: 120px;
   }
 }
