@@ -150,6 +150,76 @@
   margin-bottom: var(--spacing-lg);
 }
 
+/* Verification Banner */
+.verificationBanner {
+  background: linear-gradient(135deg, rgba(40, 167, 69, 0.1), rgba(40, 167, 69, 0.05));
+  border: 2px solid rgba(40, 167, 69, 0.2);
+  border-radius: var(--radius-medium);
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-xl);
+  animation: slideIn 0.5s ease;
+}
+
+.bannerHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+  font-weight: 600;
+  color: var(--success);
+}
+
+.successIcon {
+  color: var(--success);
+}
+
+.codeDisplay {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-md);
+  background: var(--surface);
+  border: 2px solid rgba(40, 167, 69, 0.3);
+  border-radius: var(--radius-medium);
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-md);
+}
+
+.code {
+  font-size: 2rem;
+  font-weight: 700;
+  font-family: 'Courier New', monospace;
+  color: var(--success);
+  letter-spacing: 0.5em;
+  text-align: center;
+}
+
+.copyButton {
+  background: rgba(40, 167, 69, 0.1);
+  border: 1px solid rgba(40, 167, 69, 0.3);
+  border-radius: var(--radius-small);
+  padding: var(--spacing-sm);
+  color: var(--success);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.copyButton:hover {
+  background: rgba(40, 167, 69, 0.2);
+  border-color: var(--success);
+}
+
+.bannerNote {
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  margin: 0;
+  font-style: italic;
+}
+
 /* Toggle Mode */
 .toggleMode {
   text-align: center;
@@ -264,6 +334,15 @@
   padding-left: var(--spacing-md);
 }
 
+/* Verification Code Input Special Styling */
+.loginCard form input[name="inputCode"] {
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 0.5em;
+  padding-left: var(--spacing-md);
+}
+
 /* Animations */
 @keyframes spin {
   0% { transform: rotate(0deg); }
@@ -314,6 +393,11 @@
   .demoButtons {
     grid-template-columns: 1fr;
   }
+
+  .code {
+    font-size: 1.5rem;
+    letter-spacing: 0.3em;
+  }
 }
 
 @media (max-width: 480px) {
@@ -333,6 +417,11 @@
   .submitButton {
     padding: var(--spacing-md);
     font-size: 1rem;
+  }
+
+  .code {
+    font-size: 1.25rem;
+    letter-spacing: 0.2em;
   }
 }
 

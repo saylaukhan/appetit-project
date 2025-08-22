@@ -26,6 +26,29 @@ class RegisterRequest(BaseModel):
             raise ValueError('Неверный формат номера телефона. Используйте +7XXXXXXXXXX')
         return v
 
+class RegistrationInitRequest(BaseModel):
+    phone: str = Field(..., description="Номер телефона в формате +7XXXXXXXXXX")
+    name: str = Field(..., min_length=2, max_length=50, description="Имя пользователя")
+    password: str = Field(..., min_length=6, description="Пароль (минимум 6 символов)")
+
+    @validator('phone')
+    def validate_phone(cls, v):
+        phone_pattern = r'^\+7\d{10}$'
+        if not re.match(phone_pattern, v):
+            raise ValueError('Неверный формат номера телефона. Используйте +7XXXXXXXXXX')
+        return v
+
+class VerifyCodeRequest(BaseModel):
+    phone: str = Field(..., description="Номер телефона в формате +7XXXXXXXXXX")
+    code: str = Field(..., min_length=4, max_length=4, description="4-значный код верификации")
+
+    @validator('phone')
+    def validate_phone(cls, v):
+        phone_pattern = r'^\+7\d{10}$'
+        if not re.match(phone_pattern, v):
+            raise ValueError('Неверный формат номера телефона. Используйте +7XXXXXXXXXX')
+        return v
+
 class SMSRequest(BaseModel):
     phone: str = Field(..., description="Номер телефона в формате +7XXXXXXXXXX")
 
@@ -35,6 +58,11 @@ class SMSRequest(BaseModel):
         if not re.match(phone_pattern, v):
             raise ValueError('Неверный формат номера телефона. Используйте +7XXXXXXXXXX')
         return v
+
+class RegistrationResponse(BaseModel):
+    message: str
+    verification_code: str
+    phone: str
 
 class TokenResponse(BaseModel):
     access_token: str

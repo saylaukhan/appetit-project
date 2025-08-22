@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import get_db_session
-from app.schemas.auth import LoginRequest, RegisterRequest, TokenResponse, SMSRequest
+from app.schemas.auth import LoginRequest, RegisterRequest, TokenResponse, SMSRequest, RegistrationInitRequest, VerifyCodeRequest, RegistrationResponse
 from app.services.auth import AuthService
 from app.models.user import User
 
@@ -17,6 +17,24 @@ async def register(
     """Регистрация нового пользователя по номеру телефона."""
     auth_service = AuthService(db)
     return await auth_service.register(request)
+
+@router.post("/init-registration", response_model=RegistrationResponse)
+async def init_registration(
+    request: RegistrationInitRequest,
+    db: AsyncSession = Depends(get_db_session)
+):
+    """Инициализация регистрации - генерация кода верификации."""
+    auth_service = AuthService(db)
+    return await auth_service.init_registration(request)
+
+@router.post("/verify-registration", response_model=TokenResponse)
+async def verify_registration(
+    request: VerifyCodeRequest,
+    db: AsyncSession = Depends(get_db_session)
+):
+    """Подтверждение кода верификации и завершение регистрации."""
+    auth_service = AuthService(db)
+    return await auth_service.verify_registration_code(request)
 
 @router.post("/login", response_model=TokenResponse)
 async def login(

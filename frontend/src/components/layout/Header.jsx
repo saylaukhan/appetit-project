@@ -69,7 +69,7 @@ function Header() {
       <header className={styles.headerContainer}>
         <div className={styles.headerContent}>
           <Link to="/" className={styles.logo}>
-            <img src="/assets/Logo APPETIT.png" alt="APPETIT" />
+            <img src="/src/assets/Logo MAIN.png" alt="APPETIT" />
           </Link>
 
           <nav className={styles.navigation}>
@@ -142,7 +142,7 @@ function Header() {
       <div className={`${styles.mobileMenu} ${isMobileMenuOpen ? styles.open : ''}`}>
         <div className={styles.mobileMenuHeader}>
           <Link to="/" onClick={closeMobileMenu} className={styles.logo}>
-            <img src="/assets/Logo APPETIT.png" alt="APPETIT" />
+            <img src="/src/assets/Logo APPETIT.png" alt="APPETIT" />
           </Link>
           <button onClick={closeMobileMenu}>
             <X size={24} />

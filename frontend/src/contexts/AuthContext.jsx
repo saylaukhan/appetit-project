@@ -110,6 +110,18 @@ export function AuthProvider({ children }) {
       })
 
       toast.success('Добро пожаловать!')
+
+      // Если пользователь админ, кухня или курьер - перенаправляем в их панель
+      if (user.role === 'admin') {
+        window.location.href = '/admin'
+      } else if (user.role === 'kitchen') {
+        window.location.href = '/kitchen'
+      } else if (user.role === 'courier') {
+        window.location.href = '/courier'
+      } else {
+        window.location.href = '/'
+      }
+      
       return true
     } catch (error) {
       dispatch({ type: 'LOGIN_ERROR' })
@@ -119,7 +131,7 @@ export function AuthProvider({ children }) {
     }
   }
 
-  // Регистрация по номеру телефона
+  // Регистрация по номеру телефона (старый метод для совместимости)
   const register = async (phone, name, password) => {
     try {
       dispatch({ type: 'LOGIN_START' })
@@ -148,6 +160,60 @@ export function AuthProvider({ children }) {
     } catch (error) {
       dispatch({ type: 'LOGIN_ERROR' })
       const message = error.response?.data?.detail || 'Ошибка регистрации'
+      toast.error(message)
+      return false
+    }
+  }
+
+  // Инициализация регистрации - получение кода верификации
+  const initRegistration = async (phone, name, password) => {
+    try {
+      const response = await api.post('/api/v1/auth/init-registration', {
+        phone,
+        name,
+        password
+      })
+
+      return {
+        success: true,
+        data: response.data
+      }
+    } catch (error) {
+      const message = error.response?.data?.detail || 'Ошибка регистрации'
+      toast.error(message)
+      return {
+        success: false,
+        error: message
+      }
+    }
+  }
+
+  // Подтверждение кода верификации
+  const verifyRegistrationCode = async (phone, code) => {
+    try {
+      dispatch({ type: 'LOGIN_START' })
+
+      const response = await api.post('/api/v1/auth/verify-registration', {
+        phone,
+        code
+      })
+
+      const { access_token, user } = response.data
+
+      // Сохранение в localStorage
+      localStorage.setItem('auth_token', access_token)
+      localStorage.setItem('auth_user', JSON.stringify(user))
+
+      dispatch({
+        type: 'LOGIN_SUCCESS',
+        payload: { token: access_token, user }
+      })
+
+      toast.success('Добро пожаловать!')
+      return true
+    } catch (error) {
+      dispatch({ type: 'LOGIN_ERROR' })
+      const message = error.response?.data?.detail || 'Неверный код'
       toast.error(message)
       return false
     }
@@ -232,6 +298,8 @@ export function AuthProvider({ children }) {
     ...state,
     login,
     register,
+    initRegistration,
+    verifyRegistrationCode,
     requestSMS,
     verifySMS,
     logout,

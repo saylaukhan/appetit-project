@@ -10,7 +10,7 @@ function Footer() {
         <div className={styles.footerTop}>
           <div className={styles.footerSection}>
             <div className={styles.logo}>
-              <img src="/assets/Logo APPETIT.png" alt="APPETIT" />
+              <img src="/src/assets/Logo APPETIT.png" alt="APPETIT" />
             </div>
             <p>
               Ваша любимая доставка еды в городе. Быстро, вкусно и всегда свежо!
