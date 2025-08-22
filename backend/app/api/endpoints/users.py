@@ -83,6 +83,32 @@ async def get_address(
         "address_longitude": current_user.address_longitude
     }
 
+@router.delete("/me/address")
+async def delete_address(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db_session)
+):
+    """Удаление адреса пользователя."""
+    try:
+        # Очищаем все поля адреса
+        current_user.address = None
+        current_user.address_city = None
+        current_user.address_street = None
+        current_user.address_entrance = None
+        current_user.address_floor = None
+        current_user.address_apartment = None
+        current_user.address_comment = None
+        current_user.address_latitude = None
+        current_user.address_longitude = None
+        
+        await db.commit()
+        await db.refresh(current_user)
+        
+        return {"message": "Адрес успешно удален"}
+    except Exception as e:
+        await db.rollback()
+        raise HTTPException(status_code=400, detail=f"Ошибка удаления адреса: {str(e)}")
+
 @router.post("/me/newsletter")
 async def subscribe_newsletter(
     subscription: NewsletterSubscription,

@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
 import { useAddress } from '../../hooks/useAddress'
 import AddressModal from '../../components/common/AddressModal'
+import ConfirmDeleteModal from '../../components/common/ConfirmDeleteModal'
+import Toast from '../../components/common/Toast'
 import styles from './ProfilePage.module.css'
 
 function ProfilePage() {
@@ -22,9 +24,20 @@ function ProfilePage() {
   const [isLoading, setIsLoading] = useState(false)
   const [isLoadingProfile, setIsLoadingProfile] = useState(true)
   const [showAddressModal, setShowAddressModal] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [userAddressData, setUserAddressData] = useState(null)
+  const [toast, setToast] = useState({ isVisible: false, message: '', type: 'success' })
   
-  const { getUserAddress, saveUserAddress } = useAddress()
+  const { getUserAddress, saveUserAddress, deleteUserAddress } = useAddress()
+
+  // Функция для показа уведомлений
+  const showToast = (message, type = 'success') => {
+    setToast({ isVisible: true, message, type })
+  }
+
+  const hideToast = () => {
+    setToast(prev => ({ ...prev, isVisible: false }))
+  }
 
   // Функция для загрузки профиля пользователя
   const loadUserProfile = async () => {
@@ -86,13 +99,12 @@ function ProfilePage() {
         const errorData = await response.json().catch(() => ({}))
         console.error('Ошибка загрузки профиля:', response.status, errorData)
         if (response.status === 401) {
-          alert('Сессия истекла. Необходимо войти в систему заново.')
+          console.warn('Сессия истекла')
           logout && logout()
         }
       }
     } catch (error) {
       console.error('Ошибка при загрузке профиля:', error)
-      alert('Не удалось загрузить данные профиля. Проверьте подключение к серверу.')
     } finally {
       setIsLoadingProfile(false)
     }
@@ -151,7 +163,6 @@ function ProfilePage() {
       const responseData = await response.json()
 
       if (response.ok) {
-        alert('Профиль успешно обновлен!')
         console.log('Профиль обновлен:', responseData)
         // Обновляем локальное состояние с данными от сервера
         setProfileData(prev => ({
@@ -160,12 +171,13 @@ function ProfilePage() {
         }))
         // Обновляем AuthContext
         updateUser(responseData)
+        showToast('Профиль успешно обновлен!')
       } else {
-        alert(`Ошибка при обновлении профиля: ${responseData.detail || 'Неизвестная ошибка'}`)
+        console.error(`Ошибка при обновлении профиля: ${responseData.detail || 'Неизвестная ошибка'}`)
+        showToast(`Ошибка при обновлении профиля: ${responseData.detail || 'Неизвестная ошибка'}`, 'error')
       }
     } catch (error) {
       console.error('Error updating profile:', error)
-      alert('Ошибка при обновлении профиля')
     } finally {
       setIsLoading(false)
     }
@@ -173,7 +185,7 @@ function ProfilePage() {
 
   const handleSaveName = async () => {
     if (!profileData.name.trim()) {
-      alert('Пожалуйста, введите имя')
+      console.warn('Имя не указано')
       return
     }
     
@@ -193,18 +205,18 @@ function ProfilePage() {
       const responseData = await response.json()
 
       if (response.ok) {
-        alert('Имя сохранено!')
         console.log('Имя обновлено:', responseData)
         // Обновляем локальное состояние данных пользователя
         setProfileData(prev => ({ ...prev, name: responseData.name }))
         // Обновляем AuthContext для отображения в хедере
         updateUser({ name: responseData.name })
+        showToast('Имя успешно сохранено!')
       } else {
-        alert(`Ошибка при сохранении имени: ${responseData.detail || 'Неизвестная ошибка'}`)
+        console.error(`Ошибка при сохранении имени: ${responseData.detail || 'Неизвестная ошибка'}`)
+        showToast(`Ошибка при сохранении имени: ${responseData.detail || 'Неизвестная ошибка'}`, 'error')
       }
     } catch (error) {
       console.error('Error saving name:', error)
-      alert('Ошибка при сохранении имени')
     } finally {
       setIsLoading(false)
     }
@@ -216,7 +228,7 @@ function ProfilePage() {
 
   const handleSaveBirthDate = async () => {
     if (!profileData.birth_year || !profileData.birth_month || !profileData.birth_day) {
-      alert('Пожалуйста, выберите полную дату рождения')
+      console.warn('Не все поля даты рождения заполнены')
       return
     }
     
@@ -242,18 +254,18 @@ function ProfilePage() {
       const responseData = await response.json()
 
       if (response.ok) {
-        alert('Дата рождения сохранена!')
         console.log('Дата рождения обновлена:', responseData)
         setProfileData(prev => ({ ...prev, birth_date: birth_date }))
         setEditingBirthDate(false)
         // Обновляем AuthContext
         updateUser({ birth_date: birth_date })
+        showToast('Дата рождения успешно сохранена!')
       } else {
-        alert(`Ошибка при сохранении даты: ${responseData.detail || 'Неизвестная ошибка'}`)
+        console.error(`Ошибка при сохранении даты: ${responseData.detail || 'Неизвестная ошибка'}`)
+        showToast(`Ошибка при сохранении даты: ${responseData.detail || 'Неизвестная ошибка'}`, 'error')
       }
     } catch (error) {
       console.error('Error saving birth date:', error)
-      alert('Ошибка при сохранении даты рождения')
     } finally {
       setIsLoading(false)
     }
@@ -287,26 +299,53 @@ function ProfilePage() {
 
   const handleSaveAddress = async (addressData) => {
     try {
+      // Сохраняем адрес
       await saveUserAddress(addressData)
-      
+
+      // Получаем обновленные данные с сервера
+      const updatedAddressData = await getUserAddress()
+
       // Обновляем локальные данные
-      setUserAddressData(addressData)
+      setUserAddressData(updatedAddressData)
       setProfileData(prev => ({
         ...prev,
-        address: addressData.address
+        address: updatedAddressData?.address || addressData.address
       }))
-      
+
       setShowAddressModal(false)
-      alert('Адрес успешно сохранен!')
+      showToast('Адрес успешно сохранен!')
     } catch (error) {
       console.error('Ошибка сохранения адреса:', error)
-      alert('Ошибка сохранения адреса. Попробуйте снова.')
+      showToast('Ошибка сохранения адреса. Попробуйте снова.', 'error')
+    }
+  }
+
+  const handleDeleteAddressClick = () => {
+    setShowDeleteConfirm(true)
+  }
+
+  const handleConfirmDeleteAddress = async () => {
+    try {
+      await deleteUserAddress()
+      
+      // Обновляем локальные данные
+      setUserAddressData(null)
+      setProfileData(prev => ({
+        ...prev,
+        address: ''
+      }))
+      
+      setShowDeleteConfirm(false)
+      showToast('Адрес успешно удален!')
+    } catch (error) {
+      console.error('Ошибка удаления адреса:', error)
+      showToast('Ошибка удаления адреса. Попробуйте снова.', 'error')
     }
   }
 
   const handleSaveEmail = async () => {
     if (!profileData.email || !profileData.email.trim()) {
-      alert('Пожалуйста, введите email')
+      console.warn('Email не указан')
       return
     }
     
@@ -326,17 +365,17 @@ function ProfilePage() {
       const responseData = await response.json()
 
       if (response.ok) {
-        alert('Email сохранен!')
         console.log('Email обновлен:', responseData)
         setProfileData(prev => ({ ...prev, email: responseData.email }))
         // Обновляем AuthContext
         updateUser({ email: responseData.email })
+        showToast('Email успешно сохранен!')
       } else {
-        alert(`Ошибка при сохранении email: ${responseData.detail || 'Неизвестная ошибка'}`)
+        console.error(`Ошибка при сохранении email: ${responseData.detail || 'Неизвестная ошибка'}`)
+        showToast(`Ошибка при сохранении email: ${responseData.detail || 'Неизвестная ошибка'}`, 'error')
       }
     } catch (error) {
       console.error('Error saving email:', error)
-      alert('Ошибка при сохранении email')
     } finally {
       setIsLoading(false)
     }
@@ -526,9 +565,20 @@ function ProfilePage() {
                     </div>
                   )}
                 </div>
-                <button className={styles.changeBtn} onClick={handleEditAddress}>
-                  {userAddressData?.has_address ? 'Изменить' : 'Добавить адрес'}
-                </button>
+                <div className={styles.addressActions}>
+                  <button className={styles.changeBtn} onClick={handleEditAddress}>
+                    {userAddressData?.has_address ? 'Изменить' : 'Добавить адрес'}
+                  </button>
+                  {userAddressData?.has_address && (
+                    <button 
+                      className={styles.deleteBtn} 
+                      onClick={handleDeleteAddressClick}
+                      title="Удалить адрес"
+                    >
+                      Удалить адрес
+                    </button>
+                  )}
+                </div>
               </div>
 
             </div>
@@ -554,6 +604,26 @@ function ProfilePage() {
           onClose={() => setShowAddressModal(false)}
           onSave={handleSaveAddress}
           initialAddress={userAddressData}
+        />
+
+        {/* Модальное окно подтверждения удаления адреса */}
+        <ConfirmDeleteModal
+          isOpen={showDeleteConfirm}
+          onClose={() => setShowDeleteConfirm(false)}
+          onConfirm={handleConfirmDeleteAddress}
+          title="Удаление адреса"
+          message="Вы действительно хотите удалить адрес? Это действие нельзя отменить."
+          confirmText="Удалить адрес"
+          cancelText="Отмена"
+          isLoading={isLoading}
+        />
+
+        {/* Компонент уведомлений */}
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          isVisible={toast.isVisible}
+          onClose={hideToast}
         />
       </div>
     </div>

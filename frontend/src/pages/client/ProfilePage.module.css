@@ -303,6 +303,16 @@
   .formGrid {
     gap: var(--spacing-md);
   }
+  
+  .addressActions {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .changeBtn, .deleteBtn {
+    width: 100%;
+    text-align: center;
+  }
 }
 
 @media (max-width: 480px) {
@@ -360,4 +370,35 @@
   font-style: italic;
   text-align: center;
   padding: var(--spacing-md);
+}
+
+/* Стили для действий с адресом */
+.addressActions {
+  display: flex;
+  gap: var(--spacing-sm);
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: var(--spacing-sm);
+}
+
+.deleteBtn {
+  background: none;
+  border: none;
+  color: var(--primary-color);
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: 0.9rem;
+  padding: 0;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.deleteBtn:hover {
+  color: var(--primary-dark);
+}
+
+.deleteBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  color: var(--text-muted) !important;
 }

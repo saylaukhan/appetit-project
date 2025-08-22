@@ -74,23 +74,48 @@
 .locationControls {
   display: flex;
   justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+  gap: 16px;
+}
+
+.locationButtonGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+}
+
+.locationButtonContainer {
+  display: flex;
   align-items: center;
-  margin-bottom: 16px;
+  gap: 8px;
+}
+
+.locationIcon {
+  font-size: 18px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
 }
 
 .locationBtn {
   background: var(--primary-color);
   color: var(--text-white);
   border: none;
-  padding: 10px 16px;
+  padding: 8px 12px;
   border-radius: var(--radius-medium);
   cursor: pointer;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   transition: background-color 0.2s ease;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
+  width: fit-content;
 }
 
 .locationBtn:hover:not(:disabled) {
@@ -102,10 +127,79 @@
   cursor: not-allowed;
 }
 
+.errorMessage {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: var(--radius-medium);
+  font-size: 11px;
+  color: #dc2626;
+  animation: slideDown 0.3s ease-out;
+}
+
+.errorIcon {
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.retryBtn {
+  background: none;
+  border: 1px solid #dc2626;
+  color: #dc2626;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 50%;
+  font-size: 12px;
+  line-height: 1;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.retryBtn:hover:not(:disabled) {
+  background-color: #dc2626;
+  color: white;
+}
+
+.retryBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.mapHints {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
 .mapHint {
   font-size: 12px;
   color: var(--text-secondary);
   font-style: italic;
+}
+
+.locationHint {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-style: normal;
 }
 
 .mapLoading {
@@ -281,8 +375,25 @@
   
   .locationControls {
     flex-direction: column;
-    gap: 12px;
+    gap: 16px;
     align-items: flex-start;
+  }
+
+  .locationButtonGroup {
+    width: auto;
+  }
+
+  .locationControls {
+    gap: 12px;
+  }
+
+  .errorMessage {
+    font-size: 11px;
+    padding: 6px 8px;
+  }
+
+  .mapHints {
+    gap: 6px;
   }
 }
 
@@ -292,7 +403,19 @@
   }
   
   .locationBtn {
-    width: 100%;
-    justify-content: center;
+    width: auto;
+    justify-content: flex-start;
+    font-size: 12px;
+    padding: 6px 10px;
+  }
+
+  .locationIcon {
+    font-size: 16px;
+    width: 20px;
+    height: 20px;
+  }
+
+  .locationButtonContainer {
+    gap: 6px;
   }
 }

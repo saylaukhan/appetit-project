@@ -9,6 +9,7 @@ const initialState = {
   total: 0,
   itemsCount: 0,
   deliveryType: 'delivery', // 'delivery' или 'pickup'
+  pickupAddress: null, // Выбранный адрес самовывоза
   promoCode: null,
   discount: 0,
   promoData: null,
@@ -99,6 +100,14 @@ function cartReducer(state, action) {
       return {
         ...state,
         deliveryType: action.payload,
+        // Сбрасываем адрес самовывоза при смене типа доставки
+        pickupAddress: action.payload === 'pickup' ? state.pickupAddress : null,
+      }
+
+    case 'SET_PICKUP_ADDRESS':
+      return {
+        ...state,
+        pickupAddress: action.payload,
       }
 
     case 'APPLY_PROMO_CODE': {
@@ -238,6 +247,11 @@ export function CartProvider({ children }) {
     dispatch({ type: 'SET_DELIVERY_TYPE', payload: type })
   }
 
+  // Установка адреса самовывоза
+  const setPickupAddress = (address) => {
+    dispatch({ type: 'SET_PICKUP_ADDRESS', payload: address })
+  }
+
   // Применение промокода
   const applyPromoCode = async (code) => {
     try {
@@ -310,6 +324,7 @@ export function CartProvider({ children }) {
     updateQuantity,
     clearCart,
     setDeliveryType,
+    setPickupAddress,
     applyPromoCode,
     removePromoCode,
     isInCart,

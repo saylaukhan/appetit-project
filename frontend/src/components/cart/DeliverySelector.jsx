@@ -2,8 +2,20 @@ import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import styles from './DeliverySelector.module.css'
 
-function DeliverySelector({ selectedType, onTypeChange, userAddress = null }) {
+function DeliverySelector({ selectedType, onTypeChange, userAddress = null, pickupAddress, onPickupAddressChange, onEditAddress }) {
   const navigate = useNavigate()
+
+  // Список адресов ресторанов для самовывоза
+  const pickupAddresses = [
+    'Казахстан, 70А',
+    'Сатпаева, 8А',
+    'Новаторов, 18/2',
+    'Жибек Жолы, 1к8',
+    'Самарское шоссе, 5/1',
+    'Кабанбай батыра, 148',
+    'Назарбаева, 28А'
+  ]
+
   const deliveryOptions = [
     {
       type: 'delivery',
@@ -112,21 +124,30 @@ function DeliverySelector({ selectedType, onTypeChange, userAddress = null }) {
                   strokeLinejoin="round"
                 />
               </svg>
-              <div>
-                <strong>Адрес доставки:</strong><br />
-                {userAddress.address || `${userAddress.address_city || 'Усть-Каменогорск'}, ${userAddress.address_street || ''}`}
-                {(userAddress.address_entrance || userAddress.address_floor || userAddress.address_apartment) && (
-                  <>
-                    <br />
-                    {[
-                      userAddress.address_entrance && `подъезд ${userAddress.address_entrance}`,
-                      userAddress.address_floor && `этаж ${userAddress.address_floor}`,
-                      userAddress.address_apartment && `кв. ${userAddress.address_apartment}`
-                    ].filter(Boolean).join(', ')}
-                  </>
-                )}
-                <br />
-                <strong>Время доставки:</strong> 25-35 минут
+              <div className={styles.addressContainer}>
+                <div className={styles.addressInfo}>
+                  <strong>Адрес доставки:</strong><br />
+                  {userAddress.address || `${userAddress.address_city || 'Усть-Каменогорск'}, ${userAddress.address_street || ''}`}
+                  {(userAddress.address_entrance || userAddress.address_floor || userAddress.address_apartment) && (
+                    <>
+                      <br />
+                      {[
+                        userAddress.address_entrance && `подъезд ${userAddress.address_entrance}`,
+                        userAddress.address_floor && `этаж ${userAddress.address_floor}`,
+                        userAddress.address_apartment && `кв. ${userAddress.address_apartment}`
+                      ].filter(Boolean).join(', ')}
+                    </>
+                  )}
+                  <br />
+                  <strong>Время доставки:</strong> 25-35 минут
+                </div>
+                <button
+                  className={styles.editAddressButton}
+                  onClick={onEditAddress}
+                  title="Изменить адрес"
+                >
+                  Изменить
+                </button>
               </div>
             </div>
           ) : (
@@ -159,29 +180,49 @@ function DeliverySelector({ selectedType, onTypeChange, userAddress = null }) {
 
       {selectedType === 'pickup' && (
         <div className={styles.pickupInfo}>
-          <div className={styles.pickupNote}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-              <path 
-                d="M21 10C21 7 18.5 5 16 5C13.5 5 11 7 11 10C11 13 16 21 16 21S21 13 21 10Z" 
-                stroke="currentColor" 
-                strokeWidth="2" 
-                strokeLinecap="round" 
-                strokeLinejoin="round"
-              />
-              <path 
-                d="M16 8.5C16.8284 8.5 17.5 7.82843 17.5 7C17.5 6.17157 16.8284 5.5 16 5.5C15.1716 5.5 14.5 6.17157 14.5 7C14.5 7.82843 15.1716 8.5 16 8.5Z" 
-                stroke="currentColor" 
-                strokeWidth="2" 
-                strokeLinecap="round" 
-                strokeLinejoin="round"
-              />
-            </svg>
-            <div>
-              <strong>Адрес ресторана:</strong><br />
-              г. Усть-Каменогорск, ул. Протозанова, 125<br />
-              <strong>Время готовности:</strong> 15-20 минут
+          <div className={styles.pickupAddressSelector}>
+            <h5 className={styles.pickupTitle}>Выберите адрес ресторана</h5>
+            <div className={styles.addressSelectContainer}>
+              <select
+                className={styles.addressSelect}
+                value={pickupAddress || ''}
+                onChange={(e) => onPickupAddressChange(e.target.value)}
+              >
+                <option value="" disabled>Выберите адрес...</option>
+                {pickupAddresses.map((address, index) => (
+                  <option key={index} value={address}>
+                    {address}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
+
+          {pickupAddress && (
+            <div className={styles.pickupNote}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                <path
+                  d="M21 10C21 7 18.5 5 16 5C13.5 5 11 7 11 10C11 13 16 21 16 21S21 13 21 10Z"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M16 8.5C16.8284 8.5 17.5 7.82843 17.5 7C17.5 6.17157 16.8284 5.5 16 5.5C15.1716 5.5 14.5 6.17157 14.5 7C14.5 7.82843 15.1716 8.5 16 8.5Z"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              <div>
+                <strong>Адрес ресторана:</strong><br />
+                г. Усть-Каменогорск, {pickupAddress}<br />
+                <strong>Время готовности:</strong> 15-20 минут
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>

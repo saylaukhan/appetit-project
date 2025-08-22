@@ -74,6 +74,41 @@ export const useAddress = () => {
     }
   }, [])
 
+  // Удаление адреса пользователя
+  const deleteUserAddress = useCallback(async () => {
+    setIsLoading(true)
+    setError(null)
+    
+    try {
+      const token = localStorage.getItem('auth_token')
+      if (!token) {
+        throw new Error('Не найден токен авторизации')
+      }
+
+      const response = await fetch('http://localhost:8000/api/v1/users/me/address', {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.detail || 'Ошибка удаления адреса')
+      }
+
+      const data = await response.json()
+      return data
+    } catch (err) {
+      setError(err.message)
+      console.error('Ошибка удаления адреса:', err)
+      throw err
+    } finally {
+      setIsLoading(false)
+    }
+  }, [])
+
   // Проверка наличия адреса у пользователя
   const checkUserAddress = useCallback(async () => {
     const addressData = await getUserAddress()
@@ -85,6 +120,7 @@ export const useAddress = () => {
     error,
     getUserAddress,
     saveUserAddress,
+    deleteUserAddress,
     checkUserAddress
   }
 }

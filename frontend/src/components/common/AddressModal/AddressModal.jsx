@@ -1,17 +1,31 @@
 import React, { useState, useEffect, useCallback } from 'react'
+import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet'
+import 'leaflet/dist/leaflet.css'
+import L from 'leaflet'
 import styles from './AddressModal.module.css'
 
-// Простая карта без API ключа - используем OpenStreetMap
-const mapContainerStyle = {
-  width: '100%',
-  height: '300px',
-  borderRadius: '8px',
-  border: '1px solid #e0e0e0'
-}
-
+// Координаты Усть-Каменогорска
 const defaultCenter = {
   lat: 49.948265,
-  lng: 82.628062 // Координаты Усть-Каменогорска
+  lng: 82.628062
+}
+
+// Исправляем иконку маркера для Leaflet
+delete L.Icon.Default.prototype._getIconUrl
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+})
+
+// Компонент для обработки кликов по карте
+function MapClickHandler({ onMapClick }) {
+  useMapEvents({
+    click: (e) => {
+      onMapClick(e.latlng.lat, e.latlng.lng)
+    },
+  })
+  return null
 }
 
 function AddressModal({ isOpen, onClose, onSave, initialAddress = null }) {
@@ -28,6 +42,7 @@ function AddressModal({ isOpen, onClose, onSave, initialAddress = null }) {
   const [mapCenter, setMapCenter] = useState(defaultCenter)
   const [markerPosition, setMarkerPosition] = useState(defaultCenter)
   const [isLoadingLocation, setIsLoadingLocation] = useState(false)
+  const [locationError, setLocationError] = useState(null)
 
   // Заполняем форму начальными данными
   useEffect(() => {
@@ -63,31 +78,48 @@ function AddressModal({ isOpen, onClose, onSave, initialAddress = null }) {
   // Получение текущего местоположения
   const getCurrentLocation = useCallback(() => {
     if (!navigator.geolocation) {
-      alert('Геолокация не поддерживается вашим браузером')
+      setLocationError('Геолокация не поддерживается вашим браузером')
       return
     }
 
     setIsLoadingLocation(true)
+    setLocationError(null)
+
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const { latitude, longitude } = position.coords
         const newPosition = { lat: latitude, lng: longitude }
-        
+
         setMapCenter(newPosition)
         setMarkerPosition(newPosition)
-        
+
         // Получаем адрес по координатам
         reverseGeocode(latitude, longitude)
         setIsLoadingLocation(false)
       },
       (error) => {
         console.error('Ошибка получения геолокации:', error)
-        alert('Не удалось получить ваше местоположение')
         setIsLoadingLocation(false)
+
+        // Определяем тип ошибки и показываем соответствующее сообщение
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            setLocationError('Доступ к геолокации запрещен. Разрешите доступ в настройках браузера')
+            break
+          case error.POSITION_UNAVAILABLE:
+            setLocationError('Информация о местоположении недоступна')
+            break
+          case error.TIMEOUT:
+            setLocationError('Превышено время ожидания определения местоположения')
+            break
+          default:
+            setLocationError('Произошла ошибка при определении местоположения')
+            break
+        }
       },
       {
         enableHighAccuracy: true,
-        timeout: 10000,
+        timeout: 15000,
         maximumAge: 300000
       }
     )
@@ -99,35 +131,43 @@ function AddressModal({ isOpen, onClose, onSave, initialAddress = null }) {
       const response = await fetch(
         `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=ru`
       )
-      
+
       if (response.ok) {
         const data = await response.json()
         if (data && data.address) {
           const address = data.address
-          
-          // Извлекаем город и улицу
-          const city = address.city || address.town || address.village || 'Усть-Каменогорск'
-          const street = [
-            address.house_number,
-            address.road || address.street
-          ].filter(Boolean).join(' ')
-          
+
+          // Извлекаем компоненты адреса
+          const city = address.city || address.town || address.village || address.city_district || 'Усть-Каменогорск'
+          const street = address.road || address.street || address.pedestrian || address.path || ''
+          const houseNumber = address.house_number || ''
+
+          // Формируем полный адрес
+          const streetWithNumber = houseNumber && street ? `${street} ${houseNumber}` : street || houseNumber || 'Неизвестный адрес'
+
           setFormData(prev => ({
             ...prev,
             city: city,
-            street: street || prev.street,
-            fullAddress: `${city}, ${street || prev.street}`
+            street: streetWithNumber,
+            fullAddress: `${city}, ${streetWithNumber}`
           }))
         }
       }
     } catch (error) {
       console.error('Ошибка обратного геокодирования:', error)
+      // В случае ошибки показываем базовый адрес
+      setFormData(prev => ({
+        ...prev,
+        fullAddress: `${prev.city}, координаты: ${lat.toFixed(6)}, ${lng.toFixed(6)}`
+      }))
     }
   }
 
-  // Обработка клика по карте - теперь без Google Maps API
+  // Обработка клика по карте
   const handleMapClick = useCallback((lat, lng) => {
-    setMarkerPosition({ lat, lng })
+    const newPosition = { lat, lng }
+    setMarkerPosition(newPosition)
+    setMapCenter(newPosition) // Центрируем карту на новом маркере
     reverseGeocode(lat, lng)
   }, [])
 
@@ -143,7 +183,7 @@ function AddressModal({ isOpen, onClose, onSave, initialAddress = null }) {
   // Сохранение адреса
   const handleSave = () => {
     if (!formData.fullAddress.trim()) {
-      alert('Пожалуйста, укажите адрес')
+      console.warn('Адрес не указан')
       return
     }
 
@@ -170,6 +210,7 @@ function AddressModal({ isOpen, onClose, onSave, initialAddress = null }) {
     }
 
     onSave(addressData)
+    onClose() // Закрываем модальное окно сразу после сохранения
   }
 
   if (!isOpen) return null
@@ -186,27 +227,72 @@ function AddressModal({ isOpen, onClose, onSave, initialAddress = null }) {
           {/* Геолокация и карта */}
           <div className={styles.mapSection}>
             <div className={styles.locationControls}>
-              <button 
-                className={styles.locationBtn}
-                onClick={getCurrentLocation}
-                disabled={isLoadingLocation}
-              >
-                {isLoadingLocation ? 'Определение...' : '📍 Мое местоположение'}
-              </button>
-              <span className={styles.mapHint}>
-                Нажмите на карту, чтобы указать точное местоположение
-              </span>
+              <div className={styles.locationButtonGroup}>
+                <div className={styles.locationButtonContainer}>
+                  <span className={styles.locationIcon}>📍</span>
+                  <button
+                    className={styles.locationBtn}
+                    onClick={getCurrentLocation}
+                    disabled={isLoadingLocation}
+                  >
+                    {isLoadingLocation ? 'Определение...' : 'Мое местоположение'}
+                  </button>
+                </div>
+                {locationError && (
+                  <div className={styles.errorMessage}>
+                    <span className={styles.errorIcon}>⚠️</span>
+                    <span>{locationError}</span>
+                    <button
+                      className={styles.retryBtn}
+                      onClick={getCurrentLocation}
+                      disabled={isLoadingLocation}
+                      title="Попробовать снова"
+                    >
+                      ↻
+                    </button>
+                  </div>
+                )}
+              </div>
+              <div className={styles.mapHints}>
+                <span className={styles.mapHint}>
+                  Нажмите на карту, чтобы указать точное местоположение
+                </span>
+                <span className={styles.locationHint}>
+                  💡 Для определения местоположения нужно разрешить доступ к геолокации в браузере
+                </span>
+              </div>
             </div>
 
             <div className={styles.mapContainer}>
-              <iframe
-                style={mapContainerStyle}
-                src={`https://www.openstreetmap.org/export/embed.html?bbox=${markerPosition.lng-0.01},${markerPosition.lat-0.01},${markerPosition.lng+0.01},${markerPosition.lat+0.01}&layer=mapnik&marker=${markerPosition.lat},${markerPosition.lng}`}
-                frameBorder="0"
-                scrolling="no"
-                title="Карта"
-              ></iframe>
-
+              <MapContainer
+                center={mapCenter}
+                zoom={15}
+                style={{
+                  width: '100%',
+                  height: '300px',
+                  borderRadius: '8px',
+                  border: '1px solid #e0e0e0'
+                }}
+                whenReady={(map) => {
+                  // Центрируем карту на маркере при загрузке
+                  map.target.flyTo(markerPosition, 15)
+                }}
+              >
+                <TileLayer
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                />
+                <MapClickHandler onMapClick={handleMapClick} />
+                <Marker position={markerPosition}>
+                  <Popup>
+                    <div style={{ textAlign: 'center' }}>
+                      <strong>Выбранное место</strong>
+                      <br />
+                      <small>Кликните в другом месте, чтобы изменить</small>
+                    </div>
+                  </Popup>
+                </Marker>
+              </MapContainer>
             </div>
           </div>
 

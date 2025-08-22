@@ -6,27 +6,33 @@ import CartItem from '../../components/cart/CartItem'
 import PromoCodeInput from '../../components/cart/PromoCodeInput'
 import DeliverySelector from '../../components/cart/DeliverySelector'
 import LoadingSpinner from '../../components/common/LoadingSpinner'
+import AddressModal from '../../components/common/AddressModal'
+import Toast from '../../components/common/Toast'
 import styles from './CartPage.module.css'
 
 function CartPage() {
   const navigate = useNavigate()
-  const { 
-    items, 
-    total, 
-    itemsCount, 
+  const {
+    items,
+    total,
+    itemsCount,
     subtotal,
     discount,
     discountAmount,
     deliveryType,
+    pickupAddress,
     promoCode,
     clearCart,
-    setDeliveryType 
+    setDeliveryType,
+    setPickupAddress
   } = useCart()
   
-  const { getUserAddress } = useAddress()
+  const { getUserAddress, saveUserAddress } = useAddress()
   
   const [isLoading, setIsLoading] = useState(false)
   const [userAddress, setUserAddress] = useState(null)
+  const [showAddressModal, setShowAddressModal] = useState(false)
+  const [toast, setToast] = useState({ isVisible: false, message: '', type: 'success' })
 
   const deliveryFee = deliveryType === 'delivery' ? 199 : 0
   const finalTotal = total + deliveryFee
@@ -65,6 +71,43 @@ function CartPage() {
 
   const handleContinueShopping = () => {
     navigate('/menu')
+  }
+
+  // Функции для работы с уведомлениями
+  const showToast = (message, type = 'success') => {
+    setToast({ isVisible: true, message, type })
+  }
+
+  const hideToast = () => {
+    setToast(prev => ({ ...prev, isVisible: false }))
+  }
+
+  // Обработчик редактирования адреса
+  const handleEditAddress = () => {
+    setShowAddressModal(true)
+  }
+
+  // Обработчик сохранения адреса
+  const handleSaveAddress = async (addressData) => {
+    try {
+      setIsLoading(true)
+
+      // Сохраняем адрес
+      await saveUserAddress(addressData)
+
+      // Получаем обновленные данные с сервера
+      const updatedAddressData = await getUserAddress()
+
+      // Обновляем локальные данные
+      setUserAddress(updatedAddressData)
+      setShowAddressModal(false)
+      showToast('Адрес успешно сохранен!')
+    } catch (error) {
+      console.error('Ошибка сохранения адреса:', error)
+      showToast('Ошибка сохранения адреса. Попробуйте снова.', 'error')
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   if (items.length === 0) {
@@ -137,10 +180,13 @@ function CartPage() {
             <div className={styles.summaryCard}>
               <h3>Ваш заказ</h3>
               
-              <DeliverySelector 
+              <DeliverySelector
                 selectedType={deliveryType}
                 onTypeChange={setDeliveryType}
                 userAddress={userAddress}
+                pickupAddress={pickupAddress}
+                onPickupAddressChange={setPickupAddress}
+                onEditAddress={handleEditAddress}
               />
 
               <PromoCodeInput />
@@ -193,6 +239,22 @@ function CartPage() {
           </div>
         </div>
       </div>
+
+      {/* Модальное окно для редактирования адреса */}
+      <AddressModal
+        isOpen={showAddressModal}
+        onClose={() => setShowAddressModal(false)}
+        onSave={handleSaveAddress}
+        initialAddress={userAddress}
+      />
+
+      {/* Компонент уведомлений */}
+      <Toast
+        message={toast.message}
+        type={toast.type}
+        isVisible={toast.isVisible}
+        onClose={hideToast}
+      />
     </div>
   )
 }
