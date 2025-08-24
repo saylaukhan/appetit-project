@@ -204,7 +204,7 @@ async def create_order(
         created_at=order.created_at.isoformat()
     )
 
-@router.get("/")
+@router.get("/", response_model=List[OrderResponse])
 async def get_orders(
     current_user: User = Depends(get_current_user_optional),
     db: AsyncSession = Depends(get_db_session)
@@ -213,21 +213,46 @@ async def get_orders(
     if not current_user:
         raise HTTPException(status_code=401, detail="Необходима авторизация")
     
+    # Получаем заказы пользователя
     query = select(Order).where(Order.user_id == current_user.id).order_by(Order.created_at.desc())
     result = await db.execute(query)
     orders = result.scalars().all()
     
-    return [
-        {
-            "id": order.id,
-            "order_number": order.order_number,
-            "status": order.status,
-            "delivery_type": order.delivery_type,
-            "total_amount": order.total_amount,
-            "created_at": order.created_at.isoformat()
-        }
-        for order in orders
-    ]
+    # Формируем ответ с полной информацией о заказах
+    orders_response = []
+    for order in orders:
+        # Получаем товары для каждого заказа
+        items_query = select(OrderItem).where(OrderItem.order_id == order.id)
+        items_result = await db.execute(items_query)
+        items = items_result.scalars().all()
+        
+        items_response = [
+            OrderItemResponse(
+                id=item.id,
+                dish_name=item.dish_name,
+                quantity=item.quantity,
+                price=item.price,
+                total_price=item.total_price,
+                modifiers=[mod['name'] for mod in (item.modifiers or [])]
+            )
+            for item in items
+        ]
+        
+        orders_response.append(OrderResponse(
+            id=order.id,
+            order_number=order.order_number,
+            status=order.status,
+            delivery_type=order.delivery_type,
+            payment_method=order.payment_method,
+            total_amount=order.total_amount,
+            delivery_address=order.delivery_address,
+            customer_name=order.customer_name,
+            customer_phone=order.customer_phone,
+            items=items_response,
+            created_at=order.created_at.isoformat()
+        ))
+    
+    return orders_response
 
 @router.get("/{order_id}")
 async def get_order(

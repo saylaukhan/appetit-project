@@ -364,7 +364,7 @@ function ProfilePage() {
     setIsLoadingOrders(true)
     try {
       const token = localStorage.getItem('auth_token')
-      const response = await fetch('http://localhost:8000/api/v1/orders/', {
+      const response = await fetch('http://localhost:8000/api/v1/users/me/orders', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -374,7 +374,9 @@ function ProfilePage() {
         const ordersData = await response.json()
         setOrders(ordersData)
       } else {
-        console.error('Ошибка загрузки заказов')
+        console.error('Ошибка загрузки заказов:', response.status)
+        const errorText = await response.text()
+        console.error('Детали ошибки:', errorText)
       }
     } catch (error) {
       console.error('Ошибка загрузки заказов:', error)

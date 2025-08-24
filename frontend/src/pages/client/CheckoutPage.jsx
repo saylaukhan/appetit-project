@@ -184,7 +184,7 @@ function CheckoutPage() {
         headers['Authorization'] = `Bearer ${token}`
       }
 
-      const response = await fetch('http://localhost:8000/api/v1/orders/', {
+      const response = await fetch('http://localhost:8000/api/v1/orders', {
         method: 'POST',
         headers,
         body: JSON.stringify(orderData)

@@ -7,6 +7,7 @@ pydantic-settings==2.7.0
 # База данных
 sqlalchemy==2.0.36
 alembic==1.14.0
+aiosqlite==0.21.0
 
 # Аутентификация и безопасность
 python-jose[cryptography]==3.3.0

@@ -90,6 +90,7 @@ export const menuAPI = {
 export const ordersAPI = {
   createOrder: (orderData) => api.post('/api/v1/orders', orderData),
   getOrders: (params = {}) => api.get('/api/v1/orders', { params }),
+  getMyOrders: () => api.get('/api/v1/users/me/orders'), // Новый метод для получения заказов пользователя
   getOrder: (orderId) => api.get(`/api/v1/orders/${orderId}`),
   updateOrderStatus: (orderId, status) => api.patch(`/api/v1/orders/${orderId}/status`, { status }),
   assignCourier: (orderId, courierId) => api.patch(`/api/v1/orders/${orderId}/assign`, { courier_id: courierId }),

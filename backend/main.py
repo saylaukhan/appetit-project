@@ -102,9 +102,16 @@ def create_application() -> FastAPI:
     # CORS настройки - исправленные для разработки
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["*"],  # Разрешаем все источники для разработки
-        allow_credentials=False,  # При allow_origins=["*"] должно быть False
-        allow_methods=["*"],
+        allow_origins=[
+            "http://localhost:3000",  # React dev server
+            "http://localhost:3001",  # Vite dev server (альтернативный порт)
+            "http://localhost:5173",  # Vite dev server
+            "http://127.0.0.1:3000",
+            "http://127.0.0.1:3001",
+            "http://127.0.0.1:5173"
+        ],
+        allow_credentials=True,  # Разрешаем отправку cookies и токенов
+        allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
         allow_headers=["*"],
     )
     
