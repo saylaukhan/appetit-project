@@ -1,0 +1,426 @@
+/* Order Details Modal Styles */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: var(--z-modal);
+  padding: var(--spacing-lg);
+}
+
+.modalContent {
+  background: var(--surface);
+  border-radius: var(--radius-large);
+  width: 100%;
+  max-width: 800px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-large);
+  animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-xl);
+  border-bottom: 1px solid var(--border-light);
+  position: sticky;
+  top: 0;
+  background: var(--surface);
+  z-index: 1;
+  border-radius: var(--radius-large) var(--radius-large) 0 0;
+}
+
+.modalHeader h2 {
+  color: var(--text-primary);
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.closeButton {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: var(--spacing-sm);
+  border-radius: var(--radius-medium);
+  transition: all 0.2s ease;
+}
+
+.closeButton:hover {
+  background: var(--surface-hover);
+  color: var(--text-primary);
+}
+
+.modalBody {
+  padding: var(--spacing-xl);
+}
+
+.orderStatus {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-lg);
+  background: rgba(233, 74, 78, 0.1);
+  border-radius: var(--radius-medium);
+  font-weight: 600;
+  font-size: 1.1rem;
+  border: 2px solid currentColor;
+  margin-bottom: var(--spacing-xl);
+}
+
+/* Индикатор прогресса заказа */
+.progressContainer {
+  background: var(--surface-hover);
+  border-radius: var(--radius-large);
+  padding: var(--spacing-xl);
+  margin-bottom: var(--spacing-xl);
+  border: 1px solid var(--border-light);
+}
+
+.progressSteps {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+}
+
+.progressStep {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  flex: 1;
+}
+
+.stepIcon {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface);
+  border: 3px solid var(--border-color);
+  color: var(--text-muted);
+  transition: all 0.3s ease;
+  margin-bottom: var(--spacing-md);
+  z-index: 2;
+}
+
+.stepIcon.completed {
+  background: var(--accent-color);
+  border-color: var(--accent-color);
+  color: white;
+}
+
+.stepIcon.current {
+  background: var(--primary-color);
+  border-color: var(--primary-color);
+  color: white;
+  animation: pulse 2s infinite;
+}
+
+.stepText {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  text-align: center;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.stepText.completedText {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.stepConnector {
+  position: absolute;
+  top: 25px;
+  left: 50%;
+  right: -50%;
+  height: 3px;
+  background: var(--border-color);
+  transition: background-color 0.3s ease;
+  z-index: 1;
+}
+
+.stepConnector.completedConnector {
+  background: var(--accent-color);
+}
+
+/* Анимация пульсации для текущего этапа */
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(233, 74, 78, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(233, 74, 78, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(233, 74, 78, 0);
+  }
+}
+
+.orderInfo {
+  display: grid;
+  gap: var(--spacing-xl);
+}
+
+.infoSection {
+  background: var(--surface-hover);
+  border-radius: var(--radius-large);
+  padding: var(--spacing-xl);
+  border: 1px solid var(--border-light);
+}
+
+.infoSection h3 {
+  color: var(--text-primary);
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: var(--spacing-lg);
+  padding-bottom: var(--spacing-md);
+  border-bottom: 2px solid var(--primary-color);
+  position: relative;
+}
+
+.infoSection h3:after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 60px;
+  height: 2px;
+  background: var(--primary-color);
+}
+
+.infoGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-lg);
+}
+
+.infoItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-md);
+  background: var(--surface);
+  border-radius: var(--radius-medium);
+  border: 1px solid var(--border-light);
+}
+
+.infoLabel {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.infoValue {
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.addressInfo {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-lg);
+  background: var(--surface);
+  border-radius: var(--radius-medium);
+  border-left: 4px solid var(--primary-color);
+  font-size: 1.1rem;
+}
+
+.addressInfo svg {
+  color: var(--primary-color);
+  flex-shrink: 0;
+}
+
+.orderItems {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.orderItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-lg);
+  background: var(--surface);
+  border-radius: var(--radius-medium);
+  border: 1px solid var(--border-light);
+  transition: all 0.2s ease;
+}
+
+.orderItem:hover {
+  box-shadow: var(--shadow-small);
+  transform: translateY(-1px);
+}
+
+.itemInfo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.itemName {
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.itemQuantity {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.itemPrice {
+  color: var(--primary-color);
+  font-weight: 700;
+  font-size: 1.2rem;
+}
+
+.contactInfo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.contactItem {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md) var(--spacing-lg);
+  background: var(--surface);
+  border-radius: var(--radius-medium);
+  border-left: 4px solid var(--accent-color);
+}
+
+.contactItem svg {
+  color: var(--accent-color);
+  flex-shrink: 0;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  .modalOverlay {
+    padding: var(--spacing-md);
+    align-items: flex-start;
+    padding-top: 20px;
+  }
+
+  .modalContent {
+    max-height: 95vh;
+  }
+
+  .modalHeader {
+    padding: var(--spacing-lg);
+  }
+
+  .modalHeader h2 {
+    font-size: 1.25rem;
+  }
+
+  .modalBody {
+    padding: var(--spacing-lg);
+  }
+
+  .progressContainer {
+    padding: var(--spacing-lg);
+  }
+
+  .progressSteps {
+    flex-direction: column;
+    gap: var(--spacing-lg);
+  }
+
+  .progressStep {
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+  }
+
+  .stepIcon {
+    margin-bottom: 0;
+    margin-right: var(--spacing-md);
+    width: 40px;
+    height: 40px;
+  }
+
+  .stepText {
+    text-align: left;
+    font-size: 1rem;
+  }
+
+  .stepConnector {
+    display: none;
+  }
+
+  .infoSection {
+    padding: var(--spacing-lg);
+  }
+
+  .infoGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .orderItem {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-md);
+  }
+
+  .itemPrice {
+    align-self: flex-end;
+  }
+}
+
+/* Анимации для элементов */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.infoSection {
+  animation: fadeInUp 0.4s ease-out;
+}
+
+.infoSection:nth-child(1) {
+  animation-delay: 0.1s;
+}
+
+.infoSection:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.infoSection:nth-child(3) {
+  animation-delay: 0.3s;
+}

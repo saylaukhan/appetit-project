@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
 import { useAddress } from '../../hooks/useAddress'
-import { MapPin, Edit2, Plus, User, Calendar, Phone, Mail, Package, Clock, CheckCircle, XCircle, Truck, CreditCard, Wallet } from 'lucide-react'
+import { MapPin, Edit2, Plus, User, Calendar, Phone, Mail, Package, Clock, CheckCircle, XCircle, Truck, CreditCard, Wallet, Eye } from 'lucide-react'
 import AddressModal from '../../components/common/AddressModal'
 import ConfirmDeleteModal from '../../components/common/ConfirmDeleteModal'
+import OrderDetailsModal from '../../components/common/OrderDetailsModal'
 import Toast from '../../components/common/Toast'
 import styles from './ProfilePage.module.css'
 
@@ -30,6 +31,8 @@ function ProfilePage() {
   const [orders, setOrders] = useState([])
   const [isLoadingOrders, setIsLoadingOrders] = useState(false)
   const [cancellingOrder, setCancellingOrder] = useState(null)
+  const [showOrderDetails, setShowOrderDetails] = useState(false)
+  const [selectedOrder, setSelectedOrder] = useState(null)
   const [toast, setToast] = useState({ isVisible: false, message: '', type: 'success' })
   
   const { getUserAddress, saveUserAddress, deleteUserAddress } = useAddress()
@@ -383,6 +386,16 @@ function ProfilePage() {
     } finally {
       setIsLoadingOrders(false)
     }
+  }
+
+  const handleOrderDetails = (order) => {
+    setSelectedOrder(order)
+    setShowOrderDetails(true)
+  }
+
+  const handleCloseOrderDetails = () => {
+    setShowOrderDetails(false)
+    setSelectedOrder(null)
   }
 
   const cancelOrder = async (orderId) => {
@@ -816,15 +829,24 @@ function ProfilePage() {
                             <div className={styles.totalAmount}>
                               Итого: <strong>{order.total_amount} ₸</strong>
                             </div>
-                            {canCancelOrder(order.status) && (
+                            <div className={styles.orderActions}>
                               <button 
-                                className={styles.cancelOrderBtn}
-                                onClick={() => cancelOrder(order.id)}
-                                disabled={cancellingOrder === order.id}
+                                className={styles.detailsBtn}
+                                onClick={() => handleOrderDetails(order)}
                               >
-                                {cancellingOrder === order.id ? 'Отмена...' : 'Отменить заказ'}
+                                <Eye size={16} />
+                                Подробнее
                               </button>
-                            )}
+                              {canCancelOrder(order.status) && (
+                                <button 
+                                  className={styles.cancelOrderBtn}
+                                  onClick={() => cancelOrder(order.id)}
+                                  disabled={cancellingOrder === order.id}
+                                >
+                                  {cancellingOrder === order.id ? 'Отмена...' : 'Отменить заказ'}
+                                </button>
+                              )}
+                            </div>
                           </div>
                         </div>
                       ))}
@@ -855,6 +877,13 @@ function ProfilePage() {
           confirmText="Удалить адрес"
           cancelText="Отмена"
           isLoading={isLoading}
+        />
+
+        {/* Модальное окно деталей заказа */}
+        <OrderDetailsModal
+          isOpen={showOrderDetails}
+          onClose={handleCloseOrderDetails}
+          order={selectedOrder}
         />
 
         {/* Компонент уведомлений */}
