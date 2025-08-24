@@ -402,3 +402,313 @@
   cursor: not-allowed;
   color: var(--text-muted) !important;
 }
+
+/* Навигация по вкладкам */
+.tabNavigation {
+  display: flex;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-2xl);
+  border-bottom: 2px solid var(--border-light);
+}
+
+.tabButton {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  background: none;
+  border: none;
+  padding: var(--spacing-md) var(--spacing-lg);
+  color: var(--text-secondary);
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: all 0.2s ease;
+  border-radius: var(--radius-small) var(--radius-small) 0 0;
+}
+
+.tabButton:hover {
+  color: var(--primary-color);
+  background: var(--surface-hover);
+}
+
+.tabButton.activeTab {
+  color: var(--primary-color);
+  border-bottom-color: var(--primary-color);
+  background: var(--surface);
+}
+
+/* Секция заказов */
+.orderSection {
+  background: var(--surface);
+  padding: var(--spacing-2xl);
+  border-radius: var(--radius-large);
+  box-shadow: var(--shadow-small);
+}
+
+.orderSection h2 {
+  color: var(--text-primary);
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: var(--spacing-lg);
+  border-bottom: 1px solid var(--border-light);
+  padding-bottom: var(--spacing-md);
+}
+
+/* Пустое состояние заказов */
+.emptyOrders {
+  text-align: center;
+  padding: var(--spacing-3xl) var(--spacing-2xl);
+  color: var(--text-secondary);
+}
+
+.emptyIcon {
+  color: var(--text-muted);
+  margin-bottom: var(--spacing-lg);
+}
+
+.emptyOrders h3 {
+  color: var(--text-primary);
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: var(--spacing-sm);
+}
+
+.emptyOrders p {
+  font-size: 1rem;
+  margin: 0;
+}
+
+/* Сетка заказов */
+.ordersGrid {
+  display: grid;
+  gap: var(--spacing-lg);
+}
+
+/* Карточка заказа */
+.orderCard {
+  background: var(--background);
+  border: 2px solid var(--border-light);
+  border-radius: var(--radius-large);
+  padding: var(--spacing-lg);
+  transition: all 0.2s ease;
+}
+
+.orderCard:hover {
+  border-color: var(--primary-light);
+  box-shadow: var(--shadow-small);
+}
+
+/* Заголовок заказа */
+.orderHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--spacing-md);
+  padding-bottom: var(--spacing-md);
+  border-bottom: 1px solid var(--border-light);
+}
+
+.orderInfo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.orderNumber {
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 1.125rem;
+}
+
+.orderDate {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+/* Статус заказа */
+.orderStatus {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-medium);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.statusText {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+/* Иконки статусов */
+.statusIconPending {
+  color: var(--warning-color);
+}
+
+.statusIconConfirmed {
+  color: var(--info-color);
+}
+
+.statusIconPreparing {
+  color: var(--primary-color);
+}
+
+.statusIconReady {
+  color: var(--accent-color);
+}
+
+.statusIconDelivered {
+  color: var(--success-color);
+}
+
+.statusIconCancelled {
+  color: var(--error-color);
+}
+
+/* Детали заказа */
+.orderDetails {
+  margin-bottom: var(--spacing-lg);
+}
+
+.orderMeta {
+  display: flex;
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-md);
+}
+
+.deliveryInfo,
+.paymentInfo {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.addressInfo {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  margin-bottom: var(--spacing-md);
+}
+
+/* Позиции заказа */
+.orderItems {
+  background: var(--surface);
+  border-radius: var(--radius-medium);
+  padding: var(--spacing-md);
+}
+
+.orderItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-sm) 0;
+}
+
+.orderItem:not(:last-child) {
+  border-bottom: 1px solid var(--border-light);
+  margin-bottom: var(--spacing-sm);
+  padding-bottom: var(--spacing-sm);
+}
+
+.itemName {
+  color: var(--text-primary);
+  font-weight: 500;
+  flex: 1;
+}
+
+.itemPrice {
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+/* Подвал заказа */
+.orderFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: var(--spacing-md);
+  border-top: 1px solid var(--border-light);
+}
+
+.totalAmount {
+  color: var(--text-primary);
+  font-size: 1.125rem;
+}
+
+.totalAmount strong {
+  font-weight: 700;
+  color: var(--primary-color);
+}
+
+/* Кнопка отмены заказа */
+.cancelOrderBtn {
+  background: none;
+  border: 2px solid var(--error-color);
+  color: var(--error-color);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-medium);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cancelOrderBtn:hover:not(:disabled) {
+  background: var(--error-color);
+  color: var(--text-white);
+}
+
+.cancelOrderBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Адаптивность для заказов */
+@media (max-width: 768px) {
+  .tabNavigation {
+    flex-direction: column;
+  }
+  
+  .tabButton {
+    justify-content: center;
+    text-align: center;
+  }
+  
+  .orderHeader {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-sm);
+  }
+  
+  .orderMeta {
+    flex-direction: column;
+    gap: var(--spacing-sm);
+  }
+  
+  .orderFooter {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-md);
+  }
+  
+  .totalAmount {
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .orderCard {
+    padding: var(--spacing-md);
+  }
+  
+  .orderSection {
+    padding: var(--spacing-lg);
+  }
+}

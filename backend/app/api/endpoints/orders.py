@@ -11,7 +11,7 @@ from app.core.database import get_db_session
 from app.schemas.order import OrderCreateRequest, OrderResponse, OrderItemResponse
 from app.utils.auth_dependencies import get_current_user_optional
 from app.models.user import User
-from app.models.order import Order, OrderItem, OrderStatus, DeliveryType, PaymentStatus
+from app.models.order import Order, OrderItem, OrderStatus, DeliveryType, PaymentStatus, PaymentMethod
 from app.models.menu import Dish, Variant
 from app.models.promo_code import PromoCode, DiscountType
 
@@ -139,6 +139,7 @@ async def create_order(
         'customer_phone': current_user.phone if current_user else request.phone,
         'customer_email': current_user.email if current_user else None,
         'delivery_type': request.delivery_type,
+        'payment_method': request.payment_method,
         'delivery_address': request.delivery_address,
         'status': OrderStatus.PENDING,
         'payment_status': PaymentStatus.PENDING,
@@ -191,8 +192,10 @@ async def create_order(
     
     return OrderResponse(
         id=order.id,
+        order_number=order.order_number,
         status=order.status,
         delivery_type=order.delivery_type,
+        payment_method=order.payment_method,
         total_amount=order.total_amount,
         delivery_address=order.delivery_address,
         customer_name=order.customer_name,
@@ -263,8 +266,10 @@ async def get_order(
     
     return OrderResponse(
         id=order.id,
+        order_number=order.order_number,
         status=order.status,
         delivery_type=order.delivery_type,
+        payment_method=order.payment_method,
         total_amount=order.total_amount,
         delivery_address=order.delivery_address,
         customer_name=order.customer_name,
@@ -272,3 +277,39 @@ async def get_order(
         items=items_response,
         created_at=order.created_at.isoformat()
     )
+
+@router.patch("/{order_id}/cancel")
+async def cancel_order(
+    order_id: int,
+    current_user: User = Depends(get_current_user_optional),
+    db: AsyncSession = Depends(get_db_session)
+):
+    """Отмена заказа."""
+    if not current_user:
+        raise HTTPException(status_code=401, detail="Необходима авторизация")
+    
+    query = select(Order).where(Order.id == order_id)
+    result = await db.execute(query)
+    order = result.scalar_one_or_none()
+    
+    if not order:
+        raise HTTPException(status_code=404, detail="Заказ не найден")
+    
+    # Проверяем права доступа
+    if order.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Нет доступа к этому заказу")
+    
+    # Проверяем, можно ли отменить заказ
+    if order.status not in [OrderStatus.PENDING, OrderStatus.CONFIRMED]:
+        raise HTTPException(
+            status_code=400, 
+            detail="Заказ нельзя отменить на текущем этапе"
+        )
+    
+    # Отменяем заказ
+    order.status = OrderStatus.CANCELLED
+    order.updated_at = datetime.now()
+    
+    await db.commit()
+    
+    return {"message": "Заказ успешно отменен", "order_id": order_id}

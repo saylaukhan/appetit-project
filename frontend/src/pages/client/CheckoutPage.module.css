@@ -2,4 +2,532 @@
 .checkoutContainer {
   min-height: calc(100vh - var(--header-height));
   padding: var(--spacing-xl) 0;
+  background-color: var(--background);
+}
+
+.checkoutContent {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-md);
+}
+
+.checkoutHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-2xl);
+  padding-bottom: var(--spacing-lg);
+  border-bottom: 1px solid var(--border-light);
+}
+
+.checkoutHeader h1 {
+  color: var(--text-primary);
+  font-size: 2.5rem;
+  margin: 0;
+}
+
+.backButton {
+  background: none;
+  border: none;
+  color: var(--primary-color);
+  font-size: 1rem;
+  cursor: pointer;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-medium);
+  transition: all 0.2s ease;
+}
+
+.backButton:hover {
+  background-color: var(--primary-light);
+  color: var(--primary-dark);
+}
+
+.checkoutLayout {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: var(--spacing-2xl);
+}
+
+/* Основная форма */
+.checkoutForm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2xl);
+}
+
+.formSection {
+  background: var(--surface);
+  padding: var(--spacing-2xl);
+  border-radius: var(--radius-large);
+  box-shadow: var(--shadow-small);
+}
+
+.formSection h3 {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  color: var(--text-primary);
+  font-size: 1.25rem;
+  margin-bottom: var(--spacing-lg);
+  font-weight: 600;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-lg);
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.inputGroup label {
+  color: var(--text-secondary);
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+
+.inputGroup input,
+.commentTextarea {
+  padding: var(--spacing-md);
+  border: 2px solid var(--border-light);
+  border-radius: var(--radius-medium);
+  font-size: 1rem;
+  transition: border-color 0.2s ease;
+  background: var(--surface);
+}
+
+.inputGroup input:focus,
+.commentTextarea:focus {
+  outline: none;
+  border-color: var(--primary-color);
+}
+
+.phoneInput {
+  display: flex;
+  align-items: center;
+  border: 2px solid var(--border-light);
+  border-radius: var(--radius-medium);
+  background: var(--surface);
+  transition: border-color 0.2s ease;
+}
+
+.phoneInput:focus-within {
+  border-color: var(--primary-color);
+}
+
+.phoneInput span {
+  padding: 0 var(--spacing-md);
+  color: var(--text-secondary);
+  font-weight: 500;
+  border-right: 1px solid var(--border-light);
+}
+
+.phoneInput input {
+  border: none;
+  padding: var(--spacing-md);
+  flex: 1;
+  background: transparent;
+}
+
+/* Адрес доставки */
+.addressCard {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: var(--spacing-lg);
+  background: var(--background);
+  border: 2px solid var(--border-light);
+  border-radius: var(--radius-medium);
+  gap: var(--spacing-md);
+}
+
+.addressInfo {
+  flex: 1;
+}
+
+.addressText {
+  color: var(--text-primary);
+  font-weight: 500;
+  margin-bottom: var(--spacing-xs);
+}
+
+.addressDetails {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+.editButton {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  background: none;
+  border: 2px solid var(--primary-color);
+  color: var(--primary-color);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-medium);
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.editButton:hover {
+  background: var(--primary-color);
+  color: var(--text-white);
+}
+
+.noAddress {
+  text-align: center;
+  padding: var(--spacing-2xl);
+  color: var(--text-secondary);
+}
+
+.addAddressButton {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  background: var(--primary-color);
+  border: none;
+  color: var(--text-white);
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-radius: var(--radius-medium);
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  margin-top: var(--spacing-md);
+}
+
+.addAddressButton:hover {
+  background: var(--primary-dark);
+}
+
+/* Способы оплаты */
+.paymentMethods {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+}
+
+.paymentMethod {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-lg);
+  border: 2px solid var(--border-light);
+  border-radius: var(--radius-medium);
+  background: var(--surface);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 1rem;
+}
+
+.paymentMethod:hover {
+  border-color: var(--primary-light);
+  background: var(--surface-hover);
+}
+
+.paymentMethod.active {
+  border-color: var(--primary-color);
+  background: var(--primary-light);
+  color: var(--primary-dark);
+}
+
+.paymentMethod span {
+  font-weight: 500;
+}
+
+/* Форма карты */
+.cardForm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  padding: var(--spacing-lg);
+  background: var(--background);
+  border-radius: var(--radius-medium);
+  border: 1px solid var(--border-light);
+}
+
+.cardInputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.cardInputGroup label {
+  color: var(--text-secondary);
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+
+.cardInputGroup input {
+  padding: var(--spacing-md);
+  border: 2px solid var(--border-light);
+  border-radius: var(--radius-medium);
+  font-size: 1rem;
+  transition: border-color 0.2s ease;
+  background: var(--surface);
+}
+
+.cardInputGroup input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+}
+
+.cardNumber {
+  font-family: 'Courier New', monospace;
+  letter-spacing: 1px;
+}
+
+.cardRow {
+  display: grid;
+  grid-template-columns: 1fr 120px;
+  gap: var(--spacing-md);
+}
+
+.cardExpiry,
+.cardCvv {
+  font-family: 'Courier New', monospace;
+  text-align: center;
+}
+
+/* Информация о наличных */
+.cashInfo {
+  padding: var(--spacing-lg);
+  background: var(--accent-color);
+  color: var(--text-white);
+  border-radius: var(--radius-medium);
+  text-align: center;
+}
+
+.cashInfo p {
+  margin: 0;
+  font-weight: 500;
+}
+
+/* Комментарий */
+.commentTextarea {
+  width: 100%;
+  min-height: 80px;
+  resize: vertical;
+  font-family: inherit;
+}
+
+/* Сводка заказа */
+.orderSummary {
+  position: sticky;
+  top: var(--spacing-2xl);
+  height: fit-content;
+}
+
+.summaryCard {
+  background: var(--surface);
+  padding: var(--spacing-2xl);
+  border-radius: var(--radius-large);
+  box-shadow: var(--shadow-medium);
+  border: 1px solid var(--border-light);
+}
+
+.summaryCard h3 {
+  color: var(--text-primary);
+  font-size: 1.25rem;
+  margin-bottom: var(--spacing-lg);
+  font-weight: 600;
+}
+
+.orderItems {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.orderItem {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: var(--spacing-md);
+  align-items: flex-start;
+  padding: var(--spacing-md);
+  background: var(--background);
+  border-radius: var(--radius-medium);
+}
+
+.itemInfo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.itemName {
+  color: var(--text-primary);
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+
+.itemModifiers {
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+}
+
+.itemQuantity {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.itemPrice {
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+/* Итоги заказа */
+.orderTotals {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-lg);
+}
+
+.totalRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.totalRow.discount {
+  color: var(--accent-color);
+  font-weight: 500;
+}
+
+.totalRow.finalTotal {
+  color: var(--text-primary);
+  font-weight: 700;
+  font-size: 1.125rem;
+  padding-top: var(--spacing-sm);
+  border-top: 2px solid var(--border-light);
+}
+
+.divider {
+  height: 1px;
+  background: var(--border-light);
+  margin: var(--spacing-sm) 0;
+}
+
+/* Кнопка оформления */
+.placeOrderButton {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  background: var(--primary-color);
+  border: none;
+  color: var(--text-white);
+  padding: var(--spacing-lg);
+  border-radius: var(--radius-medium);
+  font-size: 1.125rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-bottom: var(--spacing-md);
+}
+
+.placeOrderButton:hover:not(:disabled) {
+  background: var(--primary-dark);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-medium);
+}
+
+.placeOrderButton:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.paymentInfo {
+  text-align: center;
+}
+
+.paymentInfo p {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Адаптивность */
+@media (max-width: 1024px) {
+  .checkoutLayout {
+    grid-template-columns: 1fr;
+  }
+  
+  .orderSummary {
+    position: static;
+    order: -1;
+  }
+  
+  .formGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .paymentMethods {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .checkoutContainer {
+    padding: var(--spacing-lg) 0;
+  }
+  
+  .checkoutHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-md);
+  }
+  
+  .checkoutHeader h1 {
+    font-size: 2rem;
+  }
+  
+  .formSection {
+    padding: var(--spacing-lg);
+  }
+  
+  .summaryCard {
+    padding: var(--spacing-lg);
+  }
+  
+  .cardRow {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .checkoutContent {
+    padding: 0 var(--spacing-sm);
+  }
+  
+  .checkoutHeader h1 {
+    font-size: 1.5rem;
+  }
+  
+  .formSection {
+    padding: var(--spacing-md);
+  }
+  
+  .summaryCard {
+    padding: var(--spacing-md);
+  }
 }

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
 import { useAddress } from '../../hooks/useAddress'
+import { MapPin, Edit2, Plus, User, Calendar, Phone, Mail, Package, Clock, CheckCircle, XCircle, Truck, CreditCard, Wallet } from 'lucide-react'
 import AddressModal from '../../components/common/AddressModal'
 import ConfirmDeleteModal from '../../components/common/ConfirmDeleteModal'
 import Toast from '../../components/common/Toast'
@@ -26,6 +27,9 @@ function ProfilePage() {
   const [showAddressModal, setShowAddressModal] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [userAddressData, setUserAddressData] = useState(null)
+  const [orders, setOrders] = useState([])
+  const [isLoadingOrders, setIsLoadingOrders] = useState(false)
+  const [cancellingOrder, setCancellingOrder] = useState(null)
   const [toast, setToast] = useState({ isVisible: false, message: '', type: 'success' })
   
   const { getUserAddress, saveUserAddress, deleteUserAddress } = useAddress()
@@ -113,7 +117,17 @@ function ProfilePage() {
   // Загружаем профиль при монтировании компонента и изменении пользователя
   useEffect(() => {
     loadUserProfile()
+    if (activeTab === 'orders') {
+      loadOrders()
+    }
   }, [user])
+
+  // Загружаем заказы при переключении на вкладку заказов
+  useEffect(() => {
+    if (activeTab === 'orders' && user) {
+      loadOrders()
+    }
+  }, [activeTab, user])
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target
@@ -343,6 +357,107 @@ function ProfilePage() {
     }
   }
 
+  // Функции для работы с заказами
+  const loadOrders = async () => {
+    if (!user) return
+
+    setIsLoadingOrders(true)
+    try {
+      const token = localStorage.getItem('auth_token')
+      const response = await fetch('http://localhost:8000/api/v1/orders/', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+
+      if (response.ok) {
+        const ordersData = await response.json()
+        setOrders(ordersData)
+      } else {
+        console.error('Ошибка загрузки заказов')
+      }
+    } catch (error) {
+      console.error('Ошибка загрузки заказов:', error)
+    } finally {
+      setIsLoadingOrders(false)
+    }
+  }
+
+  const cancelOrder = async (orderId) => {
+    if (!user || cancellingOrder === orderId) return
+
+    setCancellingOrder(orderId)
+    try {
+      const token = localStorage.getItem('auth_token')
+      const response = await fetch(`http://localhost:8000/api/v1/orders/${orderId}/cancel`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+
+      if (response.ok) {
+        // Обновляем статус заказа в локальном состоянии
+        setOrders(prev => prev.map(order => 
+          order.id === orderId 
+            ? { ...order, status: 'cancelled' }
+            : order
+        ))
+        showToast('Заказ успешно отменен!')
+      } else {
+        const errorData = await response.json()
+        showToast(errorData.detail || 'Ошибка отмены заказа', 'error')
+      }
+    } catch (error) {
+      console.error('Ошибка отмены заказа:', error)
+      showToast('Ошибка отмены заказа', 'error')
+    } finally {
+      setCancellingOrder(null)
+    }
+  }
+
+  const getStatusIcon = (status) => {
+    switch (status) {
+      case 'pending':
+        return <Clock size={16} className={styles.statusIconPending} />
+      case 'confirmed':
+        return <CheckCircle size={16} className={styles.statusIconConfirmed} />
+      case 'preparing':
+        return <Package size={16} className={styles.statusIconPreparing} />
+      case 'ready':
+        return <Truck size={16} className={styles.statusIconReady} />
+      case 'delivered':
+        return <CheckCircle size={16} className={styles.statusIconDelivered} />
+      case 'cancelled':
+        return <XCircle size={16} className={styles.statusIconCancelled} />
+      default:
+        return <Clock size={16} />
+    }
+  }
+
+  const getStatusText = (status) => {
+    switch (status) {
+      case 'pending':
+        return 'Ожидает подтверждения'
+      case 'confirmed':
+        return 'Подтвержден'
+      case 'preparing':
+        return 'Готовится'
+      case 'ready':
+        return 'Готов к выдаче'
+      case 'delivered':
+        return 'Доставлен'
+      case 'cancelled':
+        return 'Отменен'
+      default:
+        return 'Неизвестно'
+    }
+  }
+
+  const canCancelOrder = (status) => {
+    return ['pending', 'confirmed'].includes(status)
+  }
+
   const handleSaveEmail = async () => {
     if (!profileData.email || !profileData.email.trim()) {
       console.warn('Email не указан')
@@ -426,6 +541,26 @@ function ProfilePage() {
             </div>
           ) : (
             <>
+            {/* Навигация по вкладкам */}
+            <div className={styles.tabNavigation}>
+              <button 
+                className={`${styles.tabButton} ${activeTab === 'personal' ? styles.activeTab : ''}`}
+                onClick={() => setActiveTab('personal')}
+              >
+                <User size={20} />
+                Личные данные
+              </button>
+              <button 
+                className={`${styles.tabButton} ${activeTab === 'orders' ? styles.activeTab : ''}`}
+                onClick={() => setActiveTab('orders')}
+              >
+                <Package size={20} />
+                История заказов
+              </button>
+            </div>
+
+            {activeTab === 'personal' && (
+              <>
           {/* Личные данные */}
           <section className={styles.personalSection}>
             <h2>Личные данные</h2>
@@ -583,17 +718,119 @@ function ProfilePage() {
 
             </div>
           </section>
+              </>
+            )}
 
-
-
-          {/* История заказов */}
-          <section className={styles.orderSection}>
-            <h2>История заказов</h2>
-            <p>Последние 90 дней заказов не было</p>
-            <button className={styles.exitBtn} onClick={() => logout && logout()}>
-              Выйти
-            </button>
-          </section>
+            {activeTab === 'orders' && (
+              <>
+                {/* История заказов */}
+                <section className={styles.orderSection}>
+                  <h2>История заказов</h2>
+                  
+                  {isLoadingOrders ? (
+                    <div className={styles.loadingContainer}>
+                      <div className={styles.loadingSpinner}></div>
+                      <p>Загрузка заказов...</p>
+                    </div>
+                  ) : orders.length === 0 ? (
+                    <div className={styles.emptyOrders}>
+                      <Package size={48} className={styles.emptyIcon} />
+                      <h3>У вас пока нет заказов</h3>
+                      <p>Заказы появятся здесь после их оформления</p>
+                    </div>
+                  ) : (
+                    <div className={styles.ordersGrid}>
+                      {orders.map(order => (
+                        <div key={order.id} className={styles.orderCard}>
+                          <div className={styles.orderHeader}>
+                            <div className={styles.orderInfo}>
+                              <span className={styles.orderNumber}>Заказ #{order.order_number}</span>
+                              <span className={styles.orderDate}>
+                                {new Date(order.created_at).toLocaleDateString('ru-RU', {
+                                  day: '2-digit',
+                                  month: '2-digit',
+                                  year: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}
+                              </span>
+                            </div>
+                            <div className={styles.orderStatus}>
+                              {getStatusIcon(order.status)}
+                              <span className={styles.statusText}>{getStatusText(order.status)}</span>
+                            </div>
+                          </div>
+                          
+                          <div className={styles.orderDetails}>
+                            <div className={styles.orderMeta}>
+                              <div className={styles.deliveryInfo}>
+                                {order.delivery_type === 'delivery' ? (
+                                  <>
+                                    <Truck size={16} />
+                                    <span>Доставка</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <Package size={16} />
+                                    <span>Самовывоз</span>
+                                  </>
+                                )}
+                              </div>
+                              <div className={styles.paymentInfo}>
+                                {order.payment_method === 'card' ? (
+                                  <>
+                                    <CreditCard size={16} />
+                                    <span>Карта</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <Wallet size={16} />
+                                    <span>Наличные</span>
+                                  </>
+                                )}
+                              </div>
+                            </div>
+                            
+                            {order.delivery_address && (
+                              <div className={styles.addressInfo}>
+                                <MapPin size={16} />
+                                <span>{order.delivery_address}</span>
+                              </div>
+                            )}
+                            
+                            <div className={styles.orderItems}>
+                              {order.items.map((item, index) => (
+                                <div key={index} className={styles.orderItem}>
+                                  <span className={styles.itemName}>
+                                    {item.dish_name} × {item.quantity}
+                                  </span>
+                                  <span className={styles.itemPrice}>{item.total_price} ₸</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                          
+                          <div className={styles.orderFooter}>
+                            <div className={styles.totalAmount}>
+                              Итого: <strong>{order.total_amount} ₸</strong>
+                            </div>
+                            {canCancelOrder(order.status) && (
+                              <button 
+                                className={styles.cancelOrderBtn}
+                                onClick={() => cancelOrder(order.id)}
+                                disabled={cancellingOrder === order.id}
+                              >
+                                {cancellingOrder === order.id ? 'Отмена...' : 'Отменить заказ'}
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </section>
+              </>
+            )}
             </>
           )}
         </div>

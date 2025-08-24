@@ -16,6 +16,10 @@ class DeliveryType(str, Enum):
     DELIVERY = "delivery"
     PICKUP = "pickup"
 
+class PaymentMethod(str, Enum):
+    CARD = "card"  # Банковская карта
+    CASH = "cash"  # Наличные
+
 class OrderItemRequest(BaseModel):
     dish_id: int
     quantity: int = Field(ge=1, description="Количество (минимум 1)")
@@ -24,6 +28,7 @@ class OrderItemRequest(BaseModel):
 class OrderCreateRequest(BaseModel):
     items: List[OrderItemRequest]
     delivery_type: DeliveryType
+    payment_method: PaymentMethod
     delivery_address: Optional[str] = Field(None, description="Адрес доставки (обязателен для delivery)")
     phone: Optional[str] = Field(None, description="Телефон (если не авторизован)")
     name: Optional[str] = Field(None, description="Имя (если не авторизован)")
@@ -43,8 +48,10 @@ class OrderItemResponse(BaseModel):
 
 class OrderResponse(BaseModel):
     id: int
+    order_number: str
     status: OrderStatus
     delivery_type: DeliveryType
+    payment_method: PaymentMethod
     total_amount: Decimal
     delivery_address: Optional[str] = None
     customer_name: str

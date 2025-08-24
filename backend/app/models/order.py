@@ -22,6 +22,10 @@ class PaymentStatus(str, Enum):
     PAID = "paid"
     FAILED = "failed"
 
+class PaymentMethod(str, Enum):
+    CARD = "card"  # Банковская карта
+    CASH = "cash"  # Наличные
+
 class Order(Base):
     __tablename__ = "orders"
 
@@ -43,6 +47,7 @@ class Order(Base):
     # Статусы
     status = Column(SQLEnum(OrderStatus), default=OrderStatus.PENDING)
     payment_status = Column(SQLEnum(PaymentStatus), default=PaymentStatus.PENDING)
+    payment_method = Column(SQLEnum(PaymentMethod), nullable=False)
     
     # Суммы
     subtotal = Column(Numeric(10, 2), nullable=False)  # Сумма без скидки
