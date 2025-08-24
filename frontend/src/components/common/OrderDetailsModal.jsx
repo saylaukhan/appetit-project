@@ -61,7 +61,9 @@ function OrderDetailsModal({ isOpen, onClose, order }) {
     <div className={styles.modalOverlay} onClick={onClose}>
       <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
         <div className={styles.modalHeader}>
-          <h2>Заказ {order.order_number}</h2>
+          <h2 title={`Заказ ${order.order_number}`}>
+            Заказ {order.order_number}
+          </h2>
           <button className={styles.closeButton} onClick={onClose}>
             <X size={24} />
           </button>

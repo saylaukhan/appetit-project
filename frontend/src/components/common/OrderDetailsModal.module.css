@@ -47,6 +47,9 @@
   background: var(--surface);
   z-index: 1;
   border-radius: var(--radius-large) var(--radius-large) 0 0;
+  gap: var(--spacing-lg);
+  overflow: hidden; /* Принудительно скрываем переполнение */
+  min-height: 60px; /* Минимальная высота для стабильности */
 }
 
 .modalHeader h2 {
@@ -54,6 +57,16 @@
   font-size: 1.5rem;
   font-weight: 600;
   margin: 0;
+  flex: 1;
+  min-width: 0;
+  max-width: calc(100% - 60px); /* Резервируем место для кнопки закрытия */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding-right: var(--spacing-md);
+  line-height: 1.2;
+  position: relative;
+  z-index: 0; /* Убеждаемся что заголовок под кнопкой закрытия */
 }
 
 .closeButton {
@@ -64,6 +77,14 @@
   padding: var(--spacing-sm);
   border-radius: var(--radius-medium);
   transition: all 0.2s ease;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 2; /* Убеждаемся что кнопка выше заголовка */
 }
 
 .closeButton:hover {
@@ -73,6 +94,8 @@
 
 .modalBody {
   padding: var(--spacing-xl);
+  position: relative;
+  z-index: 0; /* Убеждаемся что контент под заголовком */
 }
 
 .orderStatus {
@@ -93,8 +116,10 @@
   background: var(--surface-hover);
   border-radius: var(--radius-large);
   padding: var(--spacing-xl);
+  margin-top: var(--spacing-lg); /* Добавляем отступ сверху от заголовка */
   margin-bottom: var(--spacing-xl);
   border: 1px solid var(--border-light);
+  clear: both; /* Очищаем возможные наплывы */
 }
 
 .progressSteps {
@@ -336,10 +361,17 @@
 
   .modalHeader {
     padding: var(--spacing-lg);
+    gap: var(--spacing-md);
   }
 
   .modalHeader h2 {
     font-size: 1.25rem;
+    max-width: calc(100% - 50px); /* Ещё больше места для кнопки на мобильных */
+  }
+  
+  .closeButton {
+    width: 36px;
+    height: 36px;
   }
 
   .modalBody {
