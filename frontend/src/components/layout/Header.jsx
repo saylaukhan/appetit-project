@@ -4,12 +4,14 @@ import { ShoppingCart, User, Menu, Search, X, Settings, LogOut } from 'lucide-re
 import { useAuth } from '../../contexts/AuthContext'
 import { useCart } from '../../contexts/CartContext'
 import { RoleGuard, useRole } from '../common/ProtectedRoute'
+import ContactsModal from '../common/ContactsModal'
 import styles from './Header.module.css'
 
 function Header() {
   const [searchQuery, setSearchQuery] = useState('')
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [showUserMenu, setShowUserMenu] = useState(false)
+  const [showContactsModal, setShowContactsModal] = useState(false)
   
   const { user, isAuthenticated, logout } = useAuth()
   const { itemsCount } = useCart()
@@ -64,6 +66,19 @@ function Header() {
     setIsMobileMenuOpen(false)
   }
 
+  const handleContactsClick = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setShowContactsModal(true)
+  }
+
+  const handleContactsKeyDown = (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      handleContactsClick(e)
+    }
+  }
+
   return (
     <>
       <header className={styles.headerContainer}>
@@ -73,10 +88,16 @@ function Header() {
           </Link>
 
           <nav className={styles.navigation}>
-            <Link to="/" className={styles.navLink}>Главная</Link>
-            <Link to="/menu" className={styles.navLink}>Меню</Link>
             <Link to="/about" className={styles.navLink}>О нас</Link>
-            <Link to="/contacts" className={styles.navLink}>Контакты</Link>
+            <span 
+              onClick={handleContactsClick} 
+              onKeyDown={handleContactsKeyDown}
+              className={styles.navLink} 
+              role="button" 
+              tabIndex={0}
+            >
+              Контакты
+            </span>
           </nav>
 
           <div className={styles.searchContainer}>
@@ -150,18 +171,27 @@ function Header() {
         </div>
 
         <nav className={styles.mobileMenuNav}>
-          <Link to="/" onClick={closeMobileMenu} className={styles.mobileNavLink}>
-            Главная
-          </Link>
-          <Link to="/menu" onClick={closeMobileMenu} className={styles.mobileNavLink}>
-            Меню
-          </Link>
           <Link to="/about" onClick={closeMobileMenu} className={styles.mobileNavLink}>
             О нас
           </Link>
-          <Link to="/contacts" onClick={closeMobileMenu} className={styles.mobileNavLink}>
+          <span 
+            onClick={(e) => {
+              handleContactsClick(e)
+              closeMobileMenu()
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault()
+                handleContactsClick(e)
+                closeMobileMenu()
+              }
+            }}
+            className={styles.mobileNavLink}
+            role="button"
+            tabIndex={0}
+          >
             Контакты
-          </Link>
+          </span>
           <Link to="/cart" onClick={closeMobileMenu} className={styles.mobileNavLink}>
             Корзина ({itemsCount})
           </Link>
@@ -174,6 +204,11 @@ function Header() {
           </Link>
         </nav>
       </div>
+
+      <ContactsModal 
+        isOpen={showContactsModal} 
+        onClose={() => setShowContactsModal(false)} 
+      />
     </>
   )
 }

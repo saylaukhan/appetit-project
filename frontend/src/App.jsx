@@ -51,6 +51,7 @@ function App() {
             <Routes>
               {/* Публичные маршруты */}
               <Route path="/" element={<ClientLayout />} />
+              <Route path="/about" element={<ClientLayout />} />
               <Route path="/menu" element={<ClientLayout />} />
               <Route path="/menu/:categoryId" element={<ClientLayout />} />
               <Route path="/dish/:dishId" element={<ClientLayout />} />
@@ -105,7 +106,8 @@ function ClientLayout() {
   
   const getPageComponent = () => {
     const path = location.pathname
-    if (path === '/') return <HomePage />
+    if (path === '/') return <MenuPage />
+    if (path === '/about') return <HomePage />
     if (path === '/menu' || path.startsWith('/menu/')) return <MenuPage />
     if (path.startsWith('/dish/')) return <DishPage />
     if (path === '/cart') return <CartPage />
@@ -113,7 +115,7 @@ function ClientLayout() {
     if (path === '/login') return <LoginPage />
     if (path === '/profile') return <ProfilePage />
     if (path.startsWith('/order/')) return <OrderTrackingPage />
-    return <HomePage />
+    return <MenuPage />
   }
 
   return (

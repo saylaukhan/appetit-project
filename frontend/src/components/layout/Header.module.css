@@ -45,6 +45,12 @@
   font-weight: 400;
   transition: color 0.2s ease;
   position: relative;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: inherit;
+  font-family: inherit;
+  display: inline-block;
 }
 
 .navLink:hover {
@@ -251,6 +257,14 @@
   font-weight: 400;
   padding: var(--spacing-md) 0;
   border-bottom: 1px solid var(--border-light);
+  background: none;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+  width: 100%;
 }
 
 .mobileNavLink:hover {

@@ -1,0 +1,216 @@
+/* Contacts Modal Styles */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(45, 52, 54, 0.4);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: var(--z-modal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-lg);
+  animation: fadeIn 0.3s ease;
+}
+
+.modalContent {
+  background: var(--surface);
+  border-radius: var(--radius-large);
+  box-shadow: var(--shadow-large);
+  width: 100%;
+  max-width: 500px;
+  max-height: 80vh;
+  overflow: hidden;
+  animation: slideUp 0.4s ease;
+  border: 1px solid var(--border-light);
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-lg);
+  border-bottom: 1px solid var(--border-light);
+  background: var(--surface);
+}
+
+.modalTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.closeButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-medium);
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.closeButton:hover {
+  background: var(--background);
+  color: var(--text-primary);
+}
+
+.contactsList {
+  padding: var(--spacing-lg);
+  max-height: calc(80vh - 100px);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.contactItem {
+  padding: var(--spacing-md);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-medium);
+  background: var(--background);
+  transition: all 0.2s ease;
+}
+
+.contactItem:hover {
+  border-color: var(--primary-color);
+  box-shadow: 0 2px 8px rgba(233, 74, 78, 0.1);
+}
+
+.contactInfo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.addressRow,
+.hoursRow,
+.phoneRow {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.icon {
+  color: var(--primary-color);
+  flex-shrink: 0;
+}
+
+.address {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 1rem;
+}
+
+.hours {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.phone {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 1.1rem;
+  transition: color 0.2s ease;
+}
+
+.phone:hover {
+  color: var(--primary-dark);
+  text-decoration: underline;
+}
+
+/* Анимации */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Мобильные стили */
+@media (max-width: 768px) {
+  .modalOverlay {
+    padding: var(--spacing-md);
+  }
+  
+  .modalContent {
+    max-height: 90vh;
+  }
+  
+  .modalHeader {
+    padding: var(--spacing-md);
+  }
+  
+  .modalTitle {
+    font-size: 1.25rem;
+  }
+  
+  .contactsList {
+    padding: var(--spacing-md);
+    gap: var(--spacing-md);
+  }
+  
+  .contactItem {
+    padding: var(--spacing-sm);
+  }
+  
+  .address {
+    font-size: 0.9rem;
+  }
+  
+  .hours {
+    font-size: 0.8rem;
+  }
+  
+  .phone {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .modalOverlay {
+    padding: var(--spacing-sm);
+  }
+  
+  .modalContent {
+    max-height: 95vh;
+  }
+  
+  .modalHeader {
+    padding: var(--spacing-sm);
+  }
+  
+  .modalTitle {
+    font-size: 1.1rem;
+  }
+  
+  .contactsList {
+    padding: var(--spacing-sm);
+  }
+  
+  .contactItem {
+    padding: var(--spacing-xs);
+  }
+}
