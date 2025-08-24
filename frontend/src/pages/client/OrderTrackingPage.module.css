@@ -2,4 +2,429 @@
 .trackingContainer {
   min-height: calc(100vh - var(--header-height));
   padding: var(--spacing-xl) 0;
+  background: linear-gradient(135deg, var(--background) 0%, #f8f9fa 100%);
+}
+
+.orderHeader {
+  background: var(--surface);
+  border-radius: var(--radius-large);
+  padding: var(--spacing-xl);
+  margin-bottom: var(--spacing-xl);
+  box-shadow: var(--shadow-medium);
+  border: 1px solid var(--border-light);
+}
+
+.orderHeader h1 {
+  color: var(--text-primary);
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: var(--spacing-lg);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.orderStatus {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md) var(--spacing-lg);
+  background: rgba(233, 74, 78, 0.1);
+  border-radius: var(--radius-medium);
+  font-weight: 600;
+  font-size: 1.1rem;
+  border: 2px solid currentColor;
+}
+
+/* Индикатор прогресса заказа */
+.progressContainer {
+  background: var(--surface);
+  border-radius: var(--radius-large);
+  padding: var(--spacing-xl);
+  margin-bottom: var(--spacing-xl);
+  box-shadow: var(--shadow-medium);
+  border: 1px solid var(--border-light);
+}
+
+.progressSteps {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+}
+
+.progressStep {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  flex: 1;
+}
+
+.stepIcon {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface-hover);
+  border: 3px solid var(--border-color);
+  color: var(--text-muted);
+  transition: all 0.3s ease;
+  margin-bottom: var(--spacing-md);
+  z-index: 2;
+}
+
+.stepIcon.completed {
+  background: var(--accent-color);
+  border-color: var(--accent-color);
+  color: white;
+}
+
+.stepIcon.current {
+  background: var(--primary-color);
+  border-color: var(--primary-color);
+  color: white;
+  animation: pulse 2s infinite;
+}
+
+.stepText {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  text-align: center;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.stepText.completedText {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.stepConnector {
+  position: absolute;
+  top: 25px;
+  left: 50%;
+  right: -50%;
+  height: 3px;
+  background: var(--border-color);
+  transition: background-color 0.3s ease;
+  z-index: 1;
+}
+
+.stepConnector.completedConnector {
+  background: var(--accent-color);
+}
+
+/* Анимация пульсации для текущего этапа */
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(233, 74, 78, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(233, 74, 78, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(233, 74, 78, 0);
+  }
+}
+
+.orderInfo {
+  display: grid;
+  gap: var(--spacing-xl);
+}
+
+.infoSection {
+  background: var(--surface);
+  border-radius: var(--radius-large);
+  padding: var(--spacing-xl);
+  box-shadow: var(--shadow-small);
+  border: 1px solid var(--border-light);
+}
+
+.infoSection h3 {
+  color: var(--text-primary);
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: var(--spacing-lg);
+  padding-bottom: var(--spacing-md);
+  border-bottom: 2px solid var(--primary-color);
+  position: relative;
+}
+
+.infoSection h3:after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 60px;
+  height: 2px;
+  background: var(--primary-color);
+}
+
+.infoGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--spacing-lg);
+}
+
+.infoItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-md);
+  background: var(--surface-hover);
+  border-radius: var(--radius-medium);
+  border: 1px solid var(--border-light);
+}
+
+.infoLabel {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.infoValue {
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.addressInfo {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-lg);
+  background: var(--surface-hover);
+  border-radius: var(--radius-medium);
+  border-left: 4px solid var(--primary-color);
+  font-size: 1.1rem;
+}
+
+.addressInfo svg {
+  color: var(--primary-color);
+  flex-shrink: 0;
+}
+
+.orderItems {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.orderItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-lg);
+  background: var(--surface-hover);
+  border-radius: var(--radius-medium);
+  border: 1px solid var(--border-light);
+  transition: all 0.2s ease;
+}
+
+.orderItem:hover {
+  box-shadow: var(--shadow-small);
+  transform: translateY(-2px);
+}
+
+.itemInfo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.itemName {
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.itemQuantity {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.itemPrice {
+  color: var(--primary-color);
+  font-weight: 700;
+  font-size: 1.2rem;
+}
+
+.contactInfo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.contactItem {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md) var(--spacing-lg);
+  background: var(--surface-hover);
+  border-radius: var(--radius-medium);
+  border-left: 4px solid var(--accent-color);
+}
+
+.contactItem svg {
+  color: var(--accent-color);
+  flex-shrink: 0;
+}
+
+.actions {
+  margin-top: var(--spacing-2xl);
+  display: flex;
+  justify-content: center;
+  gap: var(--spacing-lg);
+}
+
+.backButton {
+  background: var(--primary-color);
+  color: var(--text-white);
+  border: none;
+  border-radius: var(--radius-medium);
+  padding: var(--spacing-md) var(--spacing-xl);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: var(--shadow-small);
+  min-width: 200px;
+}
+
+.backButton:hover {
+  background: var(--primary-dark);
+  box-shadow: var(--shadow-medium);
+  transform: translateY(-2px);
+}
+
+.backButton:active {
+  transform: translateY(0);
+}
+
+.errorMessage {
+  text-align: center;
+  background: var(--surface);
+  border-radius: var(--radius-large);
+  padding: var(--spacing-2xl);
+  box-shadow: var(--shadow-medium);
+  border: 1px solid var(--border-light);
+}
+
+.errorMessage h2 {
+  color: var(--error);
+  font-size: 1.5rem;
+  margin-bottom: var(--spacing-lg);
+}
+
+.errorMessage p {
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+  margin-bottom: var(--spacing-xl);
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  .trackingContainer {
+    padding: var(--spacing-lg) var(--spacing-md);
+  }
+
+  .orderHeader {
+    padding: var(--spacing-lg);
+  }
+
+  .orderHeader h1 {
+    font-size: 1.5rem;
+  }
+
+  .progressContainer {
+    padding: var(--spacing-lg);
+  }
+
+  .progressSteps {
+    flex-direction: column;
+    gap: var(--spacing-lg);
+  }
+
+  .progressStep {
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+  }
+
+  .stepIcon {
+    margin-bottom: 0;
+    margin-right: var(--spacing-md);
+    width: 40px;
+    height: 40px;
+  }
+
+  .stepText {
+    text-align: left;
+    font-size: 1rem;
+  }
+
+  .stepConnector {
+    display: none;
+  }
+
+  .infoSection {
+    padding: var(--spacing-lg);
+  }
+
+  .infoGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .orderItem {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-md);
+  }
+
+  .itemPrice {
+    align-self: flex-end;
+  }
+
+  .actions {
+    margin-top: var(--spacing-xl);
+  }
+
+  .backButton {
+    width: 100%;
+  }
+}
+
+/* Анимации загрузки */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.trackingContainer > .container > * {
+  animation: fadeIn 0.6s ease-out;
+}
+
+.orderHeader {
+  animation-delay: 0.1s;
+}
+
+.infoSection:nth-child(1) {
+  animation-delay: 0.2s;
+}
+
+.infoSection:nth-child(2) {
+  animation-delay: 0.3s;
+}
+
+.infoSection:nth-child(3) {
+  animation-delay: 0.4s;
 }

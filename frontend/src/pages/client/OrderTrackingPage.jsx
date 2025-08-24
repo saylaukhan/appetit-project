@@ -71,6 +71,32 @@ function OrderTrackingPage() {
     }
   }
 
+  // Функция для получения прогресса заказа
+  const getOrderProgress = (status, deliveryType) => {
+    const steps = deliveryType === 'delivery' 
+      ? [
+          { key: 'pending', text: 'Принят', icon: Clock },
+          { key: 'confirmed', text: 'Подтвержден', icon: CheckCircle },
+          { key: 'preparing', text: 'Готовится', icon: Package },
+          { key: 'delivering', text: 'Доставляется', icon: Truck },
+          { key: 'delivered', text: 'Доставлен', icon: CheckCircle }
+        ]
+      : [
+          { key: 'pending', text: 'Принят', icon: Clock },
+          { key: 'confirmed', text: 'Подтвержден', icon: CheckCircle },
+          { key: 'preparing', text: 'Готовится', icon: Package },
+          { key: 'ready', text: 'Готов', icon: CheckCircle }
+        ]
+
+    const currentIndex = steps.findIndex(step => step.key === status)
+    
+    return steps.map((step, index) => ({
+      ...step,
+      completed: index <= currentIndex,
+      current: index === currentIndex
+    }))
+  }
+
   if (!user) {
     navigate('/login')
     return null
@@ -114,6 +140,7 @@ function OrderTrackingPage() {
 
   const status = getOrderStatus(order.status)
   const StatusIcon = status.icon
+  const progress = getOrderProgress(order.status, order.delivery_type)
 
   return (
     <div className={styles.trackingContainer}>
@@ -123,6 +150,40 @@ function OrderTrackingPage() {
           <div className={styles.orderStatus} style={{ color: status.color }}>
             <StatusIcon size={24} />
             <span>{status.text}</span>
+          </div>
+        </div>
+
+        {/* Индикатор прогресса */}
+        <div className={styles.progressContainer}>
+          <div className={styles.progressSteps}>
+            {progress.map((step, index) => {
+              const StepIcon = step.icon
+              return (
+                <div key={step.key} className={styles.progressStep}>
+                  <div 
+                    className={`${styles.stepIcon} ${
+                      step.completed ? styles.completed : ''
+                    } ${step.current ? styles.current : ''}`}
+                  >
+                    <StepIcon size={20} />
+                  </div>
+                  <span 
+                    className={`${styles.stepText} ${
+                      step.completed ? styles.completedText : ''
+                    }`}
+                  >
+                    {step.text}
+                  </span>
+                  {index < progress.length - 1 && (
+                    <div 
+                      className={`${styles.stepConnector} ${
+                        step.completed ? styles.completedConnector : ''
+                      }`}
+                    />
+                  )}
+                </div>
+              )
+            })}
           </div>
         </div>
 
