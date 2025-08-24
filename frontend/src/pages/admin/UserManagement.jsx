@@ -1,12 +1,8 @@
 import React from 'react'
+import UsersTable from '../../components/admin/UsersTable'
 
 function UserManagement() {
-  return (
-    <div>
-      <h1>Управление пользователями</h1>
-      <p>Интерфейс управления пользователями</p>
-    </div>
-  )
+  return <UsersTable />
 }
 
 export default UserManagement

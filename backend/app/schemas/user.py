@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field, validator
-from typing import Optional
+from typing import Optional, List
 from datetime import datetime
+from enum import Enum
 import re
 
 class AddressUpdate(BaseModel):
@@ -74,3 +75,42 @@ class NewsletterSubscription(BaseModel):
         if not re.match(email_pattern, v):
             raise ValueError('Неверный формат email адреса')
         return v
+
+
+class UserRoleEnum(str, Enum):
+    CLIENT = "client"
+    ADMIN = "admin"
+    KITCHEN = "kitchen"
+    COURIER = "courier"
+
+
+class UserListItem(BaseModel):
+    id: int
+    phone: str
+    name: str
+    email: Optional[str] = None
+    role: str
+    is_active: bool
+    created_at: datetime
+    last_order_date: Optional[datetime] = None
+    orders_count: int = 0
+    address: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+
+
+class UserListResponse(BaseModel):
+    users: List[UserListItem]
+    total: int
+    page: int
+    per_page: int
+    total_pages: int
+
+
+class UserRoleUpdate(BaseModel):
+    role: UserRoleEnum = Field(..., description="Новая роль пользователя")
+
+
+class UserStatusUpdate(BaseModel):
+    is_active: bool = Field(..., description="Статус активности пользователя")

@@ -1,21 +1,198 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select, update, desc, or_, func
 from app.core.database import get_db_session
 from app.utils.auth_dependencies import get_current_admin, get_current_user
-from app.models.user import User
-from app.schemas.user import UserProfileUpdate, UserProfileResponse, NewsletterSubscription, AddressUpdate
+from app.models.user import User, UserRole
+from app.schemas.user import UserProfileUpdate, UserProfileResponse, NewsletterSubscription, AddressUpdate, UserListResponse, UserRoleUpdate, UserListItem, UserStatusUpdate
 
 router = APIRouter()
 
-@router.get("/")
-async def get_users(current_user: User = Depends(get_current_admin)):
-    """Получение списка пользователей (только для администратора)."""
-    return {"message": "Get users endpoint - coming soon"}
+@router.get("/", response_model=UserListResponse)
+async def get_users(
+    page: int = 1,
+    per_page: int = 20,
+    search: str = None,
+    role: str = None,
+    is_active: bool = None,
+    current_user: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db_session)
+):
+    """Получение списка пользователей с пагинацией, поиском и фильтрацией (только для администратора)."""
+    try:
+        # Базовый запрос
+        query = select(User).order_by(desc(User.created_at))
+        
+        # Поиск по имени, телефону или email
+        if search:
+            search_term = f"%{search}%"
+            # Создаем условия поиска
+            search_conditions = [
+                User.name.ilike(search_term),
+                User.phone.ilike(search_term)
+            ]
+            
+            # Добавляем поиск по email только если поле не пустое
+            search_conditions.append(
+                User.email.ilike(search_term) & User.email.isnot(None)
+            )
+            
+            # Объединяем условия через OR
+            query = query.where(or_(*search_conditions))
+        
+        # Фильтр по роли
+        if role:
+            try:
+                role_enum = UserRole(role)
+                query = query.where(User.role == role_enum)
+            except ValueError:
+                raise HTTPException(status_code=400, detail=f"Неверная роль: {role}")
+        
+        # Фильтр по статусу активности
+        if is_active is not None:
+            query = query.where(User.is_active == is_active)
+        
+        # Подсчет общего количества
+        count_query = select(func.count()).select_from(query.subquery())
+        total_result = await db.execute(count_query)
+        total = total_result.scalar()
+        
+        # Пагинация
+        offset = (page - 1) * per_page
+        query = query.offset(offset).limit(per_page)
+        
+        result = await db.execute(query)
+        users = result.scalars().all()
+        
+        # Получаем статистику по заказам для каждого пользователя
+        from app.models.order import Order
+        users_data = []
+        
+        for user in users:
+            # Подсчитываем заказы пользователя
+            orders_query = select(func.count(), func.max(Order.created_at)).where(Order.user_id == user.id)
+            orders_result = await db.execute(orders_query)
+            orders_count, last_order_date = orders_result.first()
+            
+            users_data.append(UserListItem(
+                id=user.id,
+                phone=user.phone,
+                name=user.name,
+                email=user.email,
+                role=user.role.value,
+                is_active=user.is_active,
+                created_at=user.created_at,
+                last_order_date=last_order_date,
+                orders_count=orders_count or 0,
+                address=user.address
+            ))
+        
+        total_pages = (total + per_page - 1) // per_page
+        
+        return UserListResponse(
+            users=users_data,
+            total=total,
+            page=page,
+            per_page=per_page,
+            total_pages=total_pages
+        )
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Ошибка получения пользователей: {str(e)}")
 
-@router.get("/{user_id}")
-async def get_user(user_id: int, current_user: User = Depends(get_current_admin)):
+
+@router.get("/{user_id}", response_model=UserProfileResponse)
+async def get_user(
+    user_id: int, 
+    current_user: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db_session)
+):
     """Получение информации о пользователе (только для администратора)."""
-    return {"message": f"Get user {user_id} endpoint - coming soon"}
+    query = select(User).where(User.id == user_id)
+    result = await db.execute(query)
+    user = result.scalar_one_or_none()
+    
+    if not user:
+        raise HTTPException(status_code=404, detail="Пользователь не найден")
+    
+    return user
+
+
+@router.put("/{user_id}/role")
+async def update_user_role(
+    user_id: int,
+    role_data: UserRoleUpdate,
+    current_user: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db_session)
+):
+    """Изменение роли пользователя (только для администратора)."""
+    try:
+        # Нельзя изменить роль самого себя
+        if user_id == current_user.id:
+            raise HTTPException(status_code=400, detail="Нельзя изменить собственную роль")
+        
+        query = select(User).where(User.id == user_id)
+        result = await db.execute(query)
+        user = result.scalar_one_or_none()
+        
+        if not user:
+            raise HTTPException(status_code=404, detail="Пользователь не найден")
+        
+        # Обновляем роль
+        user.role = UserRole(role_data.role.value)
+        await db.commit()
+        await db.refresh(user)
+        
+        return {
+            "message": f"Роль пользователя {user.name} изменена на {role_data.role.value}",
+            "user_id": user_id,
+            "new_role": role_data.role.value
+        }
+        
+    except ValueError as e:
+        await db.rollback()
+        raise HTTPException(status_code=400, detail=f"Некорректная роль: {str(e)}")
+    except Exception as e:
+        await db.rollback()
+        raise HTTPException(status_code=500, detail=f"Ошибка изменения роли: {str(e)}")
+
+
+@router.put("/{user_id}/status")
+async def update_user_status(
+    user_id: int,
+    status_data: UserStatusUpdate,
+    current_user: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db_session)
+):
+    """Изменение статуса активности пользователя (только для администратора)."""
+    try:
+        # Нельзя деактивировать самого себя
+        if user_id == current_user.id and not status_data.is_active:
+            raise HTTPException(status_code=400, detail="Нельзя деактивировать собственный аккаунт")
+        
+        query = select(User).where(User.id == user_id)
+        result = await db.execute(query)
+        user = result.scalar_one_or_none()
+        
+        if not user:
+            raise HTTPException(status_code=404, detail="Пользователь не найден")
+        
+        # Обновляем статус
+        user.is_active = status_data.is_active
+        await db.commit()
+        await db.refresh(user)
+        
+        action = "активирован" if status_data.is_active else "деактивирован"
+        
+        return {
+            "message": f"Пользователь {user.name} {action}",
+            "user_id": user_id,
+            "is_active": status_data.is_active
+        }
+        
+    except Exception as e:
+        await db.rollback()
+        raise HTTPException(status_code=500, detail=f"Ошибка изменения статуса: {str(e)}")
 
 @router.get("/me/profile", response_model=UserProfileResponse)
 async def get_my_profile(
