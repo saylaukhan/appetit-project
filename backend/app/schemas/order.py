@@ -8,7 +8,7 @@ class OrderStatus(str, Enum):
     CONFIRMED = "confirmed"  # Подтвержден
     PREPARING = "preparing"  # Готовится
     READY = "ready"  # Готов к выдаче
-    IN_DELIVERY = "in_delivery"  # В доставке
+    DELIVERING = "delivering"  # Доставляется
     DELIVERED = "delivered"  # Доставлен
     CANCELLED = "cancelled"  # Отменен
 
@@ -61,3 +61,9 @@ class OrderResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+class OrderStatusUpdateRequest(BaseModel):
+    status: OrderStatus
+
+class OrderAssignCourierRequest(BaseModel):
+    courier_id: int

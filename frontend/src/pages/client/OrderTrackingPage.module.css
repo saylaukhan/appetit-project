@@ -12,9 +12,17 @@
   margin-bottom: var(--spacing-xl);
   box-shadow: var(--shadow-medium);
   border: 1px solid var(--border-light);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--spacing-lg);
 }
 
-.orderHeader h1 {
+.headerLeft {
+  flex: 1;
+}
+
+.headerLeft h1 {
   color: var(--text-primary);
   font-size: 2rem;
   font-weight: 600;
@@ -25,6 +33,42 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  margin: 0 0 var(--spacing-lg) 0;
+}
+
+.refreshButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius-medium);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.refreshButton:hover {
+  background: var(--primary-dark);
+  transform: translateY(-1px);
+}
+
+.refreshButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 .orderStatus {

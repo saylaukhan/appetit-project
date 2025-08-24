@@ -94,6 +94,19 @@ export const ordersAPI = {
   getOrder: (orderId) => api.get(`/api/v1/orders/${orderId}`),
   updateOrderStatus: (orderId, status) => api.patch(`/api/v1/orders/${orderId}/status`, { status }),
   assignCourier: (orderId, courierId) => api.patch(`/api/v1/orders/${orderId}/assign`, { courier_id: courierId }),
+  cancelOrder: (orderId) => api.patch(`/api/v1/orders/${orderId}/cancel`),
+}
+
+// Админ API
+export const adminAPI = {
+  // Заказы
+  getAllOrders: () => api.get('/api/v1/admin/orders'),
+  updateOrderStatus: (orderId, status) => api.patch(`/api/v1/admin/orders/${orderId}/status`, { status }),
+  assignCourier: (orderId, courierId) => api.patch(`/api/v1/admin/orders/${orderId}/assign-courier`, { courier_id: courierId }),
+  getCouriers: () => api.get('/api/v1/admin/couriers'),
+  
+  // Дашборд
+  getDashboard: () => api.get('/api/v1/admin/dashboard'),
 }
 
 // Промокоды
@@ -140,8 +153,10 @@ export const marketingAPI = {
 // Курьеры
 export const courierAPI = {
   getAssignedOrders: () => api.get('/api/v1/courier/orders'),
-  updateDeliveryStatus: (orderId, status, location = null) => 
-    api.patch(`/api/v1/courier/orders/${orderId}/status`, { status, location }),
+  getAvailableOrders: () => api.get('/api/v1/courier/available-orders'),
+  takeOrder: (orderId) => api.patch(`/api/v1/courier/orders/${orderId}/take`),
+  markDelivered: (orderId) => api.patch(`/api/v1/courier/orders/${orderId}/delivered`),
+  updateDeliveryStatus: (orderId, status) => api.patch(`/api/v1/courier/orders/${orderId}/status`, { status }),
   getCouriers: () => api.get('/api/v1/couriers'),
   updateCourierLocation: (location) => api.patch('/api/v1/courier/location', location),
 }
@@ -149,8 +164,10 @@ export const courierAPI = {
 // Кухня
 export const kitchenAPI = {
   getKitchenOrders: () => api.get('/api/v1/kitchen/orders'),
+  startCooking: (orderId) => api.patch(`/api/v1/kitchen/orders/${orderId}/start-cooking`),
+  markOrderReady: (orderId) => api.patch(`/api/v1/kitchen/orders/${orderId}/mark-ready`),
+  completePickupOrder: (orderId) => api.patch(`/api/v1/kitchen/orders/${orderId}/pickup-complete`),
   updateOrderStatus: (orderId, status) => api.patch(`/api/v1/kitchen/orders/${orderId}/status`, { status }),
-  markOrderReady: (orderId) => api.patch(`/api/v1/kitchen/orders/${orderId}/ready`),
 }
 
 // Файлы и изображения

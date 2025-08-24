@@ -2,209 +2,129 @@ import React, { useState, useEffect } from 'react'
 import { 
   Clock, 
   CheckCircle, 
-  AlertTriangle, 
-  Users,
-  ChefHat,
-  Timer,
-  Bell,
+  AlertCircle, 
+  Package,
+  Phone,
+  MapPin,
+  User,
   RefreshCw
 } from 'lucide-react'
 import { kitchenAPI } from '../../services/api'
 import LoadingSpinner from '../../components/common/LoadingSpinner'
+import OrderDetailsModal from '../../components/common/OrderDetailsModal'
+import { toast } from 'react-hot-toast'
 import styles from './KitchenDashboard.module.css'
 
 function KitchenDashboard() {
   const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(true)
-  const [currentTime, setCurrentTime] = useState(new Date())
-  const [stats, setStats] = useState({
-    pending: 0,
-    cooking: 0,
-    ready: 0,
-    avgTime: 0
-  })
+  const [selectedOrder, setSelectedOrder] = useState(null)
+  const [refreshing, setRefreshing] = useState(false)
 
   useEffect(() => {
-    fetchKitchenOrders()
-    
-    // Обновляем время каждую секунду
-    const timeInterval = setInterval(() => {
-      setCurrentTime(new Date())
-    }, 1000)
-
-    // Автообновление заказов каждые 30 секунд
-    const ordersInterval = setInterval(() => {
-      fetchKitchenOrders()
-    }, 30000)
-
-    return () => {
-      clearInterval(timeInterval)
-      clearInterval(ordersInterval)
-    }
+    fetchOrders()
+    // Обновляем заказы каждые 30 секунд
+    const interval = setInterval(fetchOrders, 30000)
+    return () => clearInterval(interval)
   }, [])
 
-  useEffect(() => {
-    // Пересчитываем статистику при изменении заказов
-    const pending = orders.filter(order => order.status === 'pending').length
-    const cooking = orders.filter(order => order.status === 'cooking').length
-    const ready = orders.filter(order => order.status === 'ready').length
-    
-    // Рассчитываем среднее время приготовления
-    const cookingOrders = orders.filter(order => order.status === 'cooking')
-    const avgTime = cookingOrders.length > 0 
-      ? cookingOrders.reduce((sum, order) => sum + getElapsedMinutes(order.cookingStarted), 0) / cookingOrders.length
-      : 0
-
-    setStats({ pending, cooking, ready, avgTime: Math.round(avgTime) })
-  }, [orders])
-
-  const fetchKitchenOrders = async () => {
+  const fetchOrders = async () => {
     try {
-      // В реальном приложении здесь будет API вызов
-      // const response = await kitchenAPI.getKitchenOrders()
-      
-      // Пока используем моковые данные
-      const mockOrders = [
-        {
-          id: 1,
-          orderNumber: '0001',
-          customer: 'Айгуль К.',
-          items: [
-            { name: 'Пицца Маргарита', quantity: 1, notes: 'Без лука' },
-            { name: 'Кока-Кола 0.5л', quantity: 2, notes: '' }
-          ],
-          status: 'pending',
-          priority: 'normal',
-          deliveryType: 'delivery',
-          createdAt: new Date(Date.now() - 1000 * 60 * 8).toISOString(),
-          estimatedTime: 25,
-          tableNumber: null
-        },
-        {
-          id: 2,
-          orderNumber: '0002', 
-          customer: 'Арман Т.',
-          items: [
-            { name: 'Бургер Классик', quantity: 2, notes: 'Средней прожарки' },
-            { name: 'Картофель фри', quantity: 1, notes: 'Без соли' }
-          ],
-          status: 'cooking',
-          priority: 'high',
-          deliveryType: 'delivery',
-          createdAt: new Date(Date.now() - 1000 * 60 * 25).toISOString(),
-          cookingStarted: new Date(Date.now() - 1000 * 60 * 12).toISOString(),
-          estimatedTime: 15,
-          tableNumber: null
-        },
-        {
-          id: 3,
-          orderNumber: '0003',
-          customer: 'Жанар С.',
-          items: [
-            { name: 'Ролл Филадельфия', quantity: 3, notes: '' },
-            { name: 'Зеленый чай', quantity: 1, notes: 'Горячий' }
-          ],
-          status: 'ready',
-          priority: 'normal',
-          deliveryType: 'pickup',
-          createdAt: new Date(Date.now() - 1000 * 60 * 45).toISOString(),
-          cookingStarted: new Date(Date.now() - 1000 * 60 * 22).toISOString(),
-          completedAt: new Date(Date.now() - 1000 * 60 * 2).toISOString(),
-          estimatedTime: 20,
-          tableNumber: null
-        },
-        {
-          id: 4,
-          orderNumber: '0004',
-          customer: 'Стол №12',
-          items: [
-            { name: 'Салат Цезарь', quantity: 1, notes: 'Без сухариков' },
-            { name: 'Борщ украинский', quantity: 1, notes: '' }
-          ],
-          status: 'cooking',
-          priority: 'normal',
-          deliveryType: 'dine_in',
-          createdAt: new Date(Date.now() - 1000 * 60 * 18).toISOString(),
-          cookingStarted: new Date(Date.now() - 1000 * 60 * 8).toISOString(),
-          estimatedTime: 12,
-          tableNumber: 12
-        }
-      ]
-      
-      setOrders(mockOrders)
-      setLoading(false)
+      setRefreshing(true)
+      const response = await kitchenAPI.getKitchenOrders()
+      setOrders(response.data)
     } catch (error) {
-      console.error('Ошибка загрузки заказов кухни:', error)
+      console.error('Ошибка загрузки заказов:', error)
+      toast.error('Ошибка загрузки заказов')
+    } finally {
       setLoading(false)
+      setRefreshing(false)
     }
   }
 
-  const updateOrderStatus = async (orderId, newStatus) => {
+  const startCooking = async (orderId) => {
     try {
-      // В реальном приложении здесь будет API вызов
-      // await kitchenAPI.updateOrderStatus(orderId, newStatus)
+      await kitchenAPI.startCooking(orderId)
       
-      const now = new Date().toISOString()
-      setOrders(prev => prev.map(order => {
-        if (order.id === orderId) {
-          const updates = { status: newStatus }
-          
-          if (newStatus === 'cooking' && order.status === 'pending') {
-            updates.cookingStarted = now
-          } else if (newStatus === 'ready') {
-            updates.completedAt = now
-          }
-          
-          return { ...order, ...updates }
-        }
-        return order
-      }))
+      setOrders(prev => prev.map(order => 
+        order.id === orderId ? { ...order, status: 'preparing' } : order
+      ))
+      
+      toast.success('Заказ взят в работу')
     } catch (error) {
-      console.error('Ошибка обновления статуса заказа:', error)
+      console.error('Ошибка начала приготовления:', error)
+      toast.error('Ошибка начала приготовления')
     }
   }
 
-  const getElapsedMinutes = (startTime) => {
-    if (!startTime) return 0
-    const elapsed = (new Date() - new Date(startTime)) / 1000 / 60
-    return Math.floor(elapsed)
-  }
-
-  const getOrderElapsed = (order) => {
-    if (order.status === 'ready' && order.completedAt) {
-      return getElapsedMinutes(order.cookingStarted)
-    }
-    if (order.status === 'cooking' && order.cookingStarted) {
-      return getElapsedMinutes(order.cookingStarted)
-    }
-    return getElapsedMinutes(order.createdAt)
-  }
-
-  const getPriorityClass = (priority) => {
-    switch (priority) {
-      case 'high': return styles.priorityHigh
-      case 'normal': return styles.priorityNormal
-      case 'low': return styles.priorityLow
-      default: return styles.priorityNormal
+  const markReady = async (orderId) => {
+    try {
+      await kitchenAPI.markOrderReady(orderId)
+      
+      // Обновляем статус заказа в локальном состоянии
+      setOrders(prev => prev.map(order => 
+        order.id === orderId ? { ...order, status: 'ready' } : order
+      ))
+      
+      toast.success('Заказ готов!')
+    } catch (error) {
+      console.error('Ошибка отметки готовности:', error)
+      toast.error('Ошибка отметки готовности')
     }
   }
 
-  const getStatusColor = (status) => {
+  const completePickup = async (orderId) => {
+    try {
+      await kitchenAPI.completePickupOrder(orderId)
+      
+      // Удаляем заказ из списка, так как он выполнен
+      setOrders(prev => prev.filter(order => order.id !== orderId))
+      
+      toast.success('Заказ выдан клиенту!')
+    } catch (error) {
+      console.error('Ошибка выдачи заказа:', error)
+      toast.error('Ошибка выдачи заказа')
+    }
+  }
+
+  const getStatusIcon = (status) => {
     switch (status) {
-      case 'pending': return styles.statusPending
-      case 'cooking': return styles.statusCooking
-      case 'ready': return styles.statusReady
-      default: return styles.statusPending
+      case 'confirmed': return <Clock className={styles.statusIcon} />
+      case 'preparing': return <Package className={styles.statusIcon} />
+      case 'ready': return <CheckCircle className={styles.statusIcon} />
+      default: return <Clock className={styles.statusIcon} />
     }
   }
 
-  const getDeliveryTypeIcon = (deliveryType) => {
-    switch (deliveryType) {
-      case 'delivery': return '🚗'
-      case 'pickup': return '🚶'
-      case 'dine_in': return '🏠'
-      default: return '📦'
+  const getStatusText = (status) => {
+    switch (status) {
+      case 'confirmed': return 'Подтвержден'
+      case 'preparing': return 'Готовится'
+      case 'ready': return 'Готов'
+      default: return status
     }
+  }
+
+  const getStatusClass = (status) => {
+    return styles[`status${status.charAt(0).toUpperCase() + status.slice(1)}`] || styles.statusConfirmed
+  }
+
+  const formatTime = (dateString) => {
+    const date = new Date(dateString)
+    const now = new Date()
+    const diff = now - date
+    const minutes = Math.floor(diff / (1000 * 60))
+    
+    if (minutes < 60) {
+      return `${minutes} мин назад`
+    }
+    
+    const hours = Math.floor(minutes / 60)
+    if (hours < 24) {
+      return `${hours} ч назад`
+    }
+    
+    return date.toLocaleDateString()
   }
 
   if (loading) {
@@ -213,200 +133,310 @@ function KitchenDashboard() {
 
   return (
     <div className={styles.kitchenDashboard}>
-      {/* Header */}
       <div className={styles.header}>
-        <div className={styles.headerLeft}>
-          <ChefHat className={styles.headerIcon} />
-          <div>
-            <h1>Kitchen Display System</h1>
-            <p>{currentTime.toLocaleTimeString()}</p>
-          </div>
-        </div>
-        
-        <div className={styles.headerRight}>
-          <button 
-            className={styles.refreshButton}
-            onClick={() => fetchKitchenOrders()}
-          >
-            <RefreshCw size={18} />
-            Обновить
-          </button>
-        </div>
+        <h1>Кухня</h1>
+        <p>Управление приготовлением заказов</p>
+        <button 
+          className={styles.refreshButton}
+          onClick={fetchOrders}
+          disabled={refreshing}
+        >
+          <RefreshCw className={refreshing ? styles.spinning : ''} size={20} />
+          Обновить
+        </button>
       </div>
 
-      {/* Stats */}
+      {/* Статистика */}
       <div className={styles.stats}>
         <div className={styles.statCard}>
-          <Clock className={styles.statIcon} />
-          <div>
-            <div className={styles.statNumber}>{stats.pending}</div>
-            <div className={styles.statLabel}>Ожидают</div>
+          <div className={styles.statNumber}>
+            {orders.filter(order => order.status === 'confirmed').length}
           </div>
+          <div className={styles.statLabel}>Ожидают</div>
         </div>
-        
         <div className={styles.statCard}>
-          <ChefHat className={styles.statIcon} />
-          <div>
-            <div className={styles.statNumber}>{stats.cooking}</div>
-            <div className={styles.statLabel}>Готовятся</div>
+          <div className={styles.statNumber}>
+            {orders.filter(order => order.status === 'preparing').length}
           </div>
+          <div className={styles.statLabel}>Готовятся</div>
         </div>
-        
         <div className={styles.statCard}>
-          <CheckCircle className={styles.statIcon} />
-          <div>
-            <div className={styles.statNumber}>{stats.ready}</div>
-            <div className={styles.statLabel}>Готовы</div>
+          <div className={styles.statNumber}>
+            {orders.filter(order => order.status === 'ready' && order.delivery_type === 'pickup').length}
           </div>
+          <div className={styles.statLabel}>Готовы к выдаче</div>
         </div>
-        
         <div className={styles.statCard}>
-          <Timer className={styles.statIcon} />
-          <div>
-            <div className={styles.statNumber}>{stats.avgTime}м</div>
-            <div className={styles.statLabel}>Среднее время</div>
+          <div className={styles.statNumber}>
+            {orders.length}
           </div>
+          <div className={styles.statLabel}>Всего</div>
         </div>
       </div>
 
-      {/* Orders Grid */}
-      <div className={styles.ordersContainer}>
-        <div className={styles.ordersColumn}>
-          <h2 className={styles.columnTitle}>
+      {/* Список заказов в двух колонках */}
+      <div className={styles.ordersColumns}>
+        {/* Колонка ожидающих заказов */}
+        <div className={styles.orderColumn}>
+          <div className={styles.columnHeader}>
             <Clock size={20} />
-            Новые заказы ({stats.pending})
-          </h2>
-          {orders.filter(order => order.status === 'pending').map(order => (
-            <OrderCard
-              key={order.id}
-              order={order}
-              onStatusChange={updateOrderStatus}
-              getElapsedMinutes={() => getElapsedMinutes(order.createdAt)}
-              getPriorityClass={getPriorityClass}
-              getDeliveryTypeIcon={getDeliveryTypeIcon}
-              styles={styles}
-            />
-          ))}
-        </div>
+            <h2>Ожидают приготовления</h2>
+            <span className={styles.columnCount}>
+              {orders.filter(order => order.status === 'confirmed').length}
+            </span>
+          </div>
+          <div className={styles.columnContent}>
+            {orders.filter(order => order.status === 'confirmed').map(order => (
+              <div key={order.id} className={styles.orderCard}>
+                <div className={styles.orderHeader}>
+                  <div className={styles.orderInfo}>
+                    <span className={styles.orderNumber}>#{order.order_number}</span>
+                    <span className={styles.orderTime}>{formatTime(order.created_at)}</span>
+                  </div>
+                  <div className={`${styles.orderStatus} ${getStatusClass(order.status)}`}>
+                    {getStatusIcon(order.status)}
+                    {getStatusText(order.status)}
+                  </div>
+                </div>
 
-        <div className={styles.ordersColumn}>
-          <h2 className={styles.columnTitle}>
-            <ChefHat size={20} />
-            В приготовлении ({stats.cooking})
-          </h2>
-          {orders.filter(order => order.status === 'cooking').map(order => (
-            <OrderCard
-              key={order.id}
-              order={order}
-              onStatusChange={updateOrderStatus}
-              getElapsedMinutes={() => getElapsedMinutes(order.cookingStarted)}
-              getPriorityClass={getPriorityClass}
-              getDeliveryTypeIcon={getDeliveryTypeIcon}
-              styles={styles}
-              showCookingTimer={true}
-            />
-          ))}
-        </div>
+                <div className={styles.customerInfo}>
+                  <h3>{order.customer_name}</h3>
+                  <div className={styles.customerDetails}>
+                    <span><Phone size={14} /> {order.customer_phone}</span>
+                    {order.delivery_address && (
+                      <span><MapPin size={14} /> {order.delivery_address}</span>
+                    )}
+                  </div>
+                </div>
 
-        <div className={styles.ordersColumn}>
-          <h2 className={styles.columnTitle}>
-            <CheckCircle size={20} />
-            Готовы к выдаче ({stats.ready})
-          </h2>
-          {orders.filter(order => order.status === 'ready').map(order => (
-            <OrderCard
-              key={order.id}
-              order={order}
-              onStatusChange={updateOrderStatus}
-              getElapsedMinutes={() => getElapsedMinutes(order.completedAt)}
-              getPriorityClass={getPriorityClass}
-              getDeliveryTypeIcon={getDeliveryTypeIcon}
-              styles={styles}
-              isReady={true}
-            />
-          ))}
-        </div>
-      </div>
-    </div>
-  )
-}
+                <div className={styles.orderItems}>
+                  {order.items && order.items.map((item, index) => (
+                    <div key={index} className={styles.orderItem}>
+                      <div className={styles.itemInfo}>
+                        <span className={styles.itemName}>{item.dish_name}</span>
+                        <span className={styles.itemQuantity}>x{item.quantity}</span>
+                      </div>
+                      {item.modifiers && item.modifiers.length > 0 && (
+                        <div className={styles.itemModifiers}>
+                          {item.modifiers.join(', ')}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
 
-// Компонент карточки заказа
-function OrderCard({ 
-  order, 
-  onStatusChange, 
-  getElapsedMinutes, 
-  getPriorityClass, 
-  getDeliveryTypeIcon,
-  styles,
-  showCookingTimer = false,
-  isReady = false
-}) {
-  const elapsed = getElapsedMinutes()
-  const isOvertime = elapsed > order.estimatedTime
-
-  return (
-    <div className={`${styles.orderCard} ${getPriorityClass(order.priority)}`}>
-      <div className={styles.orderHeader}>
-        <div className={styles.orderInfo}>
-          <span className={styles.orderNumber}>#{order.orderNumber}</span>
-          <span className={styles.deliveryType}>
-            {getDeliveryTypeIcon(order.deliveryType)}
-          </span>
-        </div>
-        
-        <div className={styles.orderTime}>
-          <span className={`${styles.elapsed} ${isOvertime ? styles.overtime : ''}`}>
-            {elapsed}м
-          </span>
-          <span className={styles.estimated}>/ {order.estimatedTime}м</span>
-        </div>
-      </div>
-
-      <div className={styles.customer}>
-        {order.tableNumber ? `Стол №${order.tableNumber}` : order.customer}
-      </div>
-
-      <div className={styles.orderItems}>
-        {order.items.map((item, index) => (
-          <div key={index} className={styles.orderItem}>
-            <span className={styles.itemQuantity}>{item.quantity}x</span>
-            <span className={styles.itemName}>{item.name}</span>
-            {item.notes && (
-              <div className={styles.itemNotes}>📝 {item.notes}</div>
+                <div className={styles.orderFooter}>
+                  <div className={styles.orderTotal}>
+                    <strong>Итого: {order.total_amount.toLocaleString()} ₸</strong>
+                  </div>
+                  
+                  <div className={styles.orderActions}>
+                    <button 
+                      className={styles.actionButton}
+                      onClick={() => setSelectedOrder(order)}
+                    >
+                      <Package size={16} />
+                      Подробнее
+                    </button>
+                    
+                    <button 
+                      className={`${styles.actionButton} ${styles.startButton}`}
+                      onClick={() => startCooking(order.id)}
+                    >
+                      <AlertCircle size={16} />
+                      Начать готовить
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+            {orders.filter(order => order.status === 'confirmed').length === 0 && (
+              <div className={styles.emptyColumn}>
+                <Clock size={32} />
+                <p>Нет заказов, ожидающих приготовления</p>
+              </div>
             )}
           </div>
-        ))}
-      </div>
+        </div>
 
-      <div className={styles.orderActions}>
-        {order.status === 'pending' && (
-          <button
-            className={`${styles.actionButton} ${styles.startButton}`}
-            onClick={() => onStatusChange(order.id, 'cooking')}
-          >
-            <ChefHat size={16} />
-            Начать готовить
-          </button>
-        )}
-        
-        {order.status === 'cooking' && (
-          <button
-            className={`${styles.actionButton} ${styles.readyButton}`}
-            onClick={() => onStatusChange(order.id, 'ready')}
-          >
-            <CheckCircle size={16} />
-            Готово
-          </button>
-        )}
-
-        {isReady && (
-          <div className={styles.readyIndicator}>
-            <Bell className={styles.bellIcon} />
-            К выдаче!
+        {/* Колонка готовящихся заказов */}
+        <div className={styles.orderColumn}>
+          <div className={styles.columnHeader}>
+            <Package size={20} />
+            <h2>В процессе готовки</h2>
+            <span className={styles.columnCount}>
+              {orders.filter(order => order.status === 'preparing').length}
+            </span>
           </div>
-        )}
+          <div className={styles.columnContent}>
+            {orders.filter(order => order.status === 'preparing').map(order => (
+              <div key={order.id} className={styles.orderCard}>
+                <div className={styles.orderHeader}>
+                  <div className={styles.orderInfo}>
+                    <span className={styles.orderNumber}>#{order.order_number}</span>
+                    <span className={styles.orderTime}>{formatTime(order.created_at)}</span>
+                  </div>
+                  <div className={`${styles.orderStatus} ${getStatusClass(order.status)}`}>
+                    {getStatusIcon(order.status)}
+                    {getStatusText(order.status)}
+                  </div>
+                </div>
+
+                <div className={styles.customerInfo}>
+                  <h3>{order.customer_name}</h3>
+                  <div className={styles.customerDetails}>
+                    <span><Phone size={14} /> {order.customer_phone}</span>
+                    {order.delivery_address && (
+                      <span><MapPin size={14} /> {order.delivery_address}</span>
+                    )}
+                  </div>
+                </div>
+
+                <div className={styles.orderItems}>
+                  {order.items && order.items.map((item, index) => (
+                    <div key={index} className={styles.orderItem}>
+                      <div className={styles.itemInfo}>
+                        <span className={styles.itemName}>{item.dish_name}</span>
+                        <span className={styles.itemQuantity}>x{item.quantity}</span>
+                      </div>
+                      {item.modifiers && item.modifiers.length > 0 && (
+                        <div className={styles.itemModifiers}>
+                          {item.modifiers.join(', ')}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+
+                <div className={styles.orderFooter}>
+                  <div className={styles.orderTotal}>
+                    <strong>Итого: {order.total_amount.toLocaleString()} ₸</strong>
+                  </div>
+                  
+                  <div className={styles.orderActions}>
+                    <button 
+                      className={styles.actionButton}
+                      onClick={() => setSelectedOrder(order)}
+                    >
+                      <Package size={16} />
+                      Подробнее
+                    </button>
+                    
+                    <button 
+                      className={`${styles.actionButton} ${styles.readyButton}`}
+                      onClick={() => markReady(order.id)}
+                    >
+                      <CheckCircle size={16} />
+                      Готов
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+            {orders.filter(order => order.status === 'preparing').length === 0 && (
+              <div className={styles.emptyColumn}>
+                <Package size={32} />
+                <p>Нет заказов в процессе готовки</p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Колонка готовых заказов на самовывоз */}
+        <div className={styles.orderColumn}>
+          <div className={styles.columnHeader}>
+            <CheckCircle size={20} />
+            <h2>Готовы к выдаче</h2>
+            <span className={styles.columnCount}>
+              {orders.filter(order => order.status === 'ready' && order.delivery_type === 'pickup').length}
+            </span>
+          </div>
+          <div className={styles.columnContent}>
+            {orders.filter(order => order.status === 'ready' && order.delivery_type === 'pickup').map(order => (
+              <div key={order.id} className={styles.orderCard}>
+                <div className={styles.orderHeader}>
+                  <div className={styles.orderInfo}>
+                    <span className={styles.orderNumber}>#{order.order_number}</span>
+                    <span className={styles.orderTime}>{formatTime(order.created_at)}</span>
+                  </div>
+                  <div className={`${styles.orderStatus} ${getStatusClass(order.status)}`}>
+                    {getStatusIcon(order.status)}
+                    {getStatusText(order.status)}
+                  </div>
+                </div>
+
+                <div className={styles.customerInfo}>
+                  <h3>{order.customer_name}</h3>
+                  <div className={styles.customerDetails}>
+                    <span><Phone size={14} /> {order.customer_phone}</span>
+                    <div className={styles.pickupBadge}>
+                      <User size={14} />
+                      Самовывоз
+                    </div>
+                  </div>
+                </div>
+
+                <div className={styles.orderItems}>
+                  {order.items && order.items.map((item, index) => (
+                    <div key={index} className={styles.orderItem}>
+                      <div className={styles.itemInfo}>
+                        <span className={styles.itemName}>{item.dish_name}</span>
+                        <span className={styles.itemQuantity}>x{item.quantity}</span>
+                      </div>
+                      {item.modifiers && item.modifiers.length > 0 && (
+                        <div className={styles.itemModifiers}>
+                          {item.modifiers.join(', ')}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+
+                <div className={styles.orderFooter}>
+                  <div className={styles.orderTotal}>
+                    <strong>Итого: {order.total_amount.toLocaleString()} ₸</strong>
+                  </div>
+                  
+                  <div className={styles.orderActions}>
+                    <button 
+                      className={styles.actionButton}
+                      onClick={() => setSelectedOrder(order)}
+                    >
+                      <Package size={16} />
+                      Подробнее
+                    </button>
+                    
+                    <button 
+                      className={`${styles.actionButton} ${styles.completeButton}`}
+                      onClick={() => completePickup(order.id)}
+                    >
+                      <CheckCircle size={16} />
+                      Выдан
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+            {orders.filter(order => order.status === 'ready' && order.delivery_type === 'pickup').length === 0 && (
+              <div className={styles.emptyColumn}>
+                <CheckCircle size={32} />
+                <p>Нет заказов, готовых к выдаче</p>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
+
+
+
+      {/* Модальное окно деталей заказа */}
+      {selectedOrder && (
+        <OrderDetailsModal
+          isOpen={!!selectedOrder}
+          onClose={() => setSelectedOrder(null)}
+          order={selectedOrder}
+        />
+      )}
     </div>
   )
 }
