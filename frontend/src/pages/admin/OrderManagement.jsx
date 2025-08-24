@@ -10,10 +10,14 @@ import {
   Truck,
   Phone,
   MapPin,
-  ShoppingBag
+  ShoppingBag,
+  User,
+  X
 } from 'lucide-react'
-import { ordersAPI } from '../../services/api'
+import { adminAPI } from '../../services/api'
 import LoadingSpinner from '../../components/common/LoadingSpinner'
+import OrderDetailsModal from '../../components/common/OrderDetailsModal'
+import { toast } from 'react-hot-toast'
 import styles from './OrderManagement.module.css'
 
 function OrderManagement() {
@@ -22,124 +26,75 @@ function OrderManagement() {
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const [selectedOrder, setSelectedOrder] = useState(null)
+  const [couriers, setCouriers] = useState([])
+  const [showCourierModal, setShowCourierModal] = useState(false)
+  const [selectedOrderForCourier, setSelectedOrderForCourier] = useState(null)
 
   useEffect(() => {
     fetchOrders()
-  }, [statusFilter])
+    fetchCouriers()
+  }, [])
 
   const fetchOrders = async () => {
     try {
       setLoading(true)
-      // В реальном приложении здесь будет API вызов
-      // const response = await ordersAPI.getOrders({ status: statusFilter })
-      
-      // Пока используем моковые данные
-      setTimeout(() => {
-        const mockOrders = [
-          {
-            id: 1,
-            orderNumber: '0001',
-            customer: {
-              name: 'Айгуль Казыбекова',
-              phone: '+77774567890',
-              address: 'ул. Абая 150, кв. 25'
-            },
-            items: [
-              { name: 'Пицца Маргарита', quantity: 1, price: 2500 },
-              { name: 'Кока-Кола 0.5л', quantity: 2, price: 600 }
-            ],
-            total: 3700,
-            status: 'pending',
-            createdAt: new Date(Date.now() - 1000 * 60 * 15).toISOString(),
-            deliveryType: 'delivery',
-            paymentMethod: 'card',
-            notes: 'Без лука, пожалуйста'
-          },
-          {
-            id: 2,
-            orderNumber: '0002',
-            customer: {
-              name: 'Арман Токтасынов',
-              phone: '+77773456789',
-              address: 'ул. Сатпаева 90, офис 15'
-            },
-            items: [
-              { name: 'Бургер Классик', quantity: 2, price: 4400 },
-              { name: 'Картофель фри', quantity: 1, price: 800 }
-            ],
-            total: 5200,
-            status: 'cooking',
-            createdAt: new Date(Date.now() - 1000 * 60 * 35).toISOString(),
-            deliveryType: 'delivery',
-            paymentMethod: 'cash',
-            courier: 'Курьер Арман'
-          },
-          {
-            id: 3,
-            orderNumber: '0003',
-            customer: {
-              name: 'Жанар Сапарова',
-              phone: '+77785678901',
-              address: 'Самовывоз'
-            },
-            items: [
-              { name: 'Ролл Филадельфия', quantity: 3, price: 5400 },
-              { name: 'Зеленый чай', quantity: 1, price: 200 }
-            ],
-            total: 5600,
-            status: 'ready',
-            createdAt: new Date(Date.now() - 1000 * 60 * 45).toISOString(),
-            deliveryType: 'pickup',
-            paymentMethod: 'card'
-          },
-          {
-            id: 4,
-            orderNumber: '0004',
-            customer: {
-              name: 'Даулет Мусабаев',
-              phone: '+77796789012',
-              address: 'пр. Назарбаева 220, дом 15'
-            },
-            items: [
-              { name: 'Салат Цезарь', quantity: 1, price: 1500 },
-              { name: 'Борщ украинский', quantity: 1, price: 1000 }
-            ],
-            total: 2500,
-            status: 'delivered',
-            createdAt: new Date(Date.now() - 1000 * 60 * 120).toISOString(),
-            deliveryType: 'delivery',
-            paymentMethod: 'card',
-            courier: 'Курьер Бекзат'
-          }
-        ]
-        
-        setOrders(mockOrders)
-        setLoading(false)
-      }, 1000)
+      const response = await adminAPI.getAllOrders()
+      setOrders(response.data)
     } catch (error) {
       console.error('Ошибка загрузки заказов:', error)
+      toast.error('Ошибка загрузки заказов')
+    } finally {
       setLoading(false)
+    }
+  }
+
+  const fetchCouriers = async () => {
+    try {
+      const response = await adminAPI.getCouriers()
+      setCouriers(response.data)
+    } catch (error) {
+      console.error('Ошибка загрузки курьеров:', error)
     }
   }
 
   const updateOrderStatus = async (orderId, newStatus) => {
     try {
-      // В реальном приложении здесь будет API вызов
-      // await ordersAPI.updateOrderStatus(orderId, newStatus)
+      await adminAPI.updateOrderStatus(orderId, newStatus)
       
       setOrders(prev => prev.map(order => 
         order.id === orderId ? { ...order, status: newStatus } : order
       ))
+      
+      toast.success('Статус заказа обновлен')
     } catch (error) {
       console.error('Ошибка обновления статуса заказа:', error)
+      toast.error('Ошибка обновления статуса заказа')
+    }
+  }
+
+  const assignCourier = async (orderId, courierId) => {
+    try {
+      await adminAPI.assignCourier(orderId, courierId)
+      
+      // Обновляем заказ в списке
+      setOrders(prev => prev.map(order => 
+        order.id === orderId ? { ...order, status: 'delivering', assigned_courier_id: courierId } : order
+      ))
+      
+      toast.success('Курьер назначен на заказ')
+      setShowCourierModal(false)
+      setSelectedOrderForCourier(null)
+    } catch (error) {
+      console.error('Ошибка назначения курьера:', error)
+      toast.error('Ошибка назначения курьера')
     }
   }
 
   const getStatusIcon = (status) => {
     switch (status) {
       case 'pending': return <Clock className={styles.statusIcon} />
+      case 'confirmed': return <CheckCircle className={styles.statusIcon} />
       case 'preparing': return <AlertCircle className={styles.statusIcon} />
-      case 'cooking': return <AlertCircle className={styles.statusIcon} />
       case 'ready': return <CheckCircle className={styles.statusIcon} />
       case 'delivering': return <Truck className={styles.statusIcon} />
       case 'delivered': return <CheckCircle className={styles.statusIcon} />
@@ -151,8 +106,8 @@ function OrderManagement() {
   const getStatusText = (status) => {
     switch (status) {
       case 'pending': return 'Ожидает подтверждения'
-      case 'preparing': return 'Подготовка'
-      case 'cooking': return 'Готовится'
+      case 'confirmed': return 'Подтвержден'
+      case 'preparing': return 'Готовится'
       case 'ready': return 'Готов'
       case 'delivering': return 'Доставляется'
       case 'delivered': return 'Доставлен'
@@ -184,8 +139,8 @@ function OrderManagement() {
   }
 
   const filteredOrders = orders.filter(order => {
-    const matchesSearch = order.customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         order.orderNumber.includes(searchTerm)
+    const matchesSearch = order.customer_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         order.order_number.includes(searchTerm)
     const matchesStatus = statusFilter === 'all' || order.status === statusFilter
     return matchesSearch && matchesStatus
   })
@@ -223,7 +178,8 @@ function OrderManagement() {
           >
             <option value="all">Все статусы</option>
             <option value="pending">Ожидает</option>
-            <option value="cooking">Готовится</option>
+            <option value="confirmed">Подтвержден</option>
+            <option value="preparing">Готовится</option>
             <option value="ready">Готов</option>
             <option value="delivering">Доставляется</option>
             <option value="delivered">Доставлен</option>
@@ -238,8 +194,8 @@ function OrderManagement() {
           <div key={order.id} className={styles.orderCard}>
             <div className={styles.orderHeader}>
               <div className={styles.orderInfo}>
-                <span className={styles.orderNumber}>#{order.orderNumber}</span>
-                <span className={styles.orderTime}>{formatTime(order.createdAt)}</span>
+                <span className={styles.orderNumber}>#{order.order_number}</span>
+                <span className={styles.orderTime}>{formatTime(order.created_at)}</span>
               </div>
               <div className={`${styles.orderStatus} ${getStatusClass(order.status)}`}>
                 {getStatusIcon(order.status)}
@@ -248,25 +204,25 @@ function OrderManagement() {
             </div>
 
             <div className={styles.customerInfo}>
-              <h3>{order.customer.name}</h3>
+              <h3>{order.customer_name}</h3>
               <div className={styles.customerDetails}>
-                <span><Phone size={14} /> {order.customer.phone}</span>
-                <span><MapPin size={14} /> {order.customer.address}</span>
+                <span><Phone size={14} /> {order.customer_phone}</span>
+                <span><MapPin size={14} /> {order.delivery_address || 'Самовывоз'}</span>
               </div>
             </div>
 
             <div className={styles.orderItems}>
-              {order.items.map((item, index) => (
+              {order.items && order.items.map((item, index) => (
                 <div key={index} className={styles.orderItem}>
-                  <span>{item.name} x{item.quantity}</span>
-                  <span>{item.price.toLocaleString()} ₸</span>
+                  <span>{item.dish_name} x{item.quantity}</span>
+                  <span>{item.total_price.toLocaleString()} ₸</span>
                 </div>
               ))}
             </div>
 
             <div className={styles.orderFooter}>
               <div className={styles.orderTotal}>
-                <strong>Итого: {order.total.toLocaleString()} ₸</strong>
+                <strong>Итого: {order.total_amount.toLocaleString()} ₸</strong>
               </div>
               
               <div className={styles.orderActions}>
@@ -281,20 +237,23 @@ function OrderManagement() {
                 {order.status === 'pending' && (
                   <button 
                     className={`${styles.actionButton} ${styles.confirmButton}`}
-                    onClick={() => updateOrderStatus(order.id, 'cooking')}
+                    onClick={() => updateOrderStatus(order.id, 'confirmed')}
                   >
                     <CheckCircle size={16} />
                     Подтвердить
                   </button>
                 )}
                 
-                {order.status === 'ready' && order.deliveryType === 'delivery' && (
+                {order.status === 'ready' && order.delivery_type === 'delivery' && (
                   <button 
                     className={`${styles.actionButton} ${styles.deliverButton}`}
-                    onClick={() => updateOrderStatus(order.id, 'delivering')}
+                    onClick={() => {
+                      setSelectedOrderForCourier(order)
+                      setShowCourierModal(true)
+                    }}
                   >
-                    <Truck size={16} />
-                    К доставке
+                    <User size={16} />
+                    Назначить курьера
                   </button>
                 )}
               </div>
@@ -308,6 +267,54 @@ function OrderManagement() {
           <ShoppingBag size={48} />
           <h3>Заказов не найдено</h3>
           <p>Попробуйте изменить критерии поиска или фильтры</p>
+        </div>
+      )}
+
+      {/* Модальное окно деталей заказа */}
+      {selectedOrder && (
+        <OrderDetailsModal
+          isOpen={!!selectedOrder}
+          onClose={() => setSelectedOrder(null)}
+          order={selectedOrder}
+        />
+      )}
+
+      {/* Модальное окно назначения курьера */}
+      {showCourierModal && selectedOrderForCourier && (
+        <div className={styles.modalOverlay} onClick={() => setShowCourierModal(false)}>
+          <div className={styles.courierModal} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <h3>Назначить курьера</h3>
+              <button 
+                className={styles.closeButton}
+                onClick={() => setShowCourierModal(false)}
+              >
+                <X size={20} />
+              </button>
+            </div>
+            <div className={styles.modalBody}>
+              <p>Заказ #{selectedOrderForCourier.order_number}</p>
+              <p>Адрес: {selectedOrderForCourier.delivery_address}</p>
+              
+              <div className={styles.couriersGrid}>
+                {couriers.map(courier => (
+                  <button
+                    key={courier.id}
+                    className={styles.courierCard}
+                    onClick={() => assignCourier(selectedOrderForCourier.id, courier.id)}
+                  >
+                    <User size={24} />
+                    <span>{courier.name}</span>
+                    <span className={styles.courierPhone}>{courier.phone}</span>
+                  </button>
+                ))}
+              </div>
+              
+              {couriers.length === 0 && (
+                <p className={styles.noCouriers}>Нет доступных курьеров</p>
+              )}
+            </div>
+          </div>
         </div>
       )}
     </div>

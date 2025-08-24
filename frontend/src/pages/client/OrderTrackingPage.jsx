@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
-import { Package, Clock, CheckCircle, Truck, MapPin, Phone, User } from 'lucide-react'
+import { Package, Clock, CheckCircle, Truck, MapPin, Phone, User, RefreshCw } from 'lucide-react'
+import { ordersAPI } from '../../services/api'
 import LoadingSpinner from '../../components/common/LoadingSpinner'
+import { toast } from 'react-hot-toast'
 import styles from './OrderTrackingPage.module.css'
 
 function OrderTrackingPage() {
@@ -12,9 +14,10 @@ function OrderTrackingPage() {
   const [order, setOrder] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [refreshing, setRefreshing] = useState(false)
 
   // Функция для загрузки заказа
-  const loadOrder = async () => {
+  const loadOrder = async (showRefreshing = false) => {
     if (!orderId || !user) {
       setError('Заказ не найден')
       setIsLoading(false)
@@ -22,32 +25,41 @@ function OrderTrackingPage() {
     }
 
     try {
-      const token = localStorage.getItem('auth_token')
-      const response = await fetch(`http://localhost:8000/api/v1/orders/${orderId}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      })
-
-      if (response.ok) {
-        const orderData = await response.json()
-        setOrder(orderData)
-      } else if (response.status === 404) {
+      if (showRefreshing) {
+        setRefreshing(true)
+      }
+      
+      const response = await ordersAPI.getOrder(orderId)
+      setOrder(response.data)
+      setError(null)
+    } catch (error) {
+      console.error('Ошибка загрузки заказа:', error)
+      if (error.response?.status === 404) {
         setError('Заказ не найден')
       } else {
         setError('Ошибка загрузки заказа')
+        if (showRefreshing) {
+          toast.error('Ошибка обновления заказа')
+        }
       }
-    } catch (error) {
-      console.error('Ошибка загрузки заказа:', error)
-      setError('Ошибка подключения к серверу')
     } finally {
       setIsLoading(false)
+      setRefreshing(false)
     }
   }
 
   useEffect(() => {
     loadOrder()
-  }, [orderId, user])
+    
+    // Автоматическое обновление каждые 30 секунд для активных заказов
+    const interval = setInterval(() => {
+      if (order && !['delivered', 'cancelled'].includes(order.status)) {
+        loadOrder(true)
+      }
+    }, 30000)
+
+    return () => clearInterval(interval)
+  }, [orderId, user, order?.status])
 
   // Функция для получения статуса заказа с иконкой
   const getOrderStatus = (status) => {
@@ -146,11 +158,21 @@ function OrderTrackingPage() {
     <div className={styles.trackingContainer}>
       <div className="container">
         <div className={styles.orderHeader}>
-          <h1>Заказ {order.order_number}</h1>
-          <div className={styles.orderStatus} style={{ color: status.color }}>
-            <StatusIcon size={24} />
-            <span>{status.text}</span>
+          <div className={styles.headerLeft}>
+            <h1>Заказ {order.order_number}</h1>
+            <div className={styles.orderStatus} style={{ color: status.color }}>
+              <StatusIcon size={24} />
+              <span>{status.text}</span>
+            </div>
           </div>
+          <button 
+            className={styles.refreshButton}
+            onClick={() => loadOrder(true)}
+            disabled={refreshing}
+            title="Обновить статус заказа"
+          >
+            <RefreshCw className={refreshing ? styles.spinning : ''} size={20} />
+          </button>
         </div>
 
         {/* Индикатор прогресса */}

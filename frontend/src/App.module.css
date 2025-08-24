@@ -82,7 +82,7 @@
 .mobileContainer {
   min-height: 100vh;
   background: var(--background);
-  padding: var(--spacing-sm);
+  width: 100%;
 }
 
 /* Mobile Styles */
@@ -99,9 +99,7 @@
 
 @media (min-width: 769px) {
   .mobileContainer {
-    max-width: 400px;
-    margin: 0 auto;
-    border-left: 1px solid var(--border-light);
-    border-right: 1px solid var(--border-light);
+    width: 100%;
+    margin: 0;
   }
 }

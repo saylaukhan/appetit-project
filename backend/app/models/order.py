@@ -9,7 +9,7 @@ class OrderStatus(str, Enum):
     CONFIRMED = "confirmed"  # Подтвержден
     PREPARING = "preparing"  # Готовится
     READY = "ready"  # Готов к выдаче
-    IN_DELIVERY = "in_delivery"  # В доставке
+    DELIVERING = "delivering"  # Доставляется
     DELIVERED = "delivered"  # Доставлен
     CANCELLED = "cancelled"  # Отменен
 

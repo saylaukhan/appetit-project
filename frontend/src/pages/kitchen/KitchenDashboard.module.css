@@ -1,431 +1,506 @@
-/* Kitchen Display System Styles */
 .kitchenDashboard {
-  min-height: 100vh;
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-  padding: var(--spacing-lg);
-  font-size: 1.1rem; /* Увеличенный шрифт для кухни */
+  padding: 2rem;
+  width: 100%;
+  max-width: none;
+  margin: 0 auto;
+  box-sizing: border-box;
 }
 
-/* Header */
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: var(--surface);
-  padding: var(--spacing-xl);
-  border-radius: var(--radius-large);
-  box-shadow: var(--shadow-medium);
-  margin-bottom: var(--spacing-xl);
-}
-
-.headerLeft {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-lg);
-}
-
-.headerIcon {
-  width: 48px;
-  height: 48px;
-  color: var(--primary-color);
+  margin-bottom: 2rem;
 }
 
 .header h1 {
-  color: var(--text-primary);
-  font-size: 2.5rem;
-  margin: 0;
+  font-size: 2rem;
   font-weight: 700;
+  color: #1f2937;
+  margin: 0;
 }
 
 .header p {
-  color: var(--text-secondary);
-  font-size: 1.2rem;
-  margin: 0;
-  font-family: 'Courier New', monospace;
-}
-
-.headerRight {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-md);
+  color: #6b7280;
+  margin: 0.5rem 0 0 0;
 }
 
 .refreshButton {
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
-  padding: var(--spacing-md) var(--spacing-lg);
-  background: var(--primary-color);
-  color: var(--text-white);
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: #3b82f6;
+  color: white;
   border: none;
-  border-radius: var(--radius-medium);
-  font-weight: 600;
-  font-size: 1rem;
+  border-radius: 0.5rem;
+  font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.2s;
 }
 
 .refreshButton:hover {
-  background: var(--primary-dark);
-  transform: translateY(-2px);
+  background: #2563eb;
 }
 
-/* Stats */
+.refreshButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Статистика */
 .stats {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: var(--spacing-lg);
-  margin-bottom: var(--spacing-xl);
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
 }
 
 .statCard {
-  background: var(--surface);
-  padding: var(--spacing-xl);
-  border-radius: var(--radius-large);
-  box-shadow: var(--shadow-small);
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-lg);
-  transition: transform 0.2s ease;
-}
-
-.statCard:hover {
-  transform: translateY(-2px);
-}
-
-.statIcon {
-  width: 48px;
-  height: 48px;
-  color: var(--primary-color);
-  flex-shrink: 0;
+  background: white;
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  text-align: center;
 }
 
 .statNumber {
   font-size: 2.5rem;
   font-weight: 700;
-  color: var(--text-primary);
-  line-height: 1;
+  color: #3b82f6;
+  margin-bottom: 0.5rem;
 }
 
 .statLabel {
-  color: var(--text-secondary);
+  color: #6b7280;
   font-weight: 500;
-  margin-top: var(--spacing-xs);
 }
 
-/* Orders Container */
-.ordersContainer {
+/* Колонки заказов */
+.ordersColumns {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--spacing-xl);
-  min-height: 70vh;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1.5rem;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-.ordersColumn {
-  background: var(--surface);
-  border-radius: var(--radius-large);
-  box-shadow: var(--shadow-small);
-  padding: var(--spacing-xl);
+.orderColumn {
   display: flex;
   flex-direction: column;
+  min-height: 400px;
 }
 
-.columnTitle {
+.columnHeader {
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
-  color: var(--text-primary);
-  font-size: 1.3rem;
-  font-weight: 700;
-  margin: 0 0 var(--spacing-xl) 0;
-  padding-bottom: var(--spacing-md);
-  border-bottom: 2px solid var(--border-light);
+  gap: 0.75rem;
+  padding: 1rem 1.5rem;
+  background: white;
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin-bottom: 1rem;
+  border-left: 4px solid #3b82f6;
 }
 
-/* Order Cards */
+.columnHeader h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1f2937;
+  flex: 1;
+}
+
+.columnCount {
+  background: #3b82f6;
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  min-width: 1.5rem;
+  text-align: center;
+}
+
+.columnContent {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  flex: 1;
+}
+
+.emptyColumn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1rem;
+  color: #9ca3af;
+  text-align: center;
+  background: white;
+  border-radius: 0.75rem;
+  border: 2px dashed #e5e7eb;
+  min-height: 200px;
+}
+
+.emptyColumn svg {
+  margin-bottom: 1rem;
+  color: #d1d5db;
+}
+
+.emptyColumn p {
+  margin: 0;
+  font-size: 1rem;
+  color: #6b7280;
+}
+
 .orderCard {
-  background: var(--background);
-  border: 2px solid var(--border-light);
-  border-radius: var(--radius-large);
-  padding: var(--spacing-lg);
-  margin-bottom: var(--spacing-md);
-  transition: all 0.3s ease;
-  position: relative;
+  background: white;
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  transition: all 0.2s;
+  border-left: 4px solid #e5e7eb;
 }
 
 .orderCard:hover {
-  box-shadow: var(--shadow-medium);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   transform: translateY(-2px);
 }
 
-/* Priority Styling */
-.priorityHigh {
-  border-left: 6px solid var(--error);
-  background: linear-gradient(90deg, rgba(220, 53, 69, 0.05) 0%, var(--background) 20%);
-}
-
-.priorityNormal {
-  border-left: 6px solid var(--primary-color);
-}
-
-.priorityLow {
-  border-left: 6px solid var(--text-muted);
-}
-
+/* Заголовок заказа */
 .orderHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--spacing-md);
+  padding: 1rem 1.5rem;
+  background: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
 }
 
 .orderInfo {
   display: flex;
-  align-items: center;
-  gap: var(--spacing-md);
+  flex-direction: column;
+  gap: 0.25rem;
 }
 
 .orderNumber {
-  font-size: 1.4rem;
   font-weight: 700;
-  color: var(--primary-color);
-}
-
-.deliveryType {
-  font-size: 1.2rem;
+  font-size: 1.1rem;
+  color: #1f2937;
 }
 
 .orderTime {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.orderStatus {
   display: flex;
   align-items: center;
-  gap: var(--spacing-xs);
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  font-size: 0.875rem;
 }
 
-.elapsed {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--text-primary);
+.statusConfirmed {
+  background: #fef3c7;
+  color: #d97706;
 }
 
-.elapsed.overtime {
-  color: var(--error);
-  animation: pulse 1s infinite;
+.statusPreparing {
+  background: #dbeafe;
+  color: #2563eb;
 }
 
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.6; }
+.statusReady {
+  background: #d1fae5;
+  color: #059669;
 }
 
-.estimated {
-  color: var(--text-secondary);
-  font-size: 0.9rem;
+.statusIcon {
+  width: 16px;
+  height: 16px;
 }
 
-.customer {
-  font-size: 1.2rem;
+/* Информация о клиенте */
+.customerInfo {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.customerInfo h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.1rem;
   font-weight: 600;
-  color: var(--text-primary);
-  margin-bottom: var(--spacing-md);
+  color: #1f2937;
 }
 
-/* Order Items */
+.customerDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.customerDetails span {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.pickupBadge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.75rem;
+  background: #fef3c7;
+  color: #d97706;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-top: 0.5rem;
+}
+
+/* Товары заказа */
 .orderItems {
-  margin-bottom: var(--spacing-lg);
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
 }
 
 .orderItem {
   display: flex;
-  align-items: flex-start;
-  gap: var(--spacing-sm);
-  margin-bottom: var(--spacing-sm);
-  padding: var(--spacing-sm);
-  background: var(--surface);
-  border-radius: var(--radius-medium);
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-bottom: 0.75rem;
 }
 
-.itemQuantity {
-  background: var(--primary-color);
-  color: var(--text-white);
-  padding: 2px 8px;
-  border-radius: var(--radius-small);
-  font-weight: 600;
-  font-size: 0.9rem;
-  min-width: 24px;
-  text-align: center;
-  flex-shrink: 0;
+.orderItem:last-child {
+  margin-bottom: 0;
+}
+
+.itemInfo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .itemName {
+  font-weight: 500;
+  color: #1f2937;
+}
+
+.itemQuantity {
   font-weight: 600;
-  color: var(--text-primary);
-  flex: 1;
+  color: #3b82f6;
 }
 
-.itemNotes {
-  color: var(--text-secondary);
+.itemModifiers {
+  font-size: 0.875rem;
+  color: #6b7280;
   font-style: italic;
-  font-size: 0.9rem;
-  margin-top: var(--spacing-xs);
-  padding-left: var(--spacing-lg);
+  margin-left: 1rem;
 }
 
-/* Order Actions */
+/* Подвал заказа */
+.orderFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  background: #f9fafb;
+}
+
+.orderTotal {
+  font-size: 1.1rem;
+  color: #1f2937;
+}
+
 .orderActions {
   display: flex;
-  justify-content: center;
-  margin-top: auto;
+  gap: 0.5rem;
 }
 
 .actionButton {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: var(--spacing-sm);
-  padding: var(--spacing-md) var(--spacing-xl);
-  border: none;
-  border-radius: var(--radius-medium);
-  font-weight: 600;
-  font-size: 1rem;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid #d1d5db;
+  background: white;
+  color: #374151;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease;
-  width: 100%;
+  transition: all 0.2s;
+}
+
+.actionButton:hover {
+  background: #f3f4f6;
+  border-color: #9ca3af;
 }
 
 .startButton {
-  background: var(--primary-color);
-  color: var(--text-white);
+  background: #fbbf24;
+  color: white;
+  border-color: #f59e0b;
 }
 
 .startButton:hover {
-  background: var(--primary-dark);
-  transform: translateY(-2px);
+  background: #f59e0b;
 }
 
 .readyButton {
-  background: var(--success);
-  color: var(--text-white);
+  background: #10b981;
+  color: white;
+  border-color: #059669;
 }
 
 .readyButton:hover {
-  background: var(--accent-dark);
-  transform: translateY(-2px);
+  background: #059669;
 }
 
-.readyIndicator {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--spacing-sm);
-  padding: var(--spacing-md);
-  background: linear-gradient(45deg, var(--success), var(--accent-dark));
-  color: var(--text-white);
-  border-radius: var(--radius-medium);
-  font-weight: 700;
-  font-size: 1.1rem;
-  animation: glow 2s ease-in-out infinite alternate;
+.completeButton {
+  background: #8b5cf6;
+  color: white;
+  border-color: #7c3aed;
 }
 
-@keyframes glow {
-  from { box-shadow: 0 0 10px rgba(0, 184, 148, 0.5); }
-  to { box-shadow: 0 0 20px rgba(0, 184, 148, 0.8); }
+.completeButton:hover {
+  background: #7c3aed;
 }
 
-.bellIcon {
-  animation: ring 2s ease-in-out infinite;
+/* Пустое состояние */
+.emptyState {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: #6b7280;
 }
 
-@keyframes ring {
-  0%, 100% { transform: rotate(0deg); }
-  10%, 30%, 50%, 70%, 90% { transform: rotate(-10deg); }
-  20%, 40%, 60%, 80% { transform: rotate(10deg); }
+.emptyState svg {
+  margin-bottom: 1rem;
+  color: #d1d5db;
 }
 
-/* Responsive Design для планшетов */
-@media (max-width: 1200px) {
+.emptyState h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #374151;
+}
+
+.emptyState p {
+  font-size: 1rem;
+  margin: 0;
+}
+
+/* Адаптивность */
+
+/* Большие экраны (1200px+) - 3 колонки */
+@media (min-width: 1200px) {
+  .ordersColumns {
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1.5rem;
+  }
+}
+
+/* Средние экраны (900px-1199px) - 3 колонки с меньшим отступом */
+@media (min-width: 900px) and (max-width: 1199px) {
   .kitchenDashboard {
-    padding: var(--spacing-md);
+    padding: 1.5rem;
   }
   
-  .stats {
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--spacing-md);
+  .ordersColumns {
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1rem;
   }
   
-  .ordersContainer {
-    grid-template-columns: 1fr;
-    gap: var(--spacing-lg);
+  .columnHeader {
+    padding: 0.75rem 1rem;
   }
   
-  .ordersColumn {
-    min-height: auto;
-  }
-  
-  .header h1 {
-    font-size: 2rem;
-  }
-  
-  .statNumber {
-    font-size: 2rem;
+  .columnHeader h2 {
+    font-size: 1.1rem;
   }
 }
 
+/* Планшеты (769px-899px) - 2 колонки */
+@media (min-width: 769px) and (max-width: 899px) {
+  .kitchenDashboard {
+    padding: 1rem;
+  }
+  
+  .ordersColumns {
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+  
+  .columnHeader {
+    padding: 0.75rem 1rem;
+  }
+  
+  .columnHeader h2 {
+    font-size: 1.1rem;
+  }
+}
+
+/* Мобильные устройства (до 768px) - 1 колонка */
 @media (max-width: 768px) {
   .kitchenDashboard {
-    padding: var(--spacing-sm);
-    font-size: 1rem;
+    padding: 1rem;
   }
   
   .header {
     flex-direction: column;
-    gap: var(--spacing-md);
-    text-align: center;
+    align-items: flex-start;
+    gap: 1rem;
   }
   
-  .headerLeft {
-    justify-content: center;
-  }
-  
-  .stats {
+  .ordersColumns {
     grid-template-columns: 1fr;
-    gap: var(--spacing-sm);
+    gap: 1.5rem;
   }
   
-  .statCard {
-    padding: var(--spacing-lg);
+  .columnHeader {
+    padding: 0.75rem 1rem;
   }
   
-  .orderCard {
-    padding: var(--spacing-md);
+  .columnHeader h2 {
+    font-size: 1.1rem;
   }
   
-  .orderNumber {
-    font-size: 1.2rem;
+  .orderHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
   }
   
-  .customer {
-    font-size: 1rem;
-  }
-}
-
-/* Print Styles для кухонных принтеров */
-@media print {
-  .kitchenDashboard {
-    background: white;
-    color: black;
+  .orderFooter {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
   }
   
-  .header, .stats {
-    display: none;
+  .orderActions {
+    width: 100%;
+    justify-content: flex-end;
   }
   
-  .ordersContainer {
-    display: block;
-  }
-  
-  .orderCard {
-    border: 2px solid black;
-    margin-bottom: var(--spacing-md);
-    page-break-inside: avoid;
+  .emptyColumn {
+    min-height: 150px;
+    padding: 2rem 1rem;
   }
 }
