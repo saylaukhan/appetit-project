@@ -177,6 +177,11 @@
   color: #d39e00;
 }
 
+.statusConfirmed {
+  background: rgba(0, 123, 255, 0.1);
+  color: #0056b3;
+}
+
 .statusPreparing {
   background: rgba(233, 74, 78, 0.1);
   color: var(--primary-color);
@@ -187,6 +192,11 @@
   color: var(--primary-color);
 }
 
+.statusReady {
+  background: rgba(0, 184, 148, 0.1);
+  color: #00a085;
+}
+
 .statusDelivering {
   background: rgba(0, 123, 255, 0.1);
   color: #0056b3;
@@ -195,6 +205,11 @@
 .statusDelivered {
   background: rgba(40, 167, 69, 0.1);
   color: #1e7e34;
+}
+
+.statusCancelled {
+  background: rgba(220, 53, 69, 0.1);
+  color: #b91d47;
 }
 
 .orderTime {

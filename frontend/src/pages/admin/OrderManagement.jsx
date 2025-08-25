@@ -15,6 +15,7 @@ import {
   X
 } from 'lucide-react'
 import { adminAPI } from '../../services/api'
+import { triggerNotificationUpdate } from '../../hooks/useNotifications'
 import LoadingSpinner from '../../components/common/LoadingSpinner'
 import OrderDetailsModal from '../../components/common/OrderDetailsModal'
 import { toast } from 'react-hot-toast'
@@ -33,6 +34,13 @@ function OrderManagement() {
   useEffect(() => {
     fetchOrders()
     fetchCouriers()
+    
+    // Автообновление каждые 30 секунд
+    const interval = setInterval(() => {
+      fetchOrders()
+    }, 30000)
+    
+    return () => clearInterval(interval)
   }, [])
 
   const fetchOrders = async () => {
@@ -65,6 +73,9 @@ function OrderManagement() {
         order.id === orderId ? { ...order, status: newStatus } : order
       ))
       
+      // Обновляем уведомления автоматически
+      triggerNotificationUpdate()
+      
       toast.success('Статус заказа обновлен')
     } catch (error) {
       console.error('Ошибка обновления статуса заказа:', error)
@@ -80,6 +91,9 @@ function OrderManagement() {
       setOrders(prev => prev.map(order => 
         order.id === orderId ? { ...order, status: 'delivering', assigned_courier_id: courierId } : order
       ))
+      
+      // Обновляем уведомления автоматически
+      triggerNotificationUpdate()
       
       toast.success('Курьер назначен на заказ')
       setShowCourierModal(false)
@@ -138,12 +152,19 @@ function OrderManagement() {
     return date.toLocaleDateString()
   }
 
-  const filteredOrders = orders.filter(order => {
-    const matchesSearch = order.customer_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         order.order_number.includes(searchTerm)
-    const matchesStatus = statusFilter === 'all' || order.status === statusFilter
-    return matchesSearch && matchesStatus
-  })
+  const filteredOrders = orders
+    .filter(order => {
+      const matchesSearch = order.customer_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           order.order_number.includes(searchTerm)
+      const matchesStatus = statusFilter === 'all' || order.status === statusFilter
+      return matchesSearch && matchesStatus
+    })
+    .sort((a, b) => {
+      // Сортировка по дате создания (новые сначала)
+      const dateA = new Date(a.created_at)
+      const dateB = new Date(b.created_at)
+      return dateB - dateA
+    })
 
   if (loading) {
     return <LoadingSpinner />

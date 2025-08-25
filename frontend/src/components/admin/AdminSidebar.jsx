@@ -15,17 +15,20 @@ import {
   Plus
 } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
+import { useNotifications } from '../../hooks/useNotifications'
+import NotificationBadge from '../common/NotificationBadge'
 import styles from './AdminSidebar.module.css'
 
 function AdminSidebar({ isOpen = false, onClose = () => {} }) {
   const location = useLocation()
   const { user, logout } = useAuth()
+  const { notifications } = useNotifications()
 
   const menuItems = [
     {
       path: '/admin',
       icon: <BarChart3 />,
-      label: 'Дашборд',
+      label: 'Панель',
       exact: true
     },
     {
@@ -121,7 +124,15 @@ function AdminSidebar({ isOpen = false, onClose = () => {} }) {
                 }`}
                 onClick={handleLinkClick}
               >
-                <span className={styles.navIcon}>{item.icon}</span>
+                <span className={styles.navIcon}>
+                  {item.path === '/admin/orders' ? (
+                    <NotificationBadge count={notifications.pending_orders}>
+                      {item.icon}
+                    </NotificationBadge>
+                  ) : (
+                    item.icon
+                  )}
+                </span>
                 <span className={styles.navLabel}>{item.label}</span>
               </Link>
             </li>

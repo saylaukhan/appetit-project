@@ -100,6 +100,9 @@
   box-shadow: var(--shadow-small);
   padding: var(--spacing-xl);
   transition: box-shadow 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  min-height: 320px;
 }
 
 .orderCard:hover {
@@ -148,6 +151,11 @@
 .statusPending {
   background: rgba(255, 193, 7, 0.1);
   color: #d39e00;
+}
+
+.statusConfirmed {
+  background: rgba(0, 123, 255, 0.1);
+  color: #0056b3;
 }
 
 .statusPreparing {
@@ -235,6 +243,8 @@
   align-items: center;
   flex-wrap: wrap;
   gap: var(--spacing-md);
+  margin-top: auto;
+  padding-top: var(--spacing-md);
 }
 
 .orderTotal {
