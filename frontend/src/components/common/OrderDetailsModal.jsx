@@ -42,7 +42,8 @@ function OrderDetailsModal({ isOpen, onClose, order }) {
           { key: 'pending', text: 'Принят', icon: Clock },
           { key: 'confirmed', text: 'Подтвержден', icon: CheckCircle },
           { key: 'preparing', text: 'Готовится', icon: Package },
-          { key: 'ready', text: 'Готов', icon: CheckCircle }
+          { key: 'ready', text: 'Готов', icon: CheckCircle },
+          { key: 'delivered', text: 'Выдан', icon: CheckCircle }
         ]
 
     const currentIndex = steps.findIndex(step => step.key === status)
@@ -163,6 +164,19 @@ function OrderDetailsModal({ isOpen, onClose, order }) {
                         Комментарий: {order.delivery_comment}
                       </div>
                     )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Адрес самовывоза */}
+            {order.pickup_address && (
+              <div className={styles.infoSection}>
+                <h3>Адрес ресторана</h3>
+                <div className={styles.addressInfo}>
+                  <MapPin size={20} />
+                  <div className={styles.addressDetails}>
+                    <span>г. Усть-Каменогорск, {order.pickup_address}</span>
                   </div>
                 </div>
               </div>

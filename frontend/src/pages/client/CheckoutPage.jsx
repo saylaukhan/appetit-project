@@ -12,7 +12,7 @@ import styles from './CheckoutPage.module.css'
 function CheckoutPage() {
   const navigate = useNavigate()
   const { user } = useAuth()
-  const { items, total, deliveryType, clearCart, promoCode, discountAmount } = useCart()
+  const { items, total, deliveryType, clearCart, promoCode, discountAmount, pickupAddress, setPickupAddress } = useCart()
   const { getUserAddress, saveUserAddress } = useAddress()
   
   const [paymentMethod, setPaymentMethod] = useState('card')
@@ -31,6 +31,7 @@ function CheckoutPage() {
   const [orderComment, setOrderComment] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [toast, setToast] = useState({ isVisible: false, message: '', type: 'success' })
+  const [pickupAddressError, setPickupAddressError] = useState(false)
 
   const deliveryFee = deliveryType === 'delivery' ? 199 : 0
   const finalTotal = total + deliveryFee
@@ -131,6 +132,15 @@ function CheckoutPage() {
       return false
     }
 
+    // Проверяем адрес ресторана для самовывоза
+    if (deliveryType === 'pickup' && !pickupAddress) {
+      showToast('Выберите адрес ресторана для самовывоза', 'error')
+      setPickupAddressError(true)
+      // Убираем анимацию через 2 секунды
+      setTimeout(() => setPickupAddressError(false), 2000)
+      return false
+    }
+
     // Проверяем данные карты если выбрана оплата картой
     if (paymentMethod === 'card') {
       if (!cardData.number.replace(/\s/g, '') || cardData.number.replace(/\s/g, '').length < 16) {
@@ -175,6 +185,7 @@ function CheckoutPage() {
           apartment: userAddress.address_apartment,
           comment: userAddress.address_comment
         }) : null,
+        pickup_address: deliveryType === 'pickup' && pickupAddress ? pickupAddress : null,
         name: !user ? guestData.name : undefined,
         phone: !user ? '+7' + guestData.phone : undefined,
         comment: orderComment.trim() || undefined,
@@ -310,6 +321,41 @@ function CheckoutPage() {
                       </button>
                     </div>
                   )}
+                </div>
+              )}
+
+              {/* Адрес самовывоза */}
+              {deliveryType === 'pickup' && (
+                <div className={styles.formSection}>
+                  <h3 className={pickupAddressError ? styles.errorShake : ''}>
+                    <MapPin size={20} />
+                    Адрес ресторана
+                  </h3>
+                  <div className={styles.pickupAddressSelector}>
+                    <select
+                      className={`${styles.addressSelect} ${pickupAddressError ? styles.errorBorder : ''}`}
+                      value={pickupAddress || ''}
+                      onChange={(e) => {
+                        setPickupAddress(e.target.value)
+                        setPickupAddressError(false)
+                      }}
+                    >
+                      <option value="" disabled>Выберите адрес ресторана...</option>
+                      <option value="Казахстан, 70А">г. Усть-Каменогорск, Казахстан, 70А</option>
+                      <option value="Сатпаева, 8А">г. Усть-Каменогорск, Сатпаева, 8А</option>
+                      <option value="Новаторов, 18/2">г. Усть-Каменогорск, Новаторов, 18/2</option>
+                      <option value="Жибек Жолы, 1к8">г. Усть-Каменогорск, Жибек Жолы, 1к8</option>
+                      <option value="Самарское шоссе, 5/1">г. Усть-Каменогорск, Самарское шоссе, 5/1</option>
+                      <option value="Кабанбай батыра, 148">г. Усть-Каменогорск, Кабанбай батыра, 148</option>
+                      <option value="Назарбаева, 28А">г. Усть-Каменогорск, Назарбаева, 28А</option>
+                    </select>
+                    {pickupAddress && (
+                      <div className={styles.pickupNote}>
+                        <p><strong>Время готовности:</strong> 15-20 минут</p>
+                        <p><strong>Адрес:</strong> г. Усть-Каменогорск, {pickupAddress}</p>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
 

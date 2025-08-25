@@ -30,6 +30,7 @@ class OrderCreateRequest(BaseModel):
     delivery_type: DeliveryType
     payment_method: PaymentMethod
     delivery_address: Optional[str] = Field(None, description="Адрес доставки (обязателен для delivery)")
+    pickup_address: Optional[str] = Field(None, description="Адрес ресторана (обязателен для pickup)")
     phone: Optional[str] = Field(None, description="Телефон (если не авторизован)")
     name: Optional[str] = Field(None, description="Имя (если не авторизован)")
     comment: Optional[str] = Field(None, description="Комментарий к заказу")
@@ -58,6 +59,7 @@ class OrderResponse(BaseModel):
     delivery_floor: Optional[str] = None
     delivery_apartment: Optional[str] = None
     delivery_comment: Optional[str] = None
+    pickup_address: Optional[str] = None
     customer_name: str
     customer_phone: str
     items: List[OrderItemResponse]

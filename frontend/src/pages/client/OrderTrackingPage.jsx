@@ -266,6 +266,18 @@ function OrderTrackingPage() {
             </div>
           )}
 
+          {order.pickup_address && (
+            <div className={styles.infoSection}>
+              <h3>Адрес ресторана</h3>
+              <div className={styles.addressInfo}>
+                <MapPin size={20} />
+                <div className={styles.addressDetails}>
+                  <span>г. Усть-Каменогорск, {order.pickup_address}</span>
+                </div>
+              </div>
+            </div>
+          )}
+
           {order.items && (
             <div className={styles.infoSection}>
               <h3>Состав заказа</h3>

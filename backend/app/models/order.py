@@ -43,6 +43,7 @@ class Order(Base):
     # Тип и адрес доставки
     delivery_type = Column(SQLEnum(DeliveryType), nullable=False)
     delivery_address = Column(Text, nullable=True)  # JSON с адресом
+    pickup_address = Column(String(200), nullable=True)  # Адрес ресторана для самовывоза
     
     # Статусы
     status = Column(SQLEnum(OrderStatus), default=OrderStatus.PENDING)

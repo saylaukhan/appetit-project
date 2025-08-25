@@ -105,6 +105,13 @@ async def create_order(
             detail="Для доставки необходимо указать адрес"
         )
     
+    # Валидация адреса для самовывоза
+    if request.delivery_type == DeliveryType.PICKUP and not request.pickup_address:
+        raise HTTPException(
+            status_code=400,
+            detail="Для самовывоза необходимо указать адрес ресторана"
+        )
+    
     # Подготавливаем данные товаров
     items_data = []
     
@@ -160,6 +167,7 @@ async def create_order(
         'delivery_type': request.delivery_type,
         'payment_method': request.payment_method,
         'delivery_address': request.delivery_address,
+        'pickup_address': request.pickup_address,
         'status': OrderStatus.PENDING,
         'payment_status': PaymentStatus.PENDING,
         'subtotal': totals['subtotal'],
