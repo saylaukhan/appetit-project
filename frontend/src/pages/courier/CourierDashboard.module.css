@@ -309,6 +309,7 @@
 .orderActions {
   display: flex;
   gap: 0.5rem;
+  flex-wrap: wrap;
 }
 
 .actionButton {
@@ -413,6 +414,11 @@
   .courierDashboard {
     padding: 1rem;
   }
+  
+  .actionButton {
+    font-size: 0.8rem;
+    padding: 0.4rem 0.8rem;
+  }
 }
 
 /* Мобильные устройства (до 768px) - 1 колонка */
@@ -463,6 +469,13 @@
   .orderActions {
     width: 100%;
     justify-content: flex-end;
+    flex-wrap: wrap;
+  }
+  
+  .actionButton {
+    flex: 0 1 auto;
+    min-width: 0;
+    white-space: nowrap;
   }
   
   .addressRow {
@@ -473,6 +486,24 @@
   
   .mapsButton {
     align-self: flex-end;
+  }
+}
+
+/* Очень маленькие экраны (до 480px) */
+@media (max-width: 480px) {
+  .orderActions {
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: stretch;
+  }
+  
+  .actionButton {
+    justify-content: center;
+    width: 100%;
+  }
+  
+  .orderFooter {
+    gap: 1.5rem;
   }
 }
 
