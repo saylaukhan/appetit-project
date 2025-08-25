@@ -105,8 +105,12 @@ export const adminAPI = {
   assignCourier: (orderId, courierId) => api.patch(`/api/v1/admin/orders/${orderId}/assign-courier`, { courier_id: courierId }),
   getCouriers: () => api.get('/api/v1/admin/couriers'),
   
-  // Дашборд
+  // Панель управления
   getDashboard: () => api.get('/api/v1/admin/dashboard'),
+  getUsers: () => api.get('/api/v1/admin/users'),
+  getMenu: () => api.get('/api/v1/admin/menu'),
+  getAnalytics: () => api.get('/api/v1/admin/analytics'),
+  getNotifications: () => api.get('/api/v1/admin/notifications'),
 }
 
 // Промокоды
