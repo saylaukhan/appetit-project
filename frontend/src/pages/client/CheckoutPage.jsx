@@ -168,7 +168,13 @@ function CheckoutPage() {
         })),
         delivery_type: deliveryType,
         payment_method: paymentMethod,
-        delivery_address: deliveryType === 'delivery' && userAddress ? userAddress.address : null,
+        delivery_address: deliveryType === 'delivery' && userAddress ? JSON.stringify({
+          address: userAddress.address,
+          entrance: userAddress.address_entrance,
+          floor: userAddress.address_floor,
+          apartment: userAddress.address_apartment,
+          comment: userAddress.address_comment
+        }) : null,
         name: !user ? guestData.name : undefined,
         phone: !user ? '+7' + guestData.phone : undefined,
         comment: orderComment.trim() || undefined,

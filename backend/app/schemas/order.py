@@ -54,6 +54,10 @@ class OrderResponse(BaseModel):
     payment_method: PaymentMethod
     total_amount: Decimal
     delivery_address: Optional[str] = None
+    delivery_entrance: Optional[str] = None
+    delivery_floor: Optional[str] = None
+    delivery_apartment: Optional[str] = None
+    delivery_comment: Optional[str] = None
     customer_name: str
     customer_phone: str
     items: List[OrderItemResponse]

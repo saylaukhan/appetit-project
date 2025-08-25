@@ -3,6 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, or_, and_
 from typing import List
 from datetime import datetime
+import json
 
 from app.core.database import get_db_session
 from app.utils.auth_dependencies import get_current_kitchen
@@ -11,6 +12,24 @@ from app.models.order import Order, OrderItem, OrderStatus
 from app.schemas.order import OrderResponse, OrderItemResponse, OrderStatusUpdateRequest
 
 router = APIRouter()
+
+def parse_delivery_address(delivery_address_str):
+    """Парсит адрес доставки из строки или JSON."""
+    if not delivery_address_str:
+        return None, None, None, None, None
+    
+    try:
+        address_data = json.loads(delivery_address_str)
+        return (
+            address_data.get('address'),
+            address_data.get('entrance'),
+            address_data.get('floor'),
+            address_data.get('apartment'),
+            address_data.get('comment')
+        )
+    except (json.JSONDecodeError, TypeError):
+        # Если не JSON, то это старый формат - просто строка
+        return delivery_address_str, None, None, None, None
 
 @router.get("/orders", response_model=List[OrderResponse])
 async def get_kitchen_orders(
@@ -49,6 +68,9 @@ async def get_kitchen_orders(
             for item in items
         ]
         
+        # Парсим адрес доставки
+        delivery_address, delivery_entrance, delivery_floor, delivery_apartment, delivery_comment = parse_delivery_address(order.delivery_address)
+        
         orders_response.append(OrderResponse(
             id=order.id,
             order_number=order.order_number,
@@ -56,7 +78,11 @@ async def get_kitchen_orders(
             delivery_type=order.delivery_type,
             payment_method=order.payment_method,
             total_amount=order.total_amount,
-            delivery_address=order.delivery_address,
+            delivery_address=delivery_address,
+            delivery_entrance=delivery_entrance,
+            delivery_floor=delivery_floor,
+            delivery_apartment=delivery_apartment,
+            delivery_comment=delivery_comment,
             customer_name=order.customer_name,
             customer_phone=order.customer_phone,
             items=items_response,
@@ -162,9 +188,9 @@ async def complete_pickup_order(
             detail="Можно выдать только готовый заказ"
         )
     
-    # Меняем статус на "выполнен"
-    order.status = OrderStatus.COMPLETED
-    order.completed_at = datetime.now()
+    # Меняем статус на "доставлен" (для самовывоза это означает "выдан")
+    order.status = OrderStatus.DELIVERED
+    order.delivered_at = datetime.now()
     order.updated_at = datetime.now()
     
     await db.commit()
@@ -172,7 +198,7 @@ async def complete_pickup_order(
     return {
         "message": f"Заказ {order.order_number} выдан клиенту",
         "order_id": order_id,
-        "new_status": OrderStatus.COMPLETED
+        "new_status": OrderStatus.DELIVERED
     }
 
 @router.patch("/orders/{order_id}/status")

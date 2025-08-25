@@ -90,6 +90,7 @@ function OrderTrackingPage() {
           { key: 'pending', text: 'Принят', icon: Clock },
           { key: 'confirmed', text: 'Подтвержден', icon: CheckCircle },
           { key: 'preparing', text: 'Готовится', icon: Package },
+          { key: 'ready', text: 'Готов', icon: CheckCircle },
           { key: 'delivering', text: 'Доставляется', icon: Truck },
           { key: 'delivered', text: 'Доставлен', icon: CheckCircle }
         ]
@@ -97,7 +98,8 @@ function OrderTrackingPage() {
           { key: 'pending', text: 'Принят', icon: Clock },
           { key: 'confirmed', text: 'Подтвержден', icon: CheckCircle },
           { key: 'preparing', text: 'Готовится', icon: Package },
-          { key: 'ready', text: 'Готов', icon: CheckCircle }
+          { key: 'ready', text: 'Готов', icon: CheckCircle },
+          { key: 'delivered', text: 'Выдан', icon: CheckCircle }
         ]
 
     const currentIndex = steps.findIndex(step => step.key === status)
@@ -243,7 +245,23 @@ function OrderTrackingPage() {
               <h3>Адрес доставки</h3>
               <div className={styles.addressInfo}>
                 <MapPin size={20} />
-                <span>{order.delivery_address}</span>
+                <div className={styles.addressDetails}>
+                  <span>{order.delivery_address}</span>
+                  {(order.delivery_entrance || order.delivery_floor || order.delivery_apartment) && (
+                    <div className={styles.addressExtras}>
+                      {[
+                        order.delivery_entrance && `подъезд ${order.delivery_entrance}`,
+                        order.delivery_floor && `этаж ${order.delivery_floor}`,
+                        order.delivery_apartment && `кв. ${order.delivery_apartment}`
+                      ].filter(Boolean).join(', ')}
+                    </div>
+                  )}
+                  {order.delivery_comment && (
+                    <div className={styles.addressComment}>
+                      Комментарий: {order.delivery_comment}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           )}

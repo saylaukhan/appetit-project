@@ -475,3 +475,28 @@
     align-self: flex-end;
   }
 }
+
+/* Стили для детализированного адреса */
+.addressInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1;
+}
+
+.addressExtras {
+  color: #6b7280;
+  font-size: 0.875rem;
+  font-style: italic;
+  margin-left: 1.25rem;
+}
+
+.addressComment {
+  color: #9ca3af;
+  font-size: 0.8rem;
+  margin-left: 1.25rem;
+  padding: 0.25rem 0.5rem;
+  background: rgba(59, 130, 246, 0.05);
+  border-radius: 0.25rem;
+  border-left: 2px solid #3b82f6;
+}

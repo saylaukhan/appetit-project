@@ -448,6 +448,29 @@
   animation: fadeInUp 0.4s ease-out;
 }
 
+/* Стили для детализированного адреса */
+.addressDetails {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  flex: 1;
+}
+
+.addressExtras {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  font-style: italic;
+}
+
+.addressComment {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  padding: var(--spacing-sm);
+  background: rgba(233, 74, 78, 0.05);
+  border-radius: var(--radius-small);
+  border-left: 3px solid var(--primary-color);
+}
+
 .infoSection:nth-child(1) {
   animation-delay: 0.1s;
 }

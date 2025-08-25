@@ -211,7 +211,23 @@ function CourierDashboard() {
                 <span><Phone size={14} /> {order.customer_phone}</span>
                 {order.delivery_address && (
                   <div className={styles.addressRow}>
-                    <span><MapPin size={14} /> {order.delivery_address}</span>
+                    <div className={styles.addressInfo}>
+                      <span><MapPin size={14} /> {order.delivery_address}</span>
+                      {(order.delivery_entrance || order.delivery_floor || order.delivery_apartment) && (
+                        <div className={styles.addressExtras}>
+                          {[
+                            order.delivery_entrance && `подъезд ${order.delivery_entrance}`,
+                            order.delivery_floor && `этаж ${order.delivery_floor}`,
+                            order.delivery_apartment && `кв. ${order.delivery_apartment}`
+                          ].filter(Boolean).join(', ')}
+                        </div>
+                      )}
+                      {order.delivery_comment && (
+                        <div className={styles.addressComment}>
+                          {order.delivery_comment}
+                        </div>
+                      )}
+                    </div>
                     <button 
                       className={styles.mapsButton}
                       onClick={() => openInMaps(order.delivery_address)}
