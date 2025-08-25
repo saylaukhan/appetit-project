@@ -110,6 +110,7 @@ export const adminAPI = {
   getUsers: () => api.get('/api/v1/admin/users'),
   getMenu: () => api.get('/api/v1/admin/menu'),
   getAnalytics: () => api.get('/api/v1/admin/analytics'),
+  exportAnalytics: () => api.get('/api/v1/admin/analytics/export', { responseType: 'blob' }),
   getNotifications: () => api.get('/api/v1/admin/notifications'),
 }
 

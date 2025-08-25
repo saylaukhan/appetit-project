@@ -5,6 +5,16 @@
   margin: 0 auto;
 }
 
+.errorMessage {
+  text-align: center;
+  padding: var(--spacing-2xl);
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+  background: var(--surface);
+  border-radius: var(--radius-large);
+  box-shadow: var(--shadow-small);
+}
+
 /* Header */
 .header {
   display: flex;

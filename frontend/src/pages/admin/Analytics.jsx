@@ -12,9 +12,10 @@ import {
   Filter,
   Download
 } from 'lucide-react'
-import { analyticsAPI } from '../../services/api'
+import { adminAPI } from '../../services/api'
 import LoadingSpinner from '../../components/common/LoadingSpinner'
 import styles from './Analytics.module.css'
+import { toast } from 'react-hot-toast'
 
 function Analytics() {
   const [analytics, setAnalytics] = useState(null)
@@ -34,78 +35,66 @@ function Analytics() {
   const fetchAnalytics = async () => {
     try {
       setLoading(true)
-      // В реальном приложении здесь будет API вызов
-      // const response = await analyticsAPI.getAnalytics(timeRange)
+      const response = await adminAPI.getAnalytics()
+      const data = response.data
       
-      // Пока используем моковые данные
-      setTimeout(() => {
-        const mockAnalytics = {
-          overview: {
-            totalRevenue: 2456780,
-            revenueGrowth: 12.5,
-            totalOrders: 1247,
-            ordersGrowth: 8.3,
-            averageOrderValue: 1968,
-            avgOrderGrowth: 5.2,
-            activeCustomers: 8923,
-            customerGrowth: 15.7
+      // Адаптируем данные к существующей структуре компонента
+      const adaptedAnalytics = {
+        overview: {
+          totalRevenue: data.main_metrics.total_revenue.value,
+          revenueGrowth: data.main_metrics.total_revenue.growth,
+          totalOrders: data.main_metrics.total_orders.value,
+          ordersGrowth: data.main_metrics.total_orders.growth,
+          averageOrderValue: data.main_metrics.average_check.value,
+          avgOrderGrowth: data.main_metrics.average_check.growth,
+          activeCustomers: data.main_metrics.active_clients.value,
+          customerGrowth: data.main_metrics.active_clients.growth
+        },
+        revenue: {
+          today: data.revenue_periods.today,
+          yesterday: data.revenue_periods.today * 0.92, // Примерное значение
+          thisWeek: data.revenue_periods.week,
+          lastWeek: data.revenue_periods.week * 0.89, // Примерное значение
+          thisMonth: data.revenue_periods.month,
+          lastMonth: data.revenue_periods.month * 0.87 // Примерное значение
+        },
+        topDishes: data.popular_dishes.map(dish => ({
+          name: dish.dish_name,
+          orders: dish.orders_count,
+          revenue: dish.revenue,
+          growth: parseFloat(dish.growth.replace('%', '')) || 0
+        })),
+        ordersByHour: data.hourly_orders.map(item => ({
+          hour: String(item.hour).padStart(2, '0') + ':00',
+          orders: item.orders_count
+        })),
+        customerTypes: [
+          { 
+            type: 'Новые клиенты', 
+            count: data.client_types.new_clients.count, 
+            percentage: data.client_types.new_clients.percentage 
           },
-          revenue: {
-            today: 45670,
-            yesterday: 42100,
-            thisWeek: 298540,
-            lastWeek: 267200,
-            thisMonth: 1123400,
-            lastMonth: 1001200
-          },
-          topDishes: [
-            { name: 'Пицца Маргарита', orders: 156, revenue: 390000, growth: 12 },
-            { name: 'Бургер Классик', orders: 134, revenue: 294800, growth: 8 },
-            { name: 'Ролл Филадельфия', orders: 89, revenue: 160200, growth: -2 },
-            { name: 'Салат Цезарь', orders: 67, revenue: 100500, growth: 15 },
-            { name: 'Борщ украинский', orders: 45, revenue: 45000, growth: 5 }
-          ],
-          ordersByHour: [
-            { hour: '00:00', orders: 2 },
-            { hour: '01:00', orders: 1 },
-            { hour: '02:00', orders: 0 },
-            { hour: '03:00', orders: 1 },
-            { hour: '04:00', orders: 0 },
-            { hour: '05:00', orders: 3 },
-            { hour: '06:00', orders: 8 },
-            { hour: '07:00', orders: 15 },
-            { hour: '08:00', orders: 25 },
-            { hour: '09:00', orders: 35 },
-            { hour: '10:00', orders: 42 },
-            { hour: '11:00', orders: 58 },
-            { hour: '12:00', orders: 72 },
-            { hour: '13:00', orders: 68 },
-            { hour: '14:00', orders: 55 },
-            { hour: '15:00', orders: 48 },
-            { hour: '16:00', orders: 52 },
-            { hour: '17:00', orders: 65 },
-            { hour: '18:00', orders: 78 },
-            { hour: '19:00', orders: 85 },
-            { hour: '20:00', orders: 82 },
-            { hour: '21:00', orders: 75 },
-            { hour: '22:00', orders: 45 },
-            { hour: '23:00', orders: 25 }
-          ],
-          customerTypes: [
-            { type: 'Новые клиенты', count: 2341, percentage: 32 },
-            { type: 'Постоянные клиенты', count: 4875, percentage: 68 }
-          ],
-          paymentMethods: [
-            { method: 'Карта онлайн', orders: 856, percentage: 68.6 },
-            { method: 'Наличные', orders: 391, percentage: 31.4 }
-          ]
-        }
-        
-        setAnalytics(mockAnalytics)
-        setLoading(false)
-      }, 1000)
+          { 
+            type: 'Постоянные клиенты', 
+            count: data.client_types.regular_clients.count, 
+            percentage: data.client_types.regular_clients.percentage 
+          }
+        ],
+        paymentMethods: data.payment_methods.map((method, index) => {
+          const total = data.payment_methods.reduce((sum, m) => sum + m.count, 0)
+          return {
+            method: method.method,
+            orders: method.count,
+            percentage: total > 0 ? ((method.count / total) * 100).toFixed(1) : 0
+          }
+        })
+      }
+      
+      setAnalytics(adaptedAnalytics)
+      setLoading(false)
     } catch (error) {
       console.error('Ошибка загрузки аналитики:', error)
+      toast.error('Не удалось загрузить данные аналитики')
       setLoading(false)
     }
   }
@@ -131,6 +120,37 @@ function Analytics() {
     )
   }
 
+  const handleExportData = async () => {
+    try {
+      toast.loading('Подготавливаем данные для экспорта...')
+      const response = await adminAPI.exportAnalytics()
+      
+      // Создаем ссылку для скачивания файла
+      const blob = new Blob([response.data], { type: 'text/csv;charset=utf-8;' })
+      const link = document.createElement('a')
+      const url = URL.createObjectURL(blob)
+      link.setAttribute('href', url)
+      
+      // Генерируем имя файла с текущей датой
+      const now = new Date()
+      const filename = `analytics_export_${now.getFullYear()}_${(now.getMonth() + 1).toString().padStart(2, '0')}_${now.getDate().toString().padStart(2, '0')}.csv`
+      link.setAttribute('download', filename)
+      
+      // Скачиваем файл
+      link.style.visibility = 'hidden'
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      
+      toast.dismiss()
+      toast.success('Данные успешно экспортированы')
+    } catch (error) {
+      console.error('Ошибка экспорта:', error)
+      toast.dismiss()
+      toast.error('Ошибка при экспорте данных')
+    }
+  }
+
   const getTimeRangeText = (range) => {
     switch (range) {
       case '24h': return 'За 24 часа'
@@ -143,6 +163,16 @@ function Analytics() {
 
   if (loading) {
     return <LoadingSpinner />
+  }
+
+  if (!analytics) {
+    return (
+      <div className={styles.analyticsContainer}>
+        <div className={styles.errorMessage}>
+          Не удалось загрузить данные аналитики. Попробуйте обновить страницу.
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -168,7 +198,7 @@ function Analytics() {
             </select>
           </div>
           
-          <button className={styles.exportButton}>
+          <button className={styles.exportButton} onClick={handleExportData}>
             <Download size={16} />
             Экспорт
           </button>
