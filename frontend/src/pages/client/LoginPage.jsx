@@ -334,7 +334,7 @@ function LoginPage() {
 
           {!isLogin && (
             <div className={styles.inputGroup}>
-              <label htmlFor="confirmPassword">Подтвердите пар��ль</label>
+              <label htmlFor="confirmPassword">Подтвердите пароль</label>
               <div className={styles.inputWithIcon}>
                 <Lock size={18} className={styles.inputIcon} />
                 <input
