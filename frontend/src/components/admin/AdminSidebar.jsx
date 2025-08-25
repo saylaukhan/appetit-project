@@ -42,11 +42,6 @@ function AdminSidebar({ isOpen = false, onClose = () => {} }) {
       label: 'Меню'
     },
     {
-      path: '/admin/addons',
-      icon: <Plus />,
-      label: 'Добавки'
-    },
-    {
       path: '/admin/users',
       icon: <Users />,
       label: 'Пользователи'

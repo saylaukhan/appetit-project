@@ -415,3 +415,266 @@
     align-self: flex-start;
   }
 }
+
+/* Tabs Styles */
+.tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: var(--spacing-xl);
+  background: var(--surface);
+  border-radius: var(--radius-medium);
+  padding: var(--spacing-xs);
+  box-shadow: var(--shadow-small);
+}
+
+.tab {
+  flex: 1;
+  padding: var(--spacing-md) var(--spacing-lg);
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-weight: 600;
+  border-radius: var(--radius-small);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.95rem;
+}
+
+.tab:hover {
+  background: rgba(233, 74, 78, 0.1);
+  color: var(--primary-color);
+}
+
+.activeTab {
+  background: var(--primary-color);
+  color: var(--text-white);
+}
+
+.activeTab:hover {
+  background: var(--primary-color);
+  color: var(--text-white);
+}
+
+/* Addons Section */
+.addonsSection {
+  background: var(--surface);
+  padding: var(--spacing-xl);
+  border-radius: var(--radius-large);
+  box-shadow: var(--shadow-small);
+}
+
+.addonsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-xl);
+}
+
+.addonsHeader h2 {
+  color: var(--text-primary);
+  margin: 0;
+}
+
+/* Addons Stats */
+.addonsStats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-xl);
+}
+
+.statCard {
+  background: var(--background);
+  padding: var(--spacing-lg);
+  border-radius: var(--radius-medium);
+  box-shadow: var(--shadow-small);
+  text-align: center;
+}
+
+.statNumber {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  margin-bottom: var(--spacing-xs);
+}
+
+.statLabel {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+/* Addons Content */
+.addonsContent {
+  background: var(--background);
+  border-radius: var(--radius-medium);
+  box-shadow: var(--shadow-small);
+  overflow: hidden;
+}
+
+.categorySection {
+  padding: var(--spacing-xl);
+  border-bottom: 1px solid var(--border-light);
+}
+
+.categorySection:last-child {
+  border-bottom: none;
+}
+
+.categoryTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-lg);
+}
+
+.addonsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--spacing-md);
+}
+
+/* Addon Cards */
+.addonCard {
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-medium);
+  padding: var(--spacing-lg);
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.addonCard:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-medium);
+}
+
+.addonCard.inactive {
+  opacity: 0.6;
+  background: var(--background);
+}
+
+.addonIcon {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  border-radius: var(--radius-small);
+  overflow: hidden;
+  margin-bottom: var(--spacing-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--background);
+  border: 2px dashed var(--border-light);
+}
+
+.iconPlaceholder {
+  font-size: 2rem;
+  font-weight: bold;
+  color: var(--text-muted);
+}
+
+.statusBadge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: var(--radius-small);
+  padding: var(--spacing-xs);
+}
+
+.activeIcon {
+  color: var(--success);
+}
+
+.inactiveIcon {
+  color: var(--text-muted);
+}
+
+.addonInfo {
+  flex: 1;
+  margin-bottom: var(--spacing-md);
+}
+
+.addonName {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-xs);
+}
+
+.addonPrice {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  margin-bottom: var(--spacing-sm);
+}
+
+.addonActions {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.activateButton {
+  border-color: var(--success);
+  color: var(--success);
+}
+
+.activateButton:hover {
+  background: var(--success);
+  color: var(--text-white);
+}
+
+.deactivateButton {
+  border-color: var(--text-muted);
+  color: var(--text-muted);
+}
+
+.deactivateButton:hover {
+  background: var(--text-muted);
+  color: var(--text-white);
+}
+
+.editButton {
+  border-color: #3b82f6;
+  color: #3b82f6;
+}
+
+.editButton:hover {
+  background: #3b82f6;
+  color: var(--text-white);
+}
+
+/* Mobile Styles for Addons */
+@media (max-width: 768px) {
+  .tabs {
+    flex-direction: column;
+    gap: var(--spacing-xs);
+  }
+  
+  .tab {
+    text-align: center;
+  }
+  
+  .addonsSection {
+    padding: var(--spacing-lg);
+  }
+  
+  .addonsHeader {
+    flex-direction: column;
+    gap: var(--spacing-md);
+    align-items: stretch;
+  }
+  
+  .addonsStats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .addonsGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .categorySection {
+    padding: var(--spacing-lg);
+  }
+}

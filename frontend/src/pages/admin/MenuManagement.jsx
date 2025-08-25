@@ -5,17 +5,23 @@ import {
   Edit3, 
   Trash2, 
   Eye,
+  EyeOff,
   Image,
   DollarSign,
   ChefHat,
-  Tag
+  Tag,
+  Edit2
 } from 'lucide-react'
 import { menuAPI } from '../../services/api'
 import LoadingSpinner from '../../components/common/LoadingSpinner'
 import AddDishModal from '../../components/admin/AddDishModal'
+import AddAddonModal from '../../components/admin/AddAddonModal'
 import styles from './MenuManagement.module.css'
 
 function MenuManagement() {
+  const [activeTab, setActiveTab] = useState('dishes') // 'dishes' или 'addons'
+  
+  // Состояние для блюд
   const [categories, setCategories] = useState([])
   const [dishes, setDishes] = useState([])
   const [loading, setLoading] = useState(true)
@@ -23,9 +29,18 @@ function MenuManagement() {
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [showAddModal, setShowAddModal] = useState(false)
   const [editingDish, setEditingDish] = useState(null)
+  
+  // Состояние для добавок
+  const [addons, setAddons] = useState([])
+  const [addonCategories, setAddonCategories] = useState([])
+  const [addonSearchTerm, setAddonSearchTerm] = useState('')
+  const [selectedAddonCategory, setSelectedAddonCategory] = useState('')
+  const [showAddAddonModal, setShowAddAddonModal] = useState(false)
+  const [editingAddon, setEditingAddon] = useState(null)
 
   useEffect(() => {
     fetchMenuData()
+    fetchAddons()
   }, [])
 
   const fetchMenuData = async () => {
@@ -272,6 +287,101 @@ function MenuManagement() {
     return matchesSearch && matchesCategory
   })
 
+  // Функции для работы с добавками
+  const fetchAddons = async () => {
+    try {
+      const response = await menuAPI.getAddons({ show_all: true })
+      const addonsList = response.data
+      setAddons(addonsList)
+      
+      // Извлекаем уникальные категории
+      const uniqueCategories = [...new Set(addonsList.map(addon => addon.category).filter(Boolean))]
+      setAddonCategories(uniqueCategories)
+    } catch (error) {
+      console.error('Ошибка загрузки добавок:', error)
+    }
+  }
+
+  const handleCreateAddon = () => {
+    setEditingAddon(null)
+    setShowAddAddonModal(true)
+  }
+
+  const handleEditAddon = (addon) => {
+    setEditingAddon(addon)
+    setShowAddAddonModal(true)
+  }
+
+  const handleDeleteAddon = async (addonId) => {
+    if (!window.confirm('Вы уверены, что хотите удалить эту добавку?')) {
+      return
+    }
+
+    try {
+      await menuAPI.deleteAddon(addonId)
+      setAddons(prev => prev.filter(addon => addon.id !== addonId))
+    } catch (error) {
+      console.error('Ошибка удаления добавки:', error)
+      alert('Не удалось удалить добавку')
+    }
+  }
+
+  const handleToggleAddonActive = async (addonId) => {
+    try {
+      const response = await menuAPI.toggleAddonActive(addonId)
+      setAddons(prev => prev.map(addon => 
+        addon.id === addonId 
+          ? { ...addon, is_active: response.data.is_active }
+          : addon
+      ))
+    } catch (error) {
+      console.error('Ошибка изменения статуса добавки:', error)
+      alert('Не удалось изменить статус добавки')
+    }
+  }
+
+  const handleAddonSaved = (savedAddon) => {
+    if (editingAddon) {
+      // Обновление существующей добавки
+      setAddons(prev => prev.map(addon => 
+        addon.id === savedAddon.id ? savedAddon : addon
+      ))
+    } else {
+      // Добавление новой добавки
+      setAddons(prev => [...prev, savedAddon])
+    }
+    
+    // Обновляем список категорий если добавилась новая
+    if (savedAddon.category && !addonCategories.includes(savedAddon.category)) {
+      setAddonCategories(prev => [...prev, savedAddon.category])
+    }
+    
+    setShowAddAddonModal(false)
+    setEditingAddon(null)
+  }
+
+  const handleAddonModalClose = () => {
+    setShowAddAddonModal(false)
+    setEditingAddon(null)
+  }
+
+  // Фильтрация добавок
+  const filteredAddons = addons.filter(addon => {
+    const matchesSearch = addon.name.toLowerCase().includes(addonSearchTerm.toLowerCase())
+    const matchesCategory = !selectedAddonCategory || addon.category === selectedAddonCategory
+    return matchesSearch && matchesCategory
+  })
+
+  // Группировка добавок по категориям
+  const groupedAddons = filteredAddons.reduce((groups, addon) => {
+    const category = addon.category || 'Без категории'
+    if (!groups[category]) {
+      groups[category] = []
+    }
+    groups[category].push(addon)
+    return groups
+  }, {})
+
   if (loading) {
     return <LoadingSpinner />
   }
@@ -280,28 +390,46 @@ function MenuManagement() {
     <div className={styles.menuManagement}>
       <div className={styles.header}>
         <h1>Управление меню</h1>
-        <p>Управляйте категориями, блюдами и их доступностью</p>
+        <p>Управляйте блюдами, добавками и их доступностью</p>
       </div>
 
-      {/* Статистика категорий */}
-      <div className={styles.categoriesStats}>
-        <h2>Категории блюд</h2>
-        <div className={styles.categoriesGrid}>
-          {categories.map(category => (
-            <div key={category.id} className={styles.categoryCard}>
-              <div className={styles.categoryInfo}>
-                <h3>{category.name}</h3>
-                <p>{category.count} блюд</p>
-              </div>
-              <div className={`${styles.categoryStatus} ${category.active ? styles.active : styles.inactive}`}>
-                {category.active ? 'Активна' : 'Неактивна'}
-              </div>
+      {/* Переключение вкладок */}
+      <div className={styles.tabs}>
+        <button 
+          className={`${styles.tab} ${activeTab === 'dishes' ? styles.activeTab : ''}`}
+          onClick={() => setActiveTab('dishes')}
+        >
+          Блюда ({dishes.length})
+        </button>
+        <button 
+          className={`${styles.tab} ${activeTab === 'addons' ? styles.activeTab : ''}`}
+          onClick={() => setActiveTab('addons')}
+        >
+          Добавки ({addons.length})
+        </button>
+      </div>
+
+      {activeTab === 'dishes' ? (
+        <>
+          {/* Статистика категорий */}
+          <div className={styles.categoriesStats}>
+            <h2>Категории блюд</h2>
+            <div className={styles.categoriesGrid}>
+              {categories.map(category => (
+                <div key={category.id} className={styles.categoryCard}>
+                  <div className={styles.categoryInfo}>
+                    <h3>{category.name}</h3>
+                    <p>{category.count} блюд</p>
+                  </div>
+                  <div className={`${styles.categoryStatus} ${category.active ? styles.active : styles.inactive}`}>
+                    {category.active ? 'Активна' : 'Неактивна'}
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-      </div>
+          </div>
 
-      {/* Управление блюдами */}
+          {/* Управление блюдами */}
       <div className={styles.dishesSection}>
         <div className={styles.dishesHeader}>
           <h2>Блюда</h2>
@@ -422,8 +550,152 @@ function MenuManagement() {
           </div>
         )}
       </div>
+        </>
+      ) : (
+        <>
+          {/* Управление добавками */}
+          <div className={styles.addonsSection}>
+            <div className={styles.addonsHeader}>
+              <h2>Добавки</h2>
+              <button 
+                className={styles.addButton}
+                onClick={handleCreateAddon}
+              >
+                <Plus size={18} />
+                Добавить добавку
+              </button>
+            </div>
 
-      {/* Модальное окно добавления блюда */}
+            {/* Фильтры для добавок */}
+            <div className={styles.filters}>
+              <div className={styles.searchBox}>
+                <Search className={styles.searchIcon} />
+                <input
+                  type="text"
+                  placeholder="Поиск добавок..."
+                  value={addonSearchTerm}
+                  onChange={(e) => setAddonSearchTerm(e.target.value)}
+                  className={styles.searchInput}
+                />
+              </div>
+              
+              <select
+                value={selectedAddonCategory}
+                onChange={(e) => setSelectedAddonCategory(e.target.value)}
+                className={styles.categoryFilter}
+              >
+                <option value="">Все категории</option>
+                {addonCategories.map(category => (
+                  <option key={category} value={category}>
+                    {category}
+                  </option>
+                ))}
+                <option value="">Без категории</option>
+              </select>
+            </div>
+
+            {/* Статистика добавок */}
+            <div className={styles.addonsStats}>
+              <div className={styles.statCard}>
+                <span className={styles.statNumber}>{addons.length}</span>
+                <span className={styles.statLabel}>Всего добавок</span>
+              </div>
+              <div className={styles.statCard}>
+                <span className={styles.statNumber}>
+                  {addons.filter(addon => addon.is_active).length}
+                </span>
+                <span className={styles.statLabel}>Активных</span>
+              </div>
+              <div className={styles.statCard}>
+                <span className={styles.statNumber}>{addonCategories.length}</span>
+                <span className={styles.statLabel}>Категорий</span>
+              </div>
+            </div>
+
+            {/* Список добавок по категориям */}
+            <div className={styles.addonsContent}>
+              {Object.keys(groupedAddons).length === 0 ? (
+                <div className={styles.emptyState}>
+                  <Plus size={48} />
+                  <h3>Добавки не найдены</h3>
+                  <p>Попробуйте изменить критерии поиска или создайте первую добавку</p>
+                  <button 
+                    className={styles.addButton}
+                    onClick={handleCreateAddon}
+                  >
+                    <Plus size={20} />
+                    Создать первую добавку
+                  </button>
+                </div>
+              ) : (
+                Object.entries(groupedAddons).map(([category, categoryAddons]) => (
+                  <div key={category} className={styles.categorySection}>
+                    <h3 className={styles.categoryTitle}>{category}</h3>
+                    
+                    <div className={styles.addonsGrid}>
+                      {categoryAddons.map(addon => (
+                        <div 
+                          key={addon.id} 
+                          className={`${styles.addonCard} ${!addon.is_active ? styles.inactive : ''}`}
+                        >
+                          <div className={styles.addonIcon}>
+                            <div className={styles.iconPlaceholder}>
+                              +
+                            </div>
+                            <div className={styles.statusBadge}>
+                              {addon.is_active ? (
+                                <Eye size={16} className={styles.activeIcon} />
+                              ) : (
+                                <EyeOff size={16} className={styles.inactiveIcon} />
+                              )}
+                            </div>
+                          </div>
+                          
+                          <div className={styles.addonInfo}>
+                            <h4 className={styles.addonName}>{addon.name}</h4>
+                            <p className={styles.addonPrice}>{addon.price}₸</p>
+                            {addon.category && (
+                              <span className={styles.categoryTag}>{addon.category}</span>
+                            )}
+                          </div>
+                          
+                          <div className={styles.addonActions}>
+                            <button
+                              onClick={() => handleToggleAddonActive(addon.id)}
+                              className={`${styles.actionButton} ${addon.is_active ? styles.deactivateButton : styles.activateButton}`}
+                              title={addon.is_active ? 'Деактивировать' : 'Активировать'}
+                            >
+                              {addon.is_active ? <EyeOff size={16} /> : <Eye size={16} />}
+                            </button>
+                            
+                            <button
+                              onClick={() => handleEditAddon(addon)}
+                              className={`${styles.actionButton} ${styles.editButton}`}
+                              title="Редактировать"
+                            >
+                              <Edit2 size={16} />
+                            </button>
+                            
+                            <button
+                              onClick={() => handleDeleteAddon(addon.id)}
+                              className={`${styles.actionButton} ${styles.deleteButton}`}
+                              title="Удалить"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Модальные окна */}
       <AddDishModal
         isOpen={showAddModal}
         onClose={handleModalClose}
@@ -431,6 +703,14 @@ function MenuManagement() {
         onDishUpdated={handleDishUpdated}
         categories={categories}
         editingDish={editingDish}
+      />
+
+      <AddAddonModal
+        isOpen={showAddAddonModal}
+        onClose={handleAddonModalClose}
+        onAddonSaved={handleAddonSaved}
+        editingAddon={editingAddon}
+        existingCategories={addonCategories}
       />
     </div>
   )
