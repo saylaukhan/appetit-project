@@ -2,20 +2,19 @@ from sqlalchemy import Column, Integer, String, Text, Boolean, DateTime
 from sqlalchemy.sql import func
 from app.core.database import Base
 
-class Banner(Base):
-    __tablename__ = "banners"
+class Story(Base):
+    __tablename__ = "stories"
 
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String(100), nullable=False)
     description = Column(Text, nullable=True)
-    image = Column(String(255), nullable=True)  # Путь к изображению
-    link = Column(String(255), nullable=True)  # Ссылка при клике
     
-    # Позиционирование
-    position = Column(String(50), default="main")  # main, category, etc.
+    # Изображения для историй
+    cover_image = Column(String(255), nullable=False)  # Обложка (превью)
+    content_image = Column(String(255), nullable=False)  # Содержание (полная версия)
+    
+    # Позиционирование и статус
     sort_order = Column(Integer, default=0)
-    
-    # Статус
     is_active = Column(Boolean, default=True)
     
     # Временные ограничения показа
@@ -30,4 +29,4 @@ class Banner(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
     def __repr__(self):
-        return f"<Banner(id={self.id}, title='{self.title}')>"
+        return f"<Story(id={self.id}, title='{self.title}')>"

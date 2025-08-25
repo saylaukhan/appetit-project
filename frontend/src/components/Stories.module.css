@@ -1,0 +1,89 @@
+.storiesContainer {
+  width: 100%;
+  margin: 20px 0;
+  background: transparent;
+}
+
+.storiesScroll {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding: 16px 20px;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.storiesScroll::-webkit-scrollbar {
+  display: none;
+}
+
+.storyCard {
+  position: relative;
+  min-width: 160px;
+  height: 120px;
+  border-radius: 12px;
+  cursor: pointer;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+  color: white;
+  text-align: center;
+}
+
+.storyCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.storyIcon {
+  font-size: 2.5rem;
+  margin-bottom: 8px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+.storyText h3 {
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.2;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  margin: 0;
+}
+
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: #999;
+}
+
+/* Цвета для разных сторисов */
+.story1 { background: linear-gradient(135deg, #8FBC8F, #6A8F6A); }
+.story2 { background: linear-gradient(135deg, #e74c3c, #c0392b); }
+.story3 { background: linear-gradient(135deg, #9b59b6, #8e44ad); }
+.story4 { background: linear-gradient(135deg, #f39c12, #e67e22); }
+.story5 { background: linear-gradient(135deg, #8B4513, #654321); }
+.story6 { background: linear-gradient(135deg, #20b2aa, #1a9a8a); }
+.story7 { background: linear-gradient(135deg, #ff7f50, #ff6347); }
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  .storyCard {
+    min-width: 140px;
+    height: 100px;
+    padding: 12px;
+  }
+  
+  .storyIcon {
+    font-size: 2rem;
+    margin-bottom: 6px;
+  }
+  
+  .storyText h3 {
+    font-size: 0.8rem;
+  }
+}

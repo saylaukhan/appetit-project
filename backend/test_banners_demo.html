@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>APPETIT - Демонстрация баннеров</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8f9fa;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .section {
+            margin-bottom: 40px;
+        }
+
+        .section-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #333;
+            padding-left: 10px;
+            border-left: 4px solid #e74c3c;
+        }
+
+        .banners-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .banner-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+
+        .banner-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+            border-color: #e74c3c;
+        }
+
+        .banner-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+
+        .banner-description {
+            color: #666;
+            margin-bottom: 12px;
+            line-height: 1.4;
+        }
+
+        .banner-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 10px;
+        }
+
+        .banner-position {
+            background: #e74c3c;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            text-transform: uppercase;
+        }
+
+        .banner-stats {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #eee;
+            font-size: 12px;
+        }
+
+        .stat {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+        }
+
+        .stat-value {
+            font-weight: 600;
+            color: #e74c3c;
+        }
+
+        .stat-label {
+            color: #888;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .error {
+            background: #fee;
+            border: 1px solid #fcc;
+            color: #c00;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .main-banner {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            margin-bottom: 40px;
+            border-radius: 16px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .main-banner::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="3" fill="rgba(255,255,255,0.1)"/></svg>') repeat;
+            animation: float 20s infinite linear;
+        }
+
+        @keyframes float {
+            0% { transform: translateX(0) translateY(0); }
+            100% { transform: translateX(-100px) translateY(-100px); }
+        }
+
+        .main-banner-content {
+            z-index: 2;
+            position: relative;
+        }
+
+        .main-banner h2 {
+            font-size: 32px;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .main-banner p {
+            font-size: 18px;
+            opacity: 0.9;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .control-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background 0.3s;
+        }
+
+        .control-btn:hover {
+            background: #c0392b;
+        }
+
+        .control-btn.active {
+            background: #27ae60;
+        }
+
+        @media (max-width: 768px) {
+            .banners-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .main-banner h2 {
+                font-size: 24px;
+            }
+            
+            .main-banner p {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🍕 APPETIT - Система управления баннерами</h1>
+            <p>Демонстрация API баннеров в действии</p>
+        </div>
+
+        <div class="main-banner" id="mainBanner" style="display: none;">
+            <div class="main-banner-content">
+                <h2 id="mainBannerTitle">Загрузка...</h2>
+                <p id="mainBannerDescription">Загрузка описания...</p>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="control-btn active" onclick="loadBanners('all')">Все баннеры</button>
+            <button class="control-btn" onclick="loadBanners('main')">Главные</button>
+            <button class="control-btn" onclick="loadBanners('featured')">Рекомендуемые</button>
+            <button class="control-btn" onclick="loadBanners('category')">Категории</button>
+            <button class="control-btn" onclick="loadBanners('popup')">Модальные окна</button>
+            <button class="control-btn" onclick="loadPositions()">Позиции</button>
+        </div>
+
+        <div id="error" class="error" style="display: none;"></div>
+
+        <div class="section">
+            <div class="section-title" id="sectionTitle">Все активные баннеры</div>
+            <div id="loading" class="loading">Загрузка баннеров...</div>
+            <div id="bannersContainer" class="banners-grid" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8000/api/v1';
+        
+        // Функция для отображения ошибки
+        function showError(message) {
+            const errorDiv = document.getElementById('error');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            document.getElementById('loading').style.display = 'none';
+        }
+
+        // Функция для скрытия ошибки
+        function hideError() {
+            document.getElementById('error').style.display = 'none';
+        }
+
+        // Функция для отслеживания просмотра баннера
+        async function trackView(bannerId) {
+            try {
+                await fetch(`${API_BASE}/marketing/banners/${bannerId}/view`, {
+                    method: 'POST'
+                });
+            } catch (error) {
+                console.error('Ошибка отслеживания просмотра:', error);
+            }
+        }
+
+        // Функция для отслеживания клика по баннеру
+        async function trackClick(bannerId, link) {
+            try {
+                const response = await fetch(`${API_BASE}/marketing/banners/${bannerId}/click`, {
+                    method: 'POST'
+                });
+                
+                if (response.ok && link) {
+                    // Имитируем переход по ссылке
+                    console.log('Переход по ссылке:', link);
+                    alert(`Клик засчитан! Переход по ссылке: ${link}`);
+                }
+            } catch (error) {
+                console.error('Ошибка отслеживания клика:', error);
+            }
+        }
+
+        // Функция для создания карточки баннера
+        function createBannerCard(banner) {
+            const div = document.createElement('div');
+            div.className = 'banner-card';
+            div.onclick = () => {
+                trackClick(banner.id, banner.link);
+            };
+
+            // Отслеживаем просмотр при создании
+            trackView(banner.id);
+
+            const positionNames = {
+                'main': 'Главная',
+                'hero': 'Героический',
+                'featured': 'Рекомендуемый',
+                'category': 'Категория',
+                'cart': 'Корзина',
+                'popup': 'Модальное окно',
+                'notification': 'Уведомление'
+            };
+
+            div.innerHTML = `
+                <div class="banner-meta">
+                    <span class="banner-position">${positionNames[banner.position] || banner.position}</span>
+                    <span>ID: ${banner.id}</span>
+                </div>
+                <div class="banner-title">${banner.title}</div>
+                <div class="banner-description">${banner.description || 'Нет описания'}</div>
+                <div class="banner-stats">
+                    <div class="stat">
+                        <div class="stat-value">${banner.view_count || 0}</div>
+                        <div class="stat-label">Просмотры</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value">${banner.click_count || 0}</div>
+                        <div class="stat-label">Клики</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value">${banner.view_count > 0 ? ((banner.click_count || 0) / banner.view_count * 100).toFixed(1) : 0}%</div>
+                        <div class="stat-label">CTR</div>
+                    </div>
+                </div>
+            `;
+
+            return div;
+        }
+
+        // Функция для отображения баннеров
+        function displayBanners(banners, title) {
+            hideError();
+            
+            const container = document.getElementById('bannersContainer');
+            const loading = document.getElementById('loading');
+            const sectionTitle = document.getElementById('sectionTitle');
+            
+            sectionTitle.textContent = title + ` (${banners.length})`;
+            loading.style.display = 'none';
+            container.style.display = 'grid';
+            container.innerHTML = '';
+
+            if (banners.length === 0) {
+                container.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #666; padding: 40px;">Баннеров не найдено</p>';
+                return;
+            }
+
+            // Показываем главный баннер, если есть
+            const mainBannerDiv = document.getElementById('mainBanner');
+            if (banners.length > 0) {
+                const firstBanner = banners[0];
+                document.getElementById('mainBannerTitle').textContent = firstBanner.title;
+                document.getElementById('mainBannerDescription').textContent = firstBanner.description || 'Нет описания';
+                mainBannerDiv.style.display = 'flex';
+                mainBannerDiv.onclick = () => trackClick(firstBanner.id, firstBanner.link);
+                trackView(firstBanner.id);
+            }
+
+            banners.forEach(banner => {
+                container.appendChild(createBannerCard(banner));
+            });
+        }
+
+        // Функция для загрузки баннеров
+        async function loadBanners(type = 'all') {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('bannersContainer').style.display = 'none';
+            document.getElementById('mainBanner').style.display = 'none';
+            
+            // Обновляем активную кнопку
+            document.querySelectorAll('.control-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event?.target?.classList.add('active');
+
+            let url;
+            let title;
+
+            switch(type) {
+                case 'main':
+                    url = `${API_BASE}/marketing/banners/featured/main`;
+                    title = 'Главные баннеры';
+                    break;
+                case 'featured':
+                    url = `${API_BASE}/marketing/banners/featured`;
+                    title = 'Рекомендуемые баннеры';
+                    break;
+                case 'category':
+                    url = `${API_BASE}/marketing/banners/category`;
+                    title = 'Баннеры категорий';
+                    break;
+                case 'popup':
+                    url = `${API_BASE}/marketing/banners/popup`;
+                    title = 'Модальные баннеры';
+                    break;
+                default:
+                    url = `${API_BASE}/marketing/banners`;
+                    title = 'Все активные баннеры';
+            }
+
+            try {
+                const response = await fetch(url);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const banners = await response.json();
+                displayBanners(banners, title);
+                
+            } catch (error) {
+                console.error('Ошибка загрузки баннеров:', error);
+                showError(`Ошибка загрузки баннеров: ${error.message}`);
+            }
+        }
+
+        // Функция для загрузки позиций
+        async function loadPositions() {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('bannersContainer').style.display = 'none';
+            document.getElementById('mainBanner').style.display = 'none';
+
+            try {
+                const response = await fetch(`${API_BASE}/marketing/positions`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                const positions = data.positions || [];
+                
+                hideError();
+                
+                const container = document.getElementById('bannersContainer');
+                const loading = document.getElementById('loading');
+                const sectionTitle = document.getElementById('sectionTitle');
+                
+                sectionTitle.textContent = `Доступные позиции (${positions.length})`;
+                loading.style.display = 'none';
+                container.style.display = 'grid';
+                container.innerHTML = '';
+
+                positions.forEach(position => {
+                    const div = document.createElement('div');
+                    div.className = 'banner-card';
+                    div.innerHTML = `
+                        <div class="banner-title">${position.display_name}</div>
+                        <div class="banner-description">Кодовое имя: ${position.name}</div>
+                        <div class="banner-stats">
+                            <div class="stat">
+                                <div class="stat-value">${position.count}</div>
+                                <div class="stat-label">Баннеров</div>
+                            </div>
+                        </div>
+                    `;
+                    div.onclick = () => loadBanners(position.name);
+                    container.appendChild(div);
+                });
+                
+            } catch (error) {
+                console.error('Ошибка загрузки позиций:', error);
+                showError(`Ошибка загрузки позиций: ${error.message}`);
+            }
+        }
+
+        // Загружаем баннеры при загрузке страницы
+        document.addEventListener('DOMContentLoaded', () => {
+            loadBanners('all');
+        });
+    </script>
+</body>
+</html>

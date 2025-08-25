@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест сторисов APPETIT</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #e74c3c;
+            margin-bottom: 10px;
+        }
+
+        .stories-container {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .stories-grid {
+            display: flex;
+            gap: 16px;
+            overflow-x: auto;
+            padding: 16px 0;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .stories-grid::-webkit-scrollbar {
+            display: none;
+        }
+
+        .story-card {
+            position: relative;
+            min-width: 200px;
+            height: 120px;
+            border-radius: 16px;
+            color: white;
+            cursor: pointer;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            padding: 20px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            flex-shrink: 0;
+        }
+
+        .story-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .story-icon {
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            margin-right: 16px;
+            flex-shrink: 0;
+        }
+
+        .story-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .story-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin: 0 0 4px 0;
+            line-height: 1.2;
+        }
+
+        .story-description {
+            font-size: 0.85rem;
+            margin: 0;
+            opacity: 0.9;
+            line-height: 1.2;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        /* Цветовая палитра как в APPETIT */
+        .story-card:nth-child(1) { background: #8FBC8F; } /* Готовим без свинины */
+        .story-card:nth-child(2) { background: #e74c3c; } /* Осторожно мошенники */
+        .story-card:nth-child(3) { background: #9b59b6; } /* Нам 10 лет */
+        .story-card:nth-child(4) { background: #f39c12; } /* Новинка Чак-чак */
+        .story-card:nth-child(5) { background: #8B4513; } /* Дала Барбекю */
+        .story-card:nth-child(6) { background: #20b2aa; } /* В напитках новинки */
+        .story-card:nth-child(7) { background: #ff7f50; } /* Чебуреки */
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .error {
+            text-align: center;
+            padding: 40px;
+            color: #e74c3c;
+            background: #ffeaea;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🍕 APPETIT Сторисы</h1>
+            <p>Тестирование баннеров-сторисов</p>
+        </div>
+
+        <div class="stories-container">
+            <h2 style="margin-bottom: 16px; color: #333;">Истории</h2>
+            <div id="storiesGrid" class="stories-grid">
+                <div class="loading">Загружаем сторисы...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8000/api/v1/marketing';
+
+        // Иконки для каждого типа сторисов
+        const STORY_ICONS = {
+            'Готовим без свинины': '🐄',
+            'Осторожно, мошенники!': '⚠️',
+            'Нам 10 лет': '🎉', 
+            'Новинка Чак-чак': '🍯',
+            'Новинка: Дала Барбекю': '🍖',
+            'В напитках новинки': '🥤',
+            'Чебуреки по-домашнему': '🥟'
+        };
+
+        async function loadStories() {
+            try {
+                const response = await fetch(`${API_URL}/banners/featured`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const stories = await response.json();
+                displayStories(stories);
+                
+            } catch (error) {
+                console.error('Ошибка при загрузке сторисов:', error);
+                document.getElementById('storiesGrid').innerHTML = `
+                    <div class="error">
+                        ❌ Ошибка загрузки сторисов: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        function displayStories(stories) {
+            const grid = document.getElementById('storiesGrid');
+            
+            if (stories.length === 0) {
+                grid.innerHTML = '<div class="loading">Нет доступных сторисов</div>';
+                return;
+            }
+
+            grid.innerHTML = stories.map(story => `
+                <div class="story-card" onclick="handleStoryClick('${story.title}')">
+                    <div class="story-icon">
+                        ${STORY_ICONS[story.title] || '📱'}
+                    </div>
+                    <div class="story-content">
+                        <h3 class="story-title">${story.title}</h3>
+                        <p class="story-description">${story.description || ''}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function handleStoryClick(title) {
+            alert(`Вы кликнули на историю: ${title}`);
+            // Здесь можно добавить аналитику клика
+        }
+
+        // Загружаем сторисы при загрузке страницы
+        document.addEventListener('DOMContentLoaded', loadStories);
+    </script>
+</body>
+</html>

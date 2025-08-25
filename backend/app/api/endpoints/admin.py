@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Response
+from fastapi import APIRouter, Depends, HTTPException, Response, UploadFile, File
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func, and_, extract, desc
 from typing import List, Optional
@@ -6,13 +6,33 @@ from datetime import datetime, timedelta
 import json
 import csv
 import io
+import os
+import uuid
+import shutil
+from pathlib import Path
 
 from app.core.database import get_db_session
 from app.utils.auth_dependencies import get_current_admin
 from app.models.user import User, UserRole
 from app.models.order import Order, OrderItem, OrderStatus, PaymentMethod
 from app.models.menu import Dish
+from app.models.banner import Banner
+from app.models.story import Story
 from app.schemas.order import OrderResponse, OrderItemResponse, OrderStatusUpdateRequest, OrderAssignCourierRequest
+from app.schemas.banner import (
+    BannerCreate, 
+    BannerUpdate, 
+    BannerResponse, 
+    BannerListResponse, 
+    BannerStatsResponse
+)
+from app.schemas.story import (
+    StoryCreate,
+    StoryUpdate,
+    StoryResponse,
+    StoryListResponse,
+    StoryStatsResponse
+)
 
 router = APIRouter()
 
@@ -113,6 +133,7 @@ async def admin_dashboard(
                 {"name": "Заказы", "url": "/admin/orders", "icon": "orders"},
                 {"name": "Меню", "url": "/admin/menu", "icon": "menu"},
                 {"name": "Пользователи", "url": "/admin/users", "icon": "users"},
+                {"name": "Маркетинг", "url": "/admin/marketing", "icon": "marketing"},
                 {"name": "Аналитика", "url": "/admin/analytics", "icon": "analytics"}
             ]
         }
@@ -136,6 +157,7 @@ async def admin_dashboard(
                 {"name": "Заказы", "url": "/admin/orders", "icon": "orders"},
                 {"name": "Меню", "url": "/admin/menu", "icon": "menu"},
                 {"name": "Пользователи", "url": "/admin/users", "icon": "users"},
+                {"name": "Маркетинг", "url": "/admin/marketing", "icon": "marketing"},
                 {"name": "Аналитика", "url": "/admin/analytics", "icon": "analytics"}
             ],
             "error": str(e)
@@ -718,3 +740,657 @@ async def get_notifications(
 async def create_dish(current_user: User = Depends(get_current_admin)):
     """Создание нового блюда."""
     return {"message": "Create dish endpoint - coming soon"}
+
+# === МАРКЕТИНГ И БАННЕРЫ ===
+
+@router.get("/marketing")
+async def get_marketing_dashboard(
+    current_user: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db_session)
+):
+    """Панель управления маркетингом."""
+    try:
+        # Получаем статистику по баннерам
+        total_banners_query = select(func.count(Banner.id))
+        total_banners_result = await db.execute(total_banners_query)
+        total_banners = total_banners_result.scalar() or 0
+        
+        active_banners_query = select(func.count(Banner.id)).where(Banner.is_active == True)
+        active_banners_result = await db.execute(active_banners_query)
+        active_banners = active_banners_result.scalar() or 0
+        
+        total_views_query = select(func.sum(Banner.view_count))
+        total_views_result = await db.execute(total_views_query)
+        total_views = total_views_result.scalar() or 0
+        
+        total_clicks_query = select(func.sum(Banner.click_count))
+        total_clicks_result = await db.execute(total_clicks_query)
+        total_clicks = total_clicks_result.scalar() or 0
+        
+        # Получаем топ баннеры по просмотрам
+        top_banners_query = select(Banner).where(
+            Banner.is_active == True
+        ).order_by(Banner.view_count.desc()).limit(5)
+        top_banners_result = await db.execute(top_banners_query)
+        top_banners = top_banners_result.scalars().all()
+        
+        return {
+            "statistics": {
+                "total_banners": total_banners,
+                "active_banners": active_banners,
+                "total_views": total_views,
+                "total_clicks": total_clicks,
+                "average_ctr": round((total_clicks / max(1, total_views)) * 100, 2)
+            },
+            "top_banners": [
+                {
+                    "id": banner.id,
+                    "title": banner.title,
+                    "position": banner.position,
+                    "views": banner.view_count,
+                    "clicks": banner.click_count,
+                    "ctr": round((banner.click_count / max(1, banner.view_count)) * 100, 2)
+                }
+                for banner in top_banners
+            ],
+            "quick_actions": [
+                {"name": "Создать баннер", "action": "create_banner", "icon": "plus"},
+                {"name": "Управление баннерами", "action": "manage_banners", "icon": "settings"},
+                {"name": "Аналитика баннеров", "action": "banner_analytics", "icon": "chart"}
+            ]
+        }
+    except Exception as e:
+        return {
+            "statistics": {
+                "total_banners": 0,
+                "active_banners": 0,
+                "total_views": 0,
+                "total_clicks": 0,
+                "average_ctr": 0
+            },
+            "top_banners": [],
+            "quick_actions": [],
+            "error": str(e)
+        }
+
+@router.get("/marketing/banners", response_model=BannerListResponse)
+async def get_all_banners(
+    current_user: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db_session),
+    position: Optional[str] = None,
+    is_active: Optional[bool] = None
+):
+    """Получение всех баннеров."""
+    query = select(Banner).order_by(Banner.sort_order.asc(), Banner.created_at.desc())
+    
+    # Фильтрация по позиции
+    if position:
+        query = query.where(Banner.position == position)
+    
+    # Фильтрация по статусу
+    if is_active is not None:
+        query = query.where(Banner.is_active == is_active)
+    
+    result = await db.execute(query)
+    banners = result.scalars().all()
+    
+    return BannerListResponse(
+        banners=[BannerResponse.from_orm(banner) for banner in banners],
+        total_count=len(banners)
+    )
+
+@router.post("/marketing/banners", response_model=BannerResponse)
+async def create_banner(
+    banner_data: BannerCreate,
+    current_user: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db_session)
+):
+    """Создание нового баннера."""
+    
+    banner = Banner(
+        title=banner_data.title,
+        description=banner_data.description,
+        image=banner_data.image,
+        link=banner_data.link,
+        position=banner_data.position,
+        sort_order=banner_data.sort_order,
+        is_active=banner_data.is_active,
+        show_from=banner_data.show_from,
+        show_until=banner_data.show_until
+    )
+    
+    db.add(banner)
+    await db.commit()
+    await db.refresh(banner)
+    
+    return BannerResponse.from_orm(banner)
+
+@router.put("/marketing/banners/{banner_id}", response_model=BannerResponse)
+async def update_banner(
+    banner_id: int,
+    banner_data: BannerUpdate,
+    current_user: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db_session)
+):
+    """Обновление баннера."""
+    
+    # Получаем баннер
+    query = select(Banner).where(Banner.id == banner_id)
+    result = await db.execute(query)
+    banner = result.scalar_one_or_none()
+    
+    if not banner:
+        raise HTTPException(status_code=404, detail="Баннер не найден")
+    
+    # Обновляем поля
+    update_data = banner_data.dict(exclude_unset=True)
+    for field, value in update_data.items():
+        setattr(banner, field, value)
+    
+    await db.commit()
+    await db.refresh(banner)
+    
+    return BannerResponse.from_orm(banner)
+
+@router.delete("/marketing/banners/{banner_id}")
+async def delete_banner(
+    banner_id: int,
+    current_user: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db_session)
+):
+    """Удаление баннера."""
+    
+    # Получаем баннер
+    query = select(Banner).where(Banner.id == banner_id)
+    result = await db.execute(query)
+    banner = result.scalar_one_or_none()
+    
+    if not banner:
+        raise HTTPException(status_code=404, detail="Баннер не найден")
+    
+    await db.delete(banner)
+    await db.commit()
+    
+    return {"message": f"Баннер '{banner.title}' успешно удален"}
+
+@router.get("/marketing/banners/{banner_id}/stats", response_model=BannerStatsResponse)
+async def get_banner_stats(
+    banner_id: int,
+    current_user: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db_session)
+):
+    """Получение статистики баннера."""
+    
+    query = select(Banner).where(Banner.id == banner_id)
+    result = await db.execute(query)
+    banner = result.scalar_one_or_none()
+    
+    if not banner:
+        raise HTTPException(status_code=404, detail="Баннер не найден")
+    
+    return BannerStatsResponse(
+        id=banner.id,
+        title=banner.title,
+        position=banner.position,
+        is_active=banner.is_active,
+        view_count=banner.view_count,
+        click_count=banner.click_count,
+        ctr=round((banner.click_count / max(1, banner.view_count)) * 100, 2),
+        created_at=banner.created_at,
+        show_from=banner.show_from,
+        show_until=banner.show_until
+    )
+
+@router.post("/marketing/banners/{banner_id}/track-view")
+async def track_banner_view(
+    banner_id: int,
+    db: AsyncSession = Depends(get_db_session)
+):
+    """Отслеживание просмотра баннера."""
+    
+    query = select(Banner).where(Banner.id == banner_id)
+    result = await db.execute(query)
+    banner = result.scalar_one_or_none()
+    
+    if not banner:
+        raise HTTPException(status_code=404, detail="Баннер не найден")
+    
+    banner.view_count += 1
+    await db.commit()
+    
+    return {"message": "Просмотр засчитан", "banner_id": banner_id, "view_count": banner.view_count}
+
+@router.post("/marketing/banners/{banner_id}/track-click")
+async def track_banner_click(
+    banner_id: int,
+    db: AsyncSession = Depends(get_db_session)
+):
+    """Отслеживание клика по баннеру."""
+    
+    query = select(Banner).where(Banner.id == banner_id)
+    result = await db.execute(query)
+    banner = result.scalar_one_or_none()
+    
+    if not banner:
+        raise HTTPException(status_code=404, detail="Баннер не найден")
+    
+    banner.click_count += 1
+    await db.commit()
+    
+    return {"message": "Клик засчитан", "banner_id": banner_id, "click_count": banner.click_count}
+
+# ================================
+# STORIES ENDPOINTS
+# ================================
+
+@router.get("/stories", response_model=StoryListResponse)
+async def get_all_stories(
+    current_user: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db_session)
+):
+    """Получение всех историй для администратора."""
+    query = select(Story).order_by(Story.sort_order.asc(), Story.created_at.desc())
+    result = await db.execute(query)
+    stories = result.scalars().all()
+    
+    return StoryListResponse(
+        stories=[StoryResponse.model_validate(story) for story in stories],
+        total_count=len(stories)
+    )
+
+@router.post("/stories", response_model=StoryResponse)
+async def create_story(
+    story_data: StoryCreate,
+    current_user: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db_session)
+):
+    """Создание новой истории."""
+    story = Story(
+        title=story_data.title,
+        description=story_data.description,
+        cover_image=story_data.cover_image,
+        content_image=story_data.content_image,
+        sort_order=story_data.sort_order,
+        is_active=story_data.is_active,
+        show_from=story_data.show_from,
+        show_until=story_data.show_until
+    )
+    
+    db.add(story)
+    await db.commit()
+    await db.refresh(story)
+    
+    return StoryResponse.model_validate(story)
+
+@router.put("/stories/{story_id}", response_model=StoryResponse)
+async def update_story(
+    story_id: int,
+    story_data: StoryUpdate,
+    current_user: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db_session)
+):
+    """Обновление истории."""
+    query = select(Story).where(Story.id == story_id)
+    result = await db.execute(query)
+    story = result.scalar_one_or_none()
+    
+    if not story:
+        raise HTTPException(status_code=404, detail="История не найдена")
+    
+    # Обновляем только предоставленные поля
+    update_data = story_data.model_dump(exclude_unset=True)
+    for field, value in update_data.items():
+        setattr(story, field, value)
+    
+    story.updated_at = datetime.now()
+    await db.commit()
+    await db.refresh(story)
+    
+    return StoryResponse.model_validate(story)
+
+@router.delete("/stories/{story_id}")
+async def delete_story(
+    story_id: int,
+    current_user: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db_session)
+):
+    """Удаление истории."""
+    query = select(Story).where(Story.id == story_id)
+    result = await db.execute(query)
+    story = result.scalar_one_or_none()
+    
+    if not story:
+        raise HTTPException(status_code=404, detail="История не найдена")
+    
+    await db.delete(story)
+    await db.commit()
+    
+    return {"message": f"История '{story.title}' успешно удалена", "story_id": story_id}
+
+@router.patch("/stories/{story_id}/toggle-status")
+async def toggle_story_status(
+    story_id: int,
+    current_user: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db_session)
+):
+    """Переключение статуса истории."""
+    query = select(Story).where(Story.id == story_id)
+    result = await db.execute(query)
+    story = result.scalar_one_or_none()
+    
+    if not story:
+        raise HTTPException(status_code=404, detail="История не найдена")
+    
+    story.is_active = not story.is_active
+    story.updated_at = datetime.now()
+    await db.commit()
+    
+    status_text = "активирована" if story.is_active else "деактивирована"
+    return {
+        "message": f"История '{story.title}' {status_text}",
+        "story_id": story_id,
+        "is_active": story.is_active
+    }
+
+@router.get("/stories/stats", response_model=List[StoryStatsResponse])
+async def get_stories_stats(
+    current_user: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db_session)
+):
+    """Получение статистики по историям."""
+    query = select(Story).order_by(Story.view_count.desc())
+    result = await db.execute(query)
+    stories = result.scalars().all()
+    
+    stats = []
+    for story in stories:
+        ctr = (story.click_count / story.view_count * 100) if story.view_count > 0 else 0
+        stats.append(StoryStatsResponse(
+            id=story.id,
+            title=story.title,
+            is_active=story.is_active,
+            view_count=story.view_count,
+            click_count=story.click_count,
+            ctr=round(ctr, 2),
+            created_at=story.created_at,
+            show_from=story.show_from,
+            show_until=story.show_until
+        ))
+    
+    return stats
+
+@router.post("/stories/{story_id}/track-view")
+async def track_story_view(
+    story_id: int,
+    db: AsyncSession = Depends(get_db_session)
+):
+    """Отслеживание просмотра истории."""
+    
+    query = select(Story).where(Story.id == story_id)
+    result = await db.execute(query)
+    story = result.scalar_one_or_none()
+    
+    if not story:
+        raise HTTPException(status_code=404, detail="История не найдена")
+    
+    story.view_count += 1
+    await db.commit()
+    
+    return {"message": "Просмотр засчитан", "story_id": story_id, "view_count": story.view_count}
+
+@router.post("/stories/{story_id}/track-click")
+async def track_story_click(
+    story_id: int,
+    db: AsyncSession = Depends(get_db_session)
+):
+    """Отслеживание клика по истории."""
+    
+    query = select(Story).where(Story.id == story_id)
+    result = await db.execute(query)
+    story = result.scalar_one_or_none()
+    
+    if not story:
+        raise HTTPException(status_code=404, detail="История не найдена")
+    
+    story.click_count += 1
+    await db.commit()
+    
+    return {"message": "Клик засчитан", "story_id": story_id, "click_count": story.click_count}
+
+@router.post("/upload-image")
+async def upload_image(
+    file: UploadFile = File(...),
+    current_user: User = Depends(get_current_admin)
+):
+    """Загрузка изображения для историй."""
+    
+    # Проверяем тип файла
+    if not file.content_type or not file.content_type.startswith('image/'):
+        raise HTTPException(
+            status_code=400, 
+            detail="Файл должен быть изображением"
+        )
+    
+    # Проверяем размер файла (макс 10MB)
+    if hasattr(file, 'size') and file.size > 10 * 1024 * 1024:
+        raise HTTPException(
+            status_code=400, 
+            detail="Размер файла не должен превышать 10MB"
+        )
+    
+    # Создаем папку uploads если она не существует
+    uploads_dir = Path("static/uploads")
+    uploads_dir.mkdir(parents=True, exist_ok=True)
+    
+    # Генерируем уникальное имя файла
+    file_extension = Path(file.filename).suffix
+    unique_filename = f"{uuid.uuid4()}{file_extension}"
+    file_path = uploads_dir / unique_filename
+    
+    try:
+        # Сохраняем файл
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+        
+        # Возвращаем относительный путь к файлу
+        relative_path = f"static/uploads/{unique_filename}"
+        
+        return {
+            "message": "Изображение успешно загружено",
+            "file_path": relative_path,
+            "filename": unique_filename
+        }
+    
+    except Exception as e:
+        # В случае ошибки удаляем файл если он был создан
+        if file_path.exists():
+            file_path.unlink()
+        raise HTTPException(
+            status_code=500, 
+            detail=f"Ошибка при загрузке файла: {str(e)}"
+        )
+    finally:
+        file.file.close()
+
+
+# Stories Management Endpoints
+
+@router.get("/stories")
+async def get_all_stories(
+    current_user: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db_session)
+):
+    """Получение всех историй для администратора."""
+    try:
+        query = select(Story).order_by(Story.sort_order, Story.created_at.desc())
+        result = await db.execute(query)
+        stories = result.scalars().all()
+        
+        stories_data = [
+            {
+                "id": story.id,
+                "title": story.title,
+                "description": story.description,
+                "cover_image": story.cover_image,
+                "content_image": story.content_image,
+                "sort_order": story.sort_order,
+                "is_active": story.is_active,
+                "view_count": story.view_count or 0,
+                "click_count": story.click_count or 0,
+                "created_at": story.created_at.isoformat() if story.created_at else None
+            }
+            for story in stories
+        ]
+        
+        return {
+            "success": True,
+            "stories": stories_data,
+            "total": len(stories_data)
+        }
+        
+    except Exception as e:
+        print(f"Ошибка получения историй: {e}")
+        return {
+            "success": False,
+            "stories": [],
+            "total": 0,
+            "error": str(e)
+        }
+
+@router.post("/stories")
+async def create_story(
+    story_data: dict,
+    current_user: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db_session)
+):
+    """Создание новой истории."""
+    try:
+        # Получаем максимальный sort_order
+        max_order_query = select(func.max(Story.sort_order))
+        max_order_result = await db.execute(max_order_query)
+        max_order = max_order_result.scalar() or 0
+        
+        new_story = Story(
+            title=story_data.get("title", ""),
+            description=story_data.get("description"),
+            cover_image=story_data.get("cover_image", ""),
+            content_image=story_data.get("content_image", ""),
+            sort_order=max_order + 1,
+            is_active=story_data.get("is_active", True),
+            view_count=0,
+            click_count=0,
+            created_at=datetime.now()
+        )
+        
+        db.add(new_story)
+        await db.commit()
+        await db.refresh(new_story)
+        
+        return {
+            "success": True,
+            "message": "История успешно создана",
+            "story": {
+                "id": new_story.id,
+                "title": new_story.title,
+                "description": new_story.description,
+                "cover_image": new_story.cover_image,
+                "content_image": new_story.content_image,
+                "is_active": new_story.is_active
+            }
+        }
+        
+    except Exception as e:
+        await db.rollback()
+        print(f"Ошибка создания истории: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Ошибка создания истории: {str(e)}"
+        )
+
+@router.put("/stories/{story_id}")
+async def update_story(
+    story_id: int,
+    story_data: dict,
+    current_user: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db_session)
+):
+    """Обновление истории."""
+    try:
+        query = select(Story).where(Story.id == story_id)
+        result = await db.execute(query)
+        story = result.scalar_one_or_none()
+        
+        if not story:
+            raise HTTPException(
+                status_code=404,
+                detail="История не найдена"
+            )
+        
+        # Обновляем поля
+        story.title = story_data.get("title", story.title)
+        story.description = story_data.get("description", story.description)
+        story.cover_image = story_data.get("cover_image", story.cover_image)
+        story.content_image = story_data.get("content_image", story.content_image)
+        story.is_active = story_data.get("is_active", story.is_active)
+        story.updated_at = datetime.now()
+        
+        await db.commit()
+        
+        return {
+            "success": True,
+            "message": "История успешно обновлена",
+            "story": {
+                "id": story.id,
+                "title": story.title,
+                "description": story.description,
+                "cover_image": story.cover_image,
+                "content_image": story.content_image,
+                "is_active": story.is_active
+            }
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        await db.rollback()
+        print(f"Ошибка обновления истории: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Ошибка обновления истории: {str(e)}"
+        )
+
+@router.delete("/stories/{story_id}")
+async def delete_story(
+    story_id: int,
+    current_user: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db_session)
+):
+    """Удаление истории."""
+    try:
+        query = select(Story).where(Story.id == story_id)
+        result = await db.execute(query)
+        story = result.scalar_one_or_none()
+        
+        if not story:
+            raise HTTPException(
+                status_code=404,
+                detail="История не найдена"
+            )
+        
+        await db.delete(story)
+        await db.commit()
+        
+        return {
+            "success": True,
+            "message": "История успешно удалена"
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        await db.rollback()
+        print(f"Ошибка удаления истории: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Ошибка удаления истории: {str(e)}"
+        )

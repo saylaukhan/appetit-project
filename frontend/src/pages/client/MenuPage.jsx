@@ -5,6 +5,7 @@ import { useAddress } from '../../hooks/useAddress'
 import LoadingSpinner from '../../components/common/LoadingSpinner'
 import DishModal from '../../components/common/DishModal'
 import AddressModal from '../../components/common/AddressModal'
+import Stories from '../../components/Stories'
 import styles from './MenuPage.module.css'
 
 function MenuPage() {
@@ -371,33 +372,8 @@ function MenuPage() {
 
   return (
     <div className={styles.menuContainer}>
-      {/* Баннер с акцией */}
-      <div className={styles.promoBanner}>
-        <div className={styles.promoContent}>
-          <div className={styles.promoText}>
-            <h2>КАЖДЫЙ ВТОРНИК</h2>
-            <div className={styles.promoOffer}>1+1</div>
-            <p>НА ФИРМЕННУЮ<br />СРЕДНЮЮ ШАУРМУ</p>
-          </div>
-          <div className={styles.promoImages}>
-            <img 
-              src="https://cdn-kz11.foodpicasso.com/assets/2025/03/19/cb4e1a15ed8eb66b4cb3f04266b87a8f---jpeg_420x420:whitepadding15_94310_convert.webp?v2" 
-              alt="Фирменная шаурма"
-              onError={(e) => {
-                e.target.src = createPlaceholderImage()
-              }}
-            />
-            <img 
-              src="https://cdn-kz11.foodpicasso.com/assets/2025/04/04/b9ef70d2195ea30d7a1a5a1b22450db8---jpeg_420x420:whitepadding15_94310_convert.webp?v2" 
-              alt="Классическая шаурма"
-              onError={(e) => {
-                e.target.src = createPlaceholderImage()
-              }}
-            />
-          </div>
-          <div className={styles.promoLabel}>1+1</div>
-        </div>
-      </div>
+      {/* Сторисы */}
+      <Stories />
 
       <div className={styles.menuContent}>
         {/* Боковое меню */}

@@ -1,6 +1,7 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowRight, Clock, Truck, Star, Users } from 'lucide-react'
+import BannerDisplay from '../../components/common/BannerDisplay'
 import styles from './HomePage.module.css'
 
 function HomePage() {
@@ -20,6 +21,9 @@ function HomePage() {
           </Link>
         </div>
       </section>
+
+      {/* Story Banner Cards */}
+      <BannerDisplay position="featured" maxCount={8} />
 
       <section className={styles.featuresSection}>
         <div className="container">

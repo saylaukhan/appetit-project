@@ -148,10 +148,25 @@ export const analyticsAPI = {
 
 // Маркетинг
 export const marketingAPI = {
-  getBanners: () => api.get('/api/v1/marketing/banners'),
-  createBanner: (bannerData) => api.post('/api/v1/marketing/banners', bannerData),
-  updateBanner: (bannerId, bannerData) => api.put(`/api/v1/marketing/banners/${bannerId}`, bannerData),
-  deleteBanner: (bannerId) => api.delete(`/api/v1/marketing/banners/${bannerId}`),
+  // Публичные методы для баннеров
+  getBanners: (params = {}) => api.get('/api/v1/marketing/banners', { params }),
+  getBannersByPosition: (position) => api.get(`/api/v1/marketing/banners/${position}`),
+  getMainBanners: () => api.get('/api/v1/marketing/banners/featured/main'),
+  getPositions: () => api.get('/api/v1/marketing/positions'),
+  trackBannerView: (bannerId) => api.post(`/api/v1/marketing/banners/${bannerId}/view`),
+  trackBannerClick: (bannerId) => api.post(`/api/v1/marketing/banners/${bannerId}/click`),
+  
+  // Административные методы для баннеров
+  getMarketingDashboard: () => api.get('/api/v1/admin/marketing'),
+  getAllBanners: (params = {}) => api.get('/api/v1/admin/marketing/banners', { params }),
+  createBanner: (bannerData) => api.post('/api/v1/admin/marketing/banners', bannerData),
+  updateBanner: (bannerId, bannerData) => api.put(`/api/v1/admin/marketing/banners/${bannerId}`, bannerData),
+  deleteBanner: (bannerId) => api.delete(`/api/v1/admin/marketing/banners/${bannerId}`),
+  getBannerStats: (bannerId) => api.get(`/api/v1/admin/marketing/banners/${bannerId}/stats`),
+  adminTrackView: (bannerId) => api.post(`/api/v1/admin/marketing/banners/${bannerId}/track-view`),
+  adminTrackClick: (bannerId) => api.post(`/api/v1/admin/marketing/banners/${bannerId}/track-click`),
+  
+  // Push уведомления
   sendPushNotification: (notificationData) => api.post('/api/v1/marketing/push', notificationData),
 }
 
